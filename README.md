@@ -1,2 +1,2 @@
-# pseudonym-tim.github.io
-Portfolio website
+# Portfolio website
+Personal website for showing off projects and whatnot
