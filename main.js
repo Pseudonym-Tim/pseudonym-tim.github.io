@@ -86,9 +86,6 @@ function audioPlayer() {
     });
 }
 
-// remove fragment as much as it can go without adding an entry in browser history:
-window.history.replaceState(null, null, ' '); // this will remove the # fragment
-
 /*window.location.replace("#");
 
 // slice off the remaining '#' in HTML5:    
