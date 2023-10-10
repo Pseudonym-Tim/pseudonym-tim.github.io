@@ -85,3 +85,5 @@ function audioPlayer() {
         $("#audioPlayer")[0].play();
     });
 }
+
+document.location.href = String( document.location.href ).replace( "#/", "" );
