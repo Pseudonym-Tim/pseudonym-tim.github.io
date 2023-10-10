@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Portfolio" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet" />
+  <script src="https://kit.fontawesome.com/fa62c117c7.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="styles.css" />
+  <title>Music</title>
+</head>
+
+<body class="theme" id="top">
+  <header class="header center">
+
+    <nav class="nav center">
+      <ul class="nav_list center">
+        <li class="nav_list-item">
+          <a class="link link-nav" href="index.html">Home</a>
+        </li>
+        <li class="nav_list-item">
+          <a class="link link-nav" href="index.html#projects">Projects</a>
+        </li>
+        <li class="nav_list-item">
+          <a class="link link-nav" href="index.html#art">Art</a>
+        </li>
+        <li class="nav_list-item">
+          <a class="link link-nav" href="index.html#contact">Contact</a>
+        </li>
+      </ul>
+
+      <button type="button" area-label="toggle navigation" class="btn btn-icon nav_hamburger"
+        style="padding-right: 50px;">
+        <i area-hidden="true" class="fas fa-bars"></i>
+      </button>
+    </nav>
+  </header>
+
+</body>
+
+<main>
+  <br>
+  <u>
+    <h2 class="section_title">Music:</h2>
+  </u>
+  <center>
+    <p>
+      I like to make music in FL Studio, these are some of the best music tracks I've produced...
+    </p>
+  </center>
+  <audio controls id="audioPlayer"></audio>
+  <br>
+  <ul id="playlist">
+    <li class="current-song"><a class="btn btn-plain" href="assets/music/Over The Influence.mp3">Oikeiosis</a></li>
+    <li><a class="btn btn-plain" href="assets/music/Artifice Predance.mp3">Artifice Predance</a></li>
+    <li><a class="btn btn-plain" href="assets/music/Temporomandibular Assassination.mp3">Temporomandibular Assassination</a></li>
+    <li><a class="btn btn-plain" href="assets/music/Hammerhead Lincoln.mp3">Hammerhead Lincoln</a></li>
+    <li><a class="btn btn-plain" href="assets/music/Endless elevator.mp3">Endless Elevator</a></li>
+    <li><a class="btn btn-plain" href="assets/music/EleventySeven.mp3">EleventySeven</a></li>
+    <li><a class="btn btn-plain" href="assets/music/Absquatulate.mp3">Absquatulate</a></li>
+    <li><a class="btn btn-plain" href="assets/music/Iluminnaty.mp3">lluminnaty</a></li>
+    <li><a class="btn btn-plain" href="assets/music/MoldyHeadCheese.mp3">MoldyHeadCheese</a></li>
+    <li><a class="btn btn-plain" href="assets/music/SmoothSailingAhead.mp3">Smooth Sailing Ahead</a></li>
+    <li><a class="btn btn-plain" href="assets/music/Bipolar Ukulele.mp3">Bipolar Ukulele</a></li>
+  </ul>
+
+</main>
+
+<br>
+
+<div class="scroll-container">
+  <div class="scroll-top">
+    <a area-label="Scroll up" href="#top">
+      <i area-hidden="true" class="fas fa-arrow-up"></i>
+    </a>
+  </div>
+</div>
+
+<script src="./main.js"></script>
+<script src="https://code.jquery.com/jquery-2.2.0.js"></script>
+
+<script>
+  // Load the audio player....
+  audioPlayer();
+</script>
+
+</div>
+
+</body>
+
+</html>
