@@ -267,7 +267,7 @@ h2 {
     background-color: #1e90ff;
 }
 
-music-button.active:hover {
+.music-button.active:hover {
     background-color: #1566cc;
 }
 
