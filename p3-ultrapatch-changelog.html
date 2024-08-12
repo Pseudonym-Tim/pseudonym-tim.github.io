@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultrapatch Changelog - Pseudonym_Tim</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+
+<!-- Navigation Bar -->
+<div class="navbar">
+    <a href="index" class="username">Pseudonym_Tim</a>
+    <div class="hamburger" id="hamburger">
+        <i class="fas fa-bars"></i>
+    </div>
+    <div class="nav-links" id="nav-links">
+        <a href="index#about">About Me</a>
+        <a href="index#projects">Projects</a>
+        <a href="index#music">Music</a>
+        <a href="index#art">Art</a>
+        <!-- <a href="blog">Blog</a>-->
+        <a href="index#contact">Contact</a>
+    </div>
+</div>
+
+<!-- Blog Section -->
+<section id="blog" class="section">
+    <h2>Postal 3 Ultrapatch Changelog</h2>
+    <p>NOTE: Some changes, additions, or fixes might have missed or intentionally omitted, only the more mentionable things are listed!</p>
+</section>
+
+<div class="changelog">
+    <h1>v1.1.4 CHANGELOG:</h1>
+    <p>Special thanks to the community for some helpful feedback and testing so soon after release! You guys are the best!</p>
+    <h3>FIXES:</h3>
+    <p>* Fixed not being able to install a new ultrapatch version using the installer <br />* Fixed a prominent issue where the weemote could cause a crash when switching weapons<br />* Fixed an issue regarding shopvac saving/restoration<br />* Fixed not being able to knock out NPC's with spray weapons<br />* Fixed vaulting tutorial text on paradise dream bridge being incorrect</p>
+    <h3>IMPROVEMENTS/ADDITIONS/CHANGES:</h3>
+    <p>* NPC's get knocked out much faster by spray weapons</p>
+    <h1>v1.0.0 CHANGELOG:</h1>
+    <p>Initial v1.0.0 release of Postal III Ultrapatch! A metric crap ton of changes, fixes, and additions!</p>
+    <h3>FIXES:</h3>
+    <p>* Fixed semi-frequent game crashes caused by player throwing things</p>
+    <p>* Fixed gas refusing to pour sometimes after a level transition</p>
+    <p>* Fixed RPG fuel gauge getting stuck after secondary firing while charging a shot</p>
+    <p>* Fixed player random idle sequence not being reset properly</p>
+    <p>* Fixed "Personal jesus" achievement not working as intended</p>
+    <p>* Fixed "Peta Chairman" achievement not working as intended</p>
+    <p>* Fixed "Kavorkian" achievement not working as intended</p>
+    <p>* Fixed "Mega-Sadist" achievement being unobtainable</p>
+    <p>* Fixed "Real American" achievement counting towards Rhinos instead of terrorists</p>
+    <p>* Fixed camera Z view angle getting stuck in rare occasions</p>
+    <p>* Fixed MSAA breaking interaction glow outline effect</p>
+    <p>* Fixed all NPCs belonging to the incorrect faction<br />(Specific faction related AI behavior is now accurate)</p>
+    <p>* Fixed all NPCs belonging to the incorrect manner<br />(Specific manner related AI behavior is now accurate)</p>
+    <p>* Fixed numerous non-standard apostrophes in p3_english.txt that messed up text rendering in-game</p>
+    <p>* Fixed camera shake occurring when badgersaw isn't even attacking yet</p>
+    <p>* Fixed NPCs not receiving push force upon being ragdolled by segway</p>
+    <p>* Fixed being able to take a hostage with any weapon by having it selected beforehand<br />(You now automatically switch to the first compatible weapon upon taking a hostage if you don't already have one selected)</p>
+    <p>* Fixed cat death gibbing not being reset after getting shot from m136/rpg</p>
+    <p>* Fixed frequent player camera jittering issue</p>
+    <p>* Fixed cats getting stuck in walls and specific props</p>
+    <p>* Fixed Steam_01.vmt particle material being depthblended, causing visual artifacts, most <br />noticably on the main menu when it's used for dude's cigarette smoke!</p>
+    <p>* Fixed headblob getting stuck to the player upon picking up a tamed cat in some situations</p>
+    <p>* Fixed police academy cutscenes playing in the wrong order (English language specific issue)</p>
+    <p>* Fixed crash upon processing impact of cats launched out of the m136/rpg</p>
+    <p>* Fixed a crash that can occur upon attempting to redestroy an NPCs head with the fireaxe or sledgehammer</p>
+    <p>* Fixed crash that can happen when you release a hostage who already died from burning to death</p>
+    <p>* Fixed camera shake animation sequences carrying over and playing infinitely while the player is ragdolled</p>
+    <p>* Fixed NPCs continuing to speak when they're killed</p>
+    <p>* Fixed an issue where some sounds wouldn't change their pitch, but the volume instead</p>
+    <p>* Fixed player spray animation being cancelled but the spray still continuing if both primary and secondary fire are held when using catnip or pepperspray</p>
+    <p>* Fixed props below a certain mass not interrupting melee attacks, causing multiple duplicate impacts and lag</p>
+    <p>* Fixed player sometimes saying cut "on-self pissing" lines</p>
+    <p>* Fixed player move input being accepted during the snatch quicktime event, if snatched while in the badgersaw mauling sequence</p>
+    <p>* Fixed nailbat becoming unobtainable after getting stuck in an NPC that died</p>
+    <p>* Fixed player being able to sprint on-foot while riding a segway in certain circumstances</p>
+    <p>* Fixed "Fail Zombie" achievement not working as it should</p>
+    <p>* Fixed player cover input mode persisting after teleport</p>
+    <p>* Fixed player stamina slowly draining while the game is paused</p>
+    <p>* Fixed an awkward nailbat/baton animation issue</p>
+    <p>* Fixed an issue where the molotov would do multiple duplicate explosions upon hitting the ground</p>
+    <p>* Fixed animation persistence issue for hidden ragdoll NPCs<br />(This basically prevents a ghost version of the ragdolled NPC from doing animation events and attack traces)</p>
+    <p>* Fixed player sometimes saying cut "badger pissing" lines when attacking with the badgersaw</p>
+    <p>* Fixed throwable weapon in-hand model becoming invisible and placement restarting after the animation is interrupted by a kick</p>
+    <p>* Fixed police helicopter being able to get tased, causing it to spin uncontrollably (Very funny, almost regret patching this)</p>
+    <p>* Fixed cats getting "stuck" when hitting the ground after being thrown in some occasions</p>
+    <p>* Fixed an issue with NPC bump AI functionality</p>
+    <p>* Fixed pornworld concrete wall texture issue</p>
+    <p>* Fixed particles playing indefinitely after switching weapons while alt-fire pissing</p>
+    <p>* Fixed headblobs not being immediately removed on hidden NPCs upon ragdoll</p>
+    <p>* Fixed incorrect player throwing arm angles after switching to grenade or molotov while the current weapon is lowered</p>
+    <p>* Fixed being unable to dismember corpses of NPCs that were killed by the nailbat</p>
+    <p>* Fixed player stand up animations being almost unnoticeable after being ragdolled</p>
+    <p>* Fixed particle effects playing on reselection after holstering while pouring gasoline</p>
+    <p>* Fixed a bug where cat weapon shooting sounds would still play on previously cat-silenced weapons after player respawn</p>
+    <p>* Fixed being able to switch weapons during NPC arrest sequence and holstered the current weapon</p>
+    <p>* Fixed electricity effect being stuck on NPCs forever if hit by a taser energyball and then ragdolled</p>
+    <p>* Fixed NPC stunning sequence not ending upon ragdoll</p>
+    <p>* Fixed player attempting to shove with weapons that don't have the ability</p>
+    <p>* Fixed being able to tase NPCs that are ragdolled</p>
+    <p>* Fixed various NPC weapons dealing only 1 damage</p>
+    <p>* Fixed issues with in-game text and font</p>
+    <p>* Fixed slowmo not being disabled upon player death</p>
+    <p>* Fixed an issue where the player would automatically move without user input under specific circumstances<br />(https://youtu.be/UajWzGByMkM?t=2093)</p>
+    <p>* Fixed an issue where emptyhands aren't properly switched to after the nailbat gets stuck in an NPC</p>
+    <p>* Fixed pistol muzzle flash attachment point</p>
+    <p>* Fixed catnip slowmotion potentially causing a usercommand buffer overflow</p>
+    <p>* Fixed dude pistol hostage reload animation being broken</p>
+    <p>* Fixed nailbat not falling off of pincushioned NPC after time</p>
+    <p>* Fixed P3_RemoveAllBoltons not removing all boltons</p>
+    <p>* Fixed a crash that can occur when grabbing objects</p>
+    <p>* Fixed hud messages breaking on screen resolution change</p>
+    <p>* Fixed an issue with InputFireFSMScriptEvent</p>
+    <h3>IMPROVEMENTS/ADDITIONS/CHANGES:</h3>
+    <p>+ Added striketraces for all melee weapons</p>
+    <p>+ Added save indicator feature, now you'll be notified of when the game saves your progress</p>
+    <p>+ Added jesus run indicator: Angel wings now appear on the karma indicator within the mission log if you haven't killed anyone</p>
+    <p>+ Added back cut shotgun pumping feature and improved functionality</p>
+    <p>+ Added back the cut sniper rifle weapon</p>
+    <p>+ Added quickselect hotkey feature for the weapon selector to make it more intuitive</p>
+    <p>+ Added back cut/unused bystander freakout player voice lines</p>
+    <p>+ Added back unused badgersaw attack sounds</p>
+    <p>+ Added mauling sounds for cat snatching</p>
+    <p>* Badgersaw piss now forces NPCs to vomit instead of being knocked out</p>
+    <p>+ Added back unused dude badgersaw pissing voice lines</p>
+    <p>* NPCs are now forced to puke if their face gets pissed on</p>
+    <p>* Replaced dude pistol firing animations with ones that exhibit reduced recoil</p>
+    <p>* Significantly improved and enhanced player kicking</p>
+    <p>* Catnip spray now triggers an auto-reload, regardless of player use</p>
+    <p>+ Added back unused sounds for loading a cat into the m136/rpg</p>
+    <p>+ Added back unused emptyhands impact sounds</p>
+    <p>+ Added back unused taser energyball firing and charging sounds</p>
+    <p>+ Added M136 ammo pickup, holster, and deploy sounds</p>
+    <p>* Significantly improved melee hit detection</p>
+    <p>* Improved boomerang machete a ton</p>
+    <p>* Improved weemote and burst fire pissing</p>
+    <p>+ NPCs can now be ragdolled upon being hit by objects launched from the shopvac</p>
+    <p>* Snatch quicktime event progress is now reset if the player doesn't attack for a certain amount of time</p>
+    <p>* Improved and fixed the quality/resolution of various textures</p>
+    <p>+ Added impact velocity based screenshake upon taking fall damage</p>
+    <p>+ Added back cut dude self pissing lines</p>
+    <p>+ Added back cut hockey mom protesting animation</p>
+    <p>* Improved player interaction</p>
+    <p>* Nailbat, baton, and machete is now automatically switched to upon pickup after being thrown</p>
+    <p>+ Added back unused NPC head explosion gibs</p>
+    <p>* Improved NPC head explosion</p>
+    <p>* Improved weemote/player piss extinguishing</p>
+    <p>* Zombie acid attacks are now handled appropriately</p>
+    <p>+ Added back and improved cut player jumping</p>
+    <p>+ Added back beta m16 sounds</p>
+    <p>* NPCs can now become ragdolled while they are getting up off the ground</p>
+    <p>+ Added hitgroup damage threshold multipliers for player ragdolling</p>
+    <p>* Overhauled M136/RPG weapon</p>
+    <p>+ Added the ability to spare hostages by kicking them away</p>
+    <p>* Significantly improved taser secondary fire</p>
+    <p>* The player and their segway angles now match "info_landmark" entities upon level transition<br />(As of the time of writing this, all "info_landmark" entities have yet to be properly oriented)</p>
+    <p>- Removed jarring "forward strike" attack animation for nailbat and baton</p>
+    <p>* Fixed an awkward nailbat/baton animation issue (https://youtu.be/z2Adr_nOQmI)</p>
+    <p>* The player can now be ragdolled through various means</p>
+    <p>* Improved player vaulting a bit</p>
+    <p>+ Added gamamet/fartgun back into the game and replaced the weapon selector icon with an english version</p>
+    <p>+ Added back cut/unused player save acknowledgement feature</p>
+    <p>+ Added back unused hostage death out sequence</p>
+    <p>+ Added actual camera screenshake for a variety of scenarios (car explosions, getting hurt, melee weapon hits, etc.)</p>
+    <p>+ Catnip is now able to blind NPCs</p>
+    <p>+ Added back and improved unused ability to blind NPCs with the laserpen</p>
+    <p>+ NPCs now become angry and attack the player after being blinded by them</p>
+    <p>* Improved badgersaw melee hit detection</p>
+    <p>* Made spray weapons require a direct hit on NPC faces to blind them</p>
+    <p>* Improved segway movement and boost mechanic</p>
+    <p>* Separated player cover from jumping</p>
+    <p>* "Neurosurgeon" achievement now counts non-decapitation headshots</p>
+    <p>+ Added back a lot of previously unused mission specific loading screen backgrounds</p>
+    <p>* NPCs are now unable to be arrested or taken as a hostage if they're on fire</p>
+    <p>* There is now a player weapon input delay for a short time after the snatch quicktime event</p>
+    <p>* Idiot-proofed the RPG/M136 so the player can't instantly kill themselves with it</p>
+    <p>+ Added back unused upgrade indicators on the weapon selector</p>
+    <p>+ Added blink/flashing effect to ammo and weapon pickups</p>
+    <p>* Nailbat throw trail now uses a lighter variant</p>
+    <p>+ Added player/NPC fire spreading</p>
+    <p>* Crosshair is now hidden when utilizing certain weapons that don't require precise aim</p>
+    <p>* Prevented physx simulation while the game is paused</p>
+    <p>+ "Champ Whisperer" achievement is now implemented and obtainable</p>
+    <p>* Free-roaming is now unlocked by default</p>
+    <p>+ Added stars headblob to NPCs upon taser energyball stun</p>
+    <p>* Player ragdolls immediately upon death instead of playing an animation beforehand, death voice lines removed</p>
+    <p>* Significantly reduced ignite time for props and NPCs</p>
+    <p>* Improved player weapon shoving:</p>
+    <p>- NPC detection improved<br />- Animation speed increased by 50% <br />- Player is now capped to walking speed</p>
+    <p>+ Added back cut player segway leaning</p>
+    <p>* Improved player camera offsets and FOV</p>
+    <p>* Massively improved performance</p>
+    <p>* The badgersaw now works as it did in the alpha version of the game, removed mauling sequence</p>
+    <p>+ Added back unused player taser charging gesture for alternative fire</p>
+    <p>* Player ignite duration now depends on the ignition source</p>
+    <p>+ Added light throw trail to baton weapon</p>
+    <p>+ Added back cut dude whistling for the laserpen alternative fire</p>
+    <p>+ Added and improved unused player hurt comment feature!</p>
+    <p>+ Added unused player respawn acknowledgement feature!</p>
+    <p>* More familiar default controls based on Postal 2 and Postal 4</p>
+    <p>+ Added molotov detonation screenshake, a scorch decal now appears where the molotov landed</p>
+    <p>- Removed DRM</p>
+    <p>+ Included SDK files for modders/developers</p>
+    <p>* Updated and improved pause menu UI</p>
+    <p>+ Added back and modified Half-Life 2 damage indicator</p>
+    <h3>BALANCING:</h3>
+    <p>* Significantly improved balancing for weapons (NPC/Player)<br />* Sped up player health regeneration</p>
+    <h3>MISSIONS:</h3>
+    <p>* Made various missions less annoying/boring:</p>
+    <p>- Snot Wad collection quota in pw (PW_SNOTBALLS_NUM) is now 20 (40 in vanilla)<br />- Cat collection quota in dcr (DCR_CATS_MAX) is now 10 (15 in vanilla)<br />- Kill quota to progress through each area in zhqa (ZHQA_FRAGS) is now 8, 16, 21, 28 (8, 16, 28, 40 in vanilla)<br />- Removed annoying "al disappearance feature" on PWAC</p>
+    <h3>MAPPING:</h3>
+    <p>* Improved the nav mesh for escort missions (PA, PWAC, SBE)</p>
+    <p>* Added sniper rifle weapon to various maps (PA, PWAC, MTZ, ZHQA, AA, AA1, AA2, PM2)</p>
+    <p>* Fixed a misplaced floor tile on the exterior of Porn World (Hub1 variants)</p>
+    <p>+ Added additional maps to free roam (Dog School, Daveland, Cashmart, City Hall, Grotto, Cosmetics Lab and Police Station)</p>
+    <p>+ Gave sniper rifle to venezuelan soldiers in Apocalypse Again</p>
+    <p>+ Added the Rhino back to the Cosmetics Lab's free roam variant</p>
+    <p>- Removed the bosses from Daveland's free roam variant</p>
+    <p>* Fixed a bug where entering the Grotto from Hub3 would lock the player in a loading loop</p>
+    <p>+ Gave the sniper rifle to a few of the snipers in Patrol Mission 2</p>
+    <p>+ Added cover to border gates in Homeland Insecurity, so hopefully you'll die way less if you have a brain</p>
+    <p>+ Added additional catnip pickup boxes around the map in Diseased Cat Roundup</p>
+    <p>* Fixed misaligned house trim in all Hub1 map variants</p>
+    <p>* Fixed misaligned segway store trim in all Hub2 map variants</p>
+    <p>* Fixed misplaced clip wall in all Hub3 map variants</p>
+    <p>* Fixed missing SUV in Hub2 freeroam map</p>
+    <p>* Fixed missing roadblock in Police Academy freeroam map</p>
+    <p>* Fixed floating door frames in the Gay Rodeo maps</p>
+    <p>* Fixed NPC's spawning inside of the ground in the rodeo maps</p>
+</div>
+
+<script src="main.js"></script>
+
+</body>
+</html>
