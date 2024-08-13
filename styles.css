@@ -41,7 +41,8 @@ body {
     margin-left: 75px;
 }
 
-.changelog h1, h3 {
+.changelog h1, .changelog h3 {
+    
     text-decoration: underline;
     text-decoration-thickness: 3px;
 }
