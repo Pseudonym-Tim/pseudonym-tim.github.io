@@ -38,7 +38,8 @@ body {
 
 .changelog
 {
-    margin-left: 75px;
+    margin-left: 25px;
+    text-align: left;
 }
 
 .changelog h1, .changelog h3 {
