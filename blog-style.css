@@ -1,0 +1,76 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #1e1e1e;
+    color: #c9d1d9;
+}
+
+.blog-info {
+    text-align: center;
+}
+
+main {
+    padding: 20px;
+    margin: 25px auto;
+    max-width: 1000px;
+    background-color: #2c2f33;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    border-radius: 8px;
+}
+
+h1, h2 {
+    color: #f1f1f1;
+}
+
+p {
+    font-size: 18px;
+    line-height: 1.6;
+}
+
+/* Styling for code blocks */
+.code-block {
+    background-color: #0d1117;
+    color: #c9d1d9;
+    padding: 15px;
+    border-radius: 5px;
+    margin: 20px 0;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 16px;
+    overflow-x: auto;
+}
+
+.code-block span {
+    color: #79c0ff; /* Highlight keywords */
+}
+
+.code-block .comment {
+    color: #8b949e; /* Styling for comments */
+}
+
+.code-block .number {
+    color: #d2a8ff; /* Styling for numbers */
+}
+
+.code-block .string {
+    color: #a5d6ff; /* Styling for strings */
+}
+
+/* Styling for inline code */
+code {
+    background-color: #0d1117;
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 16px;
+    color: #c9d1d9;
+}
+
+/* Adjustments for list styling */
+ul {
+    color: #adbac7;
+}
+
+li {
+    margin-bottom: 10px;
+}

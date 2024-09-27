@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Building Procedural Levels in POSTAL: Onslaught</title>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/blog-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <style>
+        
+    </style>
+</head>
+
+<body>
+
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <a href="index" class="username">Pseudonym_Tim</a>
+        <div class="hamburger" id="hamburger">
+            <i class="fas fa-bars"></i>
+        </div>
+        <div class="nav-links" id="nav-links">
+            <a href="/index#about">About Me</a>
+            <a href="/index#projects">Projects</a>
+            <a href="/index#music">Music</a>
+            <a href="/index#art">Art</a>
+            <a href="/index#contact">Contact</a>
+        </div>
+    </div>
+
+    <div class="blog-info">
+        <h1>Building Procedural Levels in POSTAL: Onslaught</h1>
+        <p class="date">Posted on: September 27, 2024</p>
+    </div>
+
+    <main>
+        <h2>Intro</h2>
+        <p>A while back, I participated in a game jam, specifically POSTAL Jam 2, which is basically a contest where developers create games inspired by the infamous POSTAL series. I've been a long time fan of POSTAL 2 and it's one of my favorite games of all time, so when I heard that the developers behind the game were hosting a game jam, I just couldn't resist. 
+            
+            <p>One of the standout entries that actually ended up taking second place was POSTAL: Onslaught, a retro arcade-style shoot-em-up that I made for fun inbetween other projects and responsibilities.</p>
+            <p>The game features randomly generated levels that are made utilizing a custom little scripting language I wrote so I thought it might be interesting to talk about it!</p>
+        <h2>Why a Custom Scripting Language?</h2>
+        <p>
+            Instead of manually designing a set of pre-made levels and randomly picking between them or something boring like that, I decided to challenge myself. Mostly just because I thought it would be fun and I've never done anything like this before previously.
+        </p>
+        <p>
+            Might not have been the greatest use of my time, but I definitely appreciated it later on in development. 
+        </p>
+
+        <h2>How Does It Work?</h2>
+        <p>
+            Each level's script is stored in what is essentially just a plain text file with a <code>.level</code> extension, parsed during runtime by my <code>LevelScriptParser</code> class in Unity from the <code>StreamingAssets</code> folder. The scripting language was designed to be pretty simple and straightforward to allow me to iterate pretty quickly.
+        </p>
+
+        <h2>Variables</h2>
+        <p>
+            Variables can be either a whole number/integer or a floating point value, and they can control everything from the size of the level to random placement positions. For instance, to define randomized dimensions of a level, I can simply do this:
+        </p>
+        <div class="code-block">
+            <code>VAR LEVEL_SIZE_X RAND_INT 10 50</code><br>
+            <code>VAR LEVEL_SIZE_Y RAND_INT 10 50</code>
+        </div>
+        <p>
+            <code>LEVEL_SIZE_X</code> and <code>LEVEL_SIZE_Y</code> will be random integers between 10 and 50 using the <code>RAND_INT</code> function. These variables can then be used in conditions and loops.
+        </p>
+        <h2>Loops</h2>
+        <p>
+            The scripting language includes <code>FOR</code> loops, which allow iteration for placing multiple entities or filling areas with tiles and whatnot. Here's an example of a loop that places a row of tiles:
+        </p>
+        <div class="code-block">
+            <code>FOR X 0 10</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>TILE grass_tile X 0</code><br>
+            <code>ENDFOR</code>
+        </div>
+        <p>
+            This loop places a line of grass tiles using the <code>TILE</code> function along the x-axis from (0,0) to (10,0). The flexibility of loops also allows for more advanced stuff, like filling larger areas with a set of rules.
+        </p>
+
+        <h2>Conditions and Operators</h2> <p> The language supports conditional logic using <code>IF</code> statements, enabling dynamic changes based on various conditions. 
+            This allows you to control the behavior of elements within the level. 
+            Conditional statements can use various operators to define the logic. 
+            Below are the supported key operators: </p> <ul> <li><code>&gt;</code> - Greater than</li> <li><code>&lt;</code> - Less than</li> <li><code>&gt;=</code> 
+                - Greater than or equal to</li> <li><code>&lt;=</code> - Less than or equal to</li> <li><code>==</code> 
+                    - Equal to</li> <li><code>!=</code> - Not equal to</li> </ul> <p> 
+                        Here’s how you can decide whether to place an obstacle: </p> <div class="code-block"> <code>IF LEVEL_SIZE_X &gt; 30</code><br> &nbsp;&nbsp;&nbsp;&nbsp;<code>OBJECT rock_1 5 5</code><br> <code>ENDIF</code> </div>
+        <p>
+            This condition checks if the level width is greater than 30. If true, it spawns a rock at the coordinates (5,5).
+        </p>
+        <h2>Entity and object randomization</h2>
+        <p>
+            Randomness plays a huge role in procedural generation obviously. Alongside random integers and floats, there are specialized functions with parameters for random placement of entities and objects. 
+            These parameters ensure that stuff spawns safely away from other things, maintaining balance while preserving a feeling of unpredictability in its placement. For example:
+        </p>
+        <div class="code-block">
+            <code>ENTITY_RANDOM civilian_npc dirt 3 3 8</code>
+        </div>
+        <p>
+            This line spawns a <code>civilian_npc</code> entity randomly on a <code>dirt</code> tile. The following values indicate the constraints:
+            <ol>
+                <li>
+                    <p>The entity will not spawn closer than 3 tiles from the level bounds</p>
+                </li>
+                <li>
+                    <p>The entity must be at least 3 tiles away from any nearby objects/entities</p>
+                </li>
+                <li>
+                    <p>The entity must maintain a minimum distance of 8 tiles from the player</p>
+                </li>
+            </ol>
+        </p>
+        <div class="code-block">
+            <code>OBJECT_RANDOM level_palm_tree dirt 3 3 3 OUTSIDE_BOUNDS</code>
+        </div>
+        <p>
+            This line will randomly spawn a <code>level_palm_tree</code> on a <code>dirt</code> tile with certain restrictions:
+            <ol>
+                <li>
+                    <p>The object will not spawn closer than 3 tiles from the level bounds</p>
+                </li>
+                <li>
+                    <p>The object must be at least 3 tiles away from any nearby objects/entities</p>
+                </li>
+                <li>
+                    <p>The object must maintain a minimum distance of 3 tiles from the player</p>
+                </li>
+                <li>
+                    <p>The presence of the <code>OUTSIDE_BOUNDS</code> flag means this tree will spawn outside the playable level bounds for cosmetic purposes only</p>
+                </li>
+            </ol>
+        </p>
+        <h2>Structures and Tile Fills</h2>
+        <p>
+            Another feature of the language is the ability to fill areas with tiles or place procedural structures. Using the <code>TILE_FILL</code> function, I can easily fill a region of the level:
+        </p>
+        <div class="code-block">
+            <code>TILE_FILL dirt 0 0 10 10</code>
+        </div>
+        <p>This will fill a 10x10 area with dirt tiles. </p>
+        <p>The <code>STRUCTURE</code> function allows me to place predefined randomized structures:</p>
+        <div class="code-block">
+            <code>STRUCTURE player_housing LEVEL_BOUNDS_DIST + 5</code>
+        </div>
+        <p>This will generate a player housing structure in a random location, ensuring that it is at least 5 tiles away from the boundaries of the level.</p>
+
+        <h2>Breakdown of the Level Generation Process</h2>
+
+        <h3>1. Setting the Level Dimensions and Boundaries</h3>
+        <div class="code-block">
+            <code>VAR LEVEL_SIZE_X RAND_INT 64 96</code><br>
+            <code>VAR LEVEL_SIZE_Y RAND_INT 64 96</code><br>
+            <code>VAR LEVEL_BOUNDS_DIST 13</code>
+        </div>
+        <p>This section of the script randomizes the dimensions of the level (between 64 and 96 tiles for both width and height). It also defines a boundary distance of 13 tiles, which will be used later to ensure there is a consistent buffer around the edge of the level.</p>
+        
+        <h3>2. Filling the Area with Dirt</h3>
+        <div class="code-block">
+            <code>TILE_FILL dirt 0 0 LEVEL_SIZE_X-1 LEVEL_SIZE_Y-1</code>
+        </div>
+        <p>This function fills the entire level with dirt tiles as the base terrain. Every tile in the defined area is initially filled with dirt to essentially set up the rest of the generation...</p>
+        
+        <h3>3. Creating Cliffs along the Level Edges</h3>
+        <div class="code-block">
+            <code>FOR X LEVEL_BOUNDS_DIST LEVEL_SIZE_X-LEVEL_BOUNDS_DIST-1</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>TILE dirt_cliff_b X LEVEL_BOUNDS_DIST-1</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>TILE dirt_cliff_t X LEVEL_SIZE_Y-LEVEL_BOUNDS_DIST-1</code><br>
+            <code>ENDFOR</code>
+        </div>
+           
+        <div class="code-block">
+            <code>FOR Y LEVEL_BOUNDS_DIST LEVEL_SIZE_Y-LEVEL_BOUNDS_DIST-1</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>TILE dirt_cliff_l LEVEL_BOUNDS_DIST-1 Y</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>TILE dirt_cliff_r LEVEL_SIZE_X-LEVEL_BOUNDS_DIST-1 Y</code><br>
+            <code>ENDFOR</code>
+        </div>
+        
+        <p>These loops place cliff tiles around the edges of the level, forming simple boundaries.</p>
+        
+        <div class="code-block">
+            <code>TILE dirt_cliff_tl LEVEL_BOUNDS_DIST-1 LEVEL_SIZE_Y-LEVEL_BOUNDS_DIST</code><br>
+            <code>TILE dirt_cliff_tr LEVEL_SIZE_X-LEVEL_BOUNDS_DIST LEVEL_SIZE_Y-LEVEL_BOUNDS_DIST</code><br>
+            <code>TILE dirt_cliff_bl LEVEL_BOUNDS_DIST-1 LEVEL_BOUNDS_DIST-1</code><br>
+            <code>TILE dirt_cliff_br LEVEL_SIZE_X-LEVEL_BOUNDS_DIST LEVEL_BOUNDS_DIST-1</code>
+        </div>
+
+        <p>Corner cliffs are then placed at the four corners of the level to finish off the boundary. These cliffs help to separate the playable area from the rest of the map, making it feel more like an arena.</p>
+        
+        <h3>5. Placing player housing structure</h3>
+        
+        <div class="code-block">
+            <code>STRUCTURE player_housing LEVEL_BOUNDS_DIST + 5</code><br>
+        </div>
+        The player's housing structure is generated early, even before most other entities and objects are manually spawned. This is because the player is essentially part of the house and we want to prioritize spawning the player before most other elements, just to ensure that anything that needs a reference to the player can likely obtain it!
+
+        <h3>6. Placing Entities and Randomizing NPCs</h3>
+        <div class="code-block">
+            <code>VAR POLICE_COUNT RAND_INT 1 5</code><br>
+            <code>VAR CIVILIAN_COUNT RAND_INT 4 6</code><br>
+            <code>VAR PROTESTER_COUNT RAND_INT 1 3</code><br>
+        </div>
+
+        <div class="code-block">
+            <code>FOR INDEX 1 POLICE_COUNT</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>ENTITY_RANDOM police_enemy_npc dirt 3 3 8</code><br>
+            <code>ENDFOR</code><br>
+        </div>
+
+        <div class="code-block">
+            <code>FOR INDEX 1 CIVILIAN_COUNT</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>ENTITY_RANDOM civilian_npc dirt 3 3 8</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>ENTITY_RANDOM civilian_enemy_npc dirt 3 3 8</code><br>
+            <code>ENDFOR</code><br>
+        </div>
+
+        <div class="code-block">
+            <code>FOR INDEX 1 PROTESTER_COUNT</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>ENTITY_RANDOM protester_npc dirt 3 3 8</code><br>
+            <code>ENDFOR</code><br>
+        </div>
+
+        <p>The number of police and civilian NPCs is randomized between 1-5 and 4-6, and protesters between 1-3 respectively. These values are then used in loops to randomly place them throughout the level using set rules.</p>
+        
+        <h3>7. Adding Random Pickups</h3>
+
+        <div class="code-block">
+            <code>FOR INDEX 1 3</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>ENTITY_RANDOM weapon_pickup dirt 5 3 8</code><br>
+            <code>ENDFOR</code><br>
+        </div>
+
+        <div class="code-block">
+            <code>FOR INDEX 1 3</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>ENTITY_RANDOM item_pickup dirt 3 3 8</code><br>
+            <code>ENDFOR</code><br>
+        </div>
+
+        <p>Weapon and item pickups are scattered across the map randomly. The constraints in the script ensure they do not spawn too close to other entities, like the player, ensuring the level remains balanced.</p>
+        
+        <h3>8. Placing trees and other objects</h3>
+
+        <div class="code-block">
+            <code>FOR INDEX 1 5</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>OBJECT_RANDOM level_palm_tree dirt 2 3 3</code><br>
+            <code>ENDFOR</code><br>
+            <br>
+            <code>FOR INDEX 1 6</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>OBJECT_RANDOM level_cactus dirt 2 3 3</code><br>
+            <code>ENDFOR</code><br>
+            <br><code>...</code>
+        </div>
+
+        <p>Objects like trees and rocks are randomly placed to give the level a more varied and natural appearance. The script ensures that they don't spawn too close to the player or other objects/entities.</p>
+        
+        <h3>9. Placing out-of-bounds objects</h3>
+
+        <div class="code-block">
+            <code>FOR INDEX 1 20</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>OBJECT_RANDOM level_palm_tree dirt 3 3 3 OUTSIDE_BOUNDS</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>OBJECT_RANDOM level_cactus dirt 3 3 3 OUTSIDE_BOUNDS</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>OBJECT_RANDOM level_rock1 dirt 3 3 3 OUTSIDE_BOUNDS</code><br>
+            <code>ENDFOR</code><br>
+        </div>
+
+        <p>Cosmetic objects are placed outside the playable area using the <code>OUTSIDE_BOUNDS</code> flag, ensuring that the surroundings outside the playable area appears populated.</p>
+        
+        <h3>10. Placing more structures</h3>
+
+        <div class="code-block">
+            <code>FOR INDEX 1 2</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>STRUCTURE npc_housing_01 LEVEL_BOUNDS_DIST + 3</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>STRUCTURE npc_housing_02 LEVEL_BOUNDS_DIST + 3</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>STRUCTURE npc_housing_03 LEVEL_BOUNDS_DIST + 3</code><br>
+            <code>ENDFOR</code><br>
+        </div>
+
+        <p>Finally, a few procedural structures are randomly placed in the level including various NPC housing, ensuring they maintain a certain distance from the boundaries.</p>
+
+        <h2>Final Thoughts</h2>
+        <p>
+            Creating this custom scripting language was a bit of a challenge, but it became an essential part of delivering decent enough levels that are fun to play.
+        </p>
+        <p>
+            I hope this dive into the inner workings of the scripting language was interesting. Thanks for reading!
+        </p>
+    </main>
+
+</body>
+</html>
