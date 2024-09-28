@@ -54,7 +54,7 @@
 
         <h2>How Does It Work?</h2>
         <p>
-            Each level's script is stored in what is essentially just a plain text file with a <code>.level</code> extension, parsed during runtime by my <code>LevelScriptParser</code> class in Unity from the <code>StreamingAssets</code> folder. The scripting language was designed to be pretty simple and straightforward to allow me to iterate pretty quickly.
+            The level generation script is stored in what is essentially just a plain text file with a <code>.level</code> extension, parsed during runtime by my <code>LevelScriptParser</code> class in Unity from the <code>StreamingAssets</code> folder. The scripting language was designed to be pretty simple and straightforward to allow me to iterate pretty quickly.
         </p>
 
         <h2>Variables</h2>
@@ -189,7 +189,7 @@
 
         <p>Corner cliffs are then placed at the four corners of the level to finish off the boundary. These cliffs help to separate the playable area from the rest of the map, making it feel more like an arena.</p>
         
-        <h3>5. Placing player housing structure</h3>
+        <h3>5. Placing Player Housing Structure</h3>
         
         <div class="code-block">
             <code>STRUCTURE player_housing LEVEL_BOUNDS_DIST + 5</code><br>
@@ -240,7 +240,7 @@
 
         <p>Weapon and item pickups are scattered across the map randomly. The constraints in the script ensure they do not spawn too close to other entities, like the player, ensuring the level remains balanced.</p>
         
-        <h3>8. Placing trees and other objects</h3>
+        <h3>8. Placing Trees and Other Objects</h3>
 
         <div class="code-block">
             <code>FOR INDEX 1 5</code><br>
@@ -255,7 +255,7 @@
 
         <p>Objects like trees and rocks are randomly placed to give the level a more varied and natural appearance. The script ensures that they don't spawn too close to the player or other objects/entities.</p>
         
-        <h3>9. Placing out-of-bounds objects</h3>
+        <h3>9. Placing out-of-bounds Objects</h3>
 
         <div class="code-block">
             <code>FOR INDEX 1 20</code><br>
@@ -267,7 +267,7 @@
 
         <p>Cosmetic objects are placed outside the playable area using the <code>OUTSIDE_BOUNDS</code> flag, ensuring that the surroundings outside the playable area appears populated.</p>
         
-        <h3>10. Placing more structures</h3>
+        <h3>10. Placing more Structures</h3>
 
         <div class="code-block">
             <code>FOR INDEX 1 2</code><br>
