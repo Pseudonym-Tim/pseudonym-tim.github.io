@@ -58,7 +58,7 @@ function playMusic(track, trackName, button) {
         currentTrackName = trackName;
         button.querySelector('i').classList.remove('fa-play');
         button.querySelector('i').classList.add('fa-stop');
-        button.innerHTML = '<i class="fas fa-stop"></i> Stop "' + trackName + '"';
+        button.innerHTML = '<i class="fas fa-stop"></i> Stop playing "' + trackName + '"';
         button.classList.add('active');
         currentButton = button;
     }
