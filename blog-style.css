@@ -23,6 +23,16 @@ h1, h2 {
     color: #f1f1f1;
 }
 
+h1{
+    font-weight: bold;
+    text-underline-offset: 10px;
+}
+
+.blog-info
+{
+    text-underline-offset: 6px;
+}
+
 p {
     font-size: 18px;
     line-height: 1.6;
