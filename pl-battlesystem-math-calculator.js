@@ -134,7 +134,11 @@ function castInterruptNewATB(castTime, mpCost, hpCost, castProgress, minPenaltyR
     const blended = 0.50 * timeValue + 0.35 * resourceValue + 0.15 * earlyness;
     const ratio = clamp(lerp(minPenaltyRatio, 0.80, blended), minPenaltyRatio, 0.80);
     const newATB = Math.max(0, currentATB - currentATB * ratio * pushbackIntensity);
-    return { blended: blended, penaltyRatio: ratio, newATB: newATB };
+    return {
+        blended: blended,
+        penaltyRatio: ratio,
+        newATB: newATB
+    };
 }
 
 /** DOM helpers */
@@ -219,9 +223,9 @@ function computeExpected()
     const vExpected = expectedVariance(variancePM);
 
     const baseDamage =
-        attackType === "physical"
-        ? physicalDamage(power, str, pdef, elemMod, vExpected)
-        : magicalDamage(power, mag, mdef, elemMod, vExpected);
+        attackType === "physical" ?
+        physicalDamage(power, str, pdef, elemMod, vExpected) :
+        magicalDamage(power, mag, mdef, elemMod, vExpected);
 
     const defended = applyDefend(baseDamage, defending);
     const critDamage = Math.max(ifloor(defended * 1.5), 1);
@@ -288,15 +292,15 @@ function rollOnce()
 
     let dmg = 0;
 
-    if (connects)
+    if(connects)
     {
         const v = sampleVariance(variancePM);
         dmg =
-            attackType === "physical"
-            ? physicalDamage(power, str, pdef, elemMod, v)
-            : magicalDamage(power, mag, mdef, elemMod, v);
+            attackType === "physical" ?
+            physicalDamage(power, str, pdef, elemMod, v) :
+            magicalDamage(power, mag, mdef, elemMod, v);
 
-        if (isCrit)
+        if(isCrit)
         {
             dmg = Math.max(ifloor(dmg * 1.5), 1);
         }
@@ -305,7 +309,7 @@ function rollOnce()
     }
 
     out("hitCrit").innerHTML =
-    `<div>Hit Chance: <strong>${pct(hc)}</strong>${cannotMiss ? ' <span class="good">(cannot miss)</span>' : ''}</div>
+        `<div>Hit Chance: <strong>${pct(hc)}</strong>${cannotMiss ? ' <span class="good">(cannot miss)</span>' : ''}</div>
      <div>Crit Chance: <strong>${pct(cc)}</strong></div>
      <div>${connects ? '<span class="good">Attack connected</span>' : '<span class="warn">Missed</span>'}
           (Hit Roll: ${hitRoll.toFixed(2)} < ${pct(hc)})</div>
@@ -313,9 +317,9 @@ function rollOnce()
           ${connects ? `(Crit Roll: ${critRoll.toFixed(2)} < ${pct(cc)})` : ''}</div>`;
 
     out("damage").innerHTML =
-        connects
-        ? `<div>Damage Dealt: <strong>${intfmt(dmg)}</strong>${flag("defending") ? ' (defending)' : ''}</div>`
-        : `<div>No damage on miss...</div>`;
+        connects ?
+        `<div>Damage Dealt: <strong>${intfmt(dmg)}</strong>${flag("defending") ? ' (defending)' : ''}</div>` :
+        `<div>No damage on miss...</div>`;
 
 
     // ATB / Cast block
@@ -369,9 +373,18 @@ function resetDefaults()
 
 document.addEventListener("DOMContentLoaded", function()
 {
-    document.getElementById("btnCompute").addEventListener("click", function() { computeExpected(); });
-    document.getElementById("btnRoll").addEventListener("click", function() { rollOnce(); });
-    document.getElementById("btnReset").addEventListener("click", function() { resetDefaults(); });
+    document.getElementById("btnCompute").addEventListener("click", function()
+    {
+        computeExpected();
+    });
+    document.getElementById("btnRoll").addEventListener("click", function()
+    {
+        rollOnce();
+    });
+    document.getElementById("btnReset").addEventListener("click", function()
+    {
+        resetDefaults();
+    });
     computeExpected();
 });
 
