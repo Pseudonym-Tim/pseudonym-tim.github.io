@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Project L.I.F.E — Battle Calculator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="pl-battlesystem-math-calculator.css">
+</head>
+<body>
+    <main class="calc">
+        <h1>Project L.I.F.E Battle Math Calculator</h1>
+        <p class="subtle">Quick and useful calculator/simulator for battle related math...</p>
+        
+        <footer class="foot">
+            <small>
+                Formulas based on the ones found in the
+                <a href="https://docs.google.com/document/d/1MKzVicZJNrmdAQaTIf2zL7VvOf2RWXAYgVY0IxvP3Pw/edit?usp=sharing" target="_blank" rel="noopener noreferrer">
+                    Battle System Math document</a>. 
+                    <br>
+                    <br>Click "Compute Expected" to calculate the average outcome based on your current stats and settings, no randomness involved.
+                    <br>
+                    <br>
+                    Click "Roll (Random)" to perform a normal simulation of what will actually happen in battle, based on your current stats and settings, applying random variance and critical checks. This basically gives you a realistic result as to what will actually happen in-game.
+            </small>
+        </footer>
+        <br>
+        <section class="grid">
+            <div class="card">
+                <h2>Attacker</h2>
+                <div class="row">
+                    <label for="power">Power</label>
+                    <input id="power" type="number" min="0" value="120">
+                </div>
+                <div class="row">
+                    <label for="strength">Strength</label>
+                    <input id="strength" type="number" min="0" max="255" value="120">
+                </div>
+                <div class="row">
+                    <label for="magic">Magic</label>
+                    <input id="magic" type="number" min="0" max="255" value="110">
+                </div>
+                <div class="row">
+                    <label for="aim">Aim</label>
+                    <input id="aim" type="number" min="0" max="255" value="140">
+                </div>
+                <div class="row">
+                    <label for="luck">Luck</label>
+                    <input id="luck" type="number" min="0" max="255" value="25">
+                </div>
+                <div class="row">
+                    <label for="speed">Speed</label>
+                    <input id="speed" type="number" min="0" max="255" value="120">
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Defender</h2>
+                <div class="row">
+                    <label for="pdef">Physical DEF</label>
+                    <input id="pdef" type="number" min="0" max="255" value="90">
+                </div>
+                <div class="row">
+                    <label for="mdef">Magic DEF</label>
+                    <input id="mdef" type="number" min="0" max="255" value="95">
+                </div>
+                <div class="row">
+                    <label for="agility">Agility</label>
+                    <input id="agility" type="number" min="0" max="255" value="100">
+                </div>
+                <div class="row">
+                    <label for="luckDef">Luck</label>
+                    <input id="luckDef" type="number" min="0" max="255" value="20">
+                </div>
+                <div class="row">
+                    <label for="resistance">Element Resistance</label>
+                    <input id="resistance" type="number" step="0.05" min="-1" max="1" value="0">
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Action</h2>
+                <div class="row">
+                    <label for="attackType">Type</label>
+                    <select id="attackType">
+                        <option value="physical">Physical</option>
+                        <option value="magical">Magical</option>
+                    </select>
+                </div>
+                <div class="row">
+                    <label for="cannotMiss">Cannot Miss</label>
+                    <input id="cannotMiss" type="checkbox">
+                </div>
+                <div class="row">
+                    <label for="defending">Target Defending</label>
+                    <input id="defending" type="checkbox">
+                </div>
+                <div class="row">
+                    <label for="variance">Variance</label>
+                    <input id="variance" type="number" step="0.01" min="0" max="0.25" value="0.05">
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Cast Interrupt</h2>
+                <div class="row">
+                    <label for="castTime">Cast Time (Seconds)</label>
+                    <input id="castTime" type="number" min="0" step="0.1" value="2.0">
+                </div>
+                <div class="row">
+                    <label for="mpCost">MP Cost</label>
+                    <input id="mpCost" type="number" min="0" value="30">
+                </div>
+                <div class="row">
+                    <label for="hpCost">HP Cost</label>
+                    <input id="hpCost" type="number" min="0" value="0">
+                </div>
+                <div class="row">
+                    <label for="castProgress">Cast Progress (0-1)</label>
+                    <input id="castProgress" type="number" min="0" max="1" step="0.05" value="0.3">
+                </div>
+                <div class="row">
+                    <label for="minPenalty">Min Penalty Ratio</label>
+                    <input id="minPenalty" type="number" min="0" max="0.8" step="0.05" value="0.25">
+                </div>
+                <div class="row">
+                    <label for="pushbackIntensity">Pushback Intensity (0-1)</label>
+                    <input id="pushbackIntensity" type="number" min="0" max="1" step="0.05" value="0.7">
+                </div>
+                <div class="row">
+                    <label for="currentATB">Current ATB (0-100)</label>
+                    <input id="currentATB" type="number" min="0" max="100" value="60">
+                </div>
+            </div>
+        </section>
+
+        <div class="buttons">
+            <button id="btnCompute" type="button">Compute Expected</button>
+            <button id="btnRoll" type="button">Roll (Random)</button>
+            <button id="btnReset" type="button" class="ghost">Reset Defaults</button>
+        </div>
+
+        <section class="results">
+            <div class="result-card">
+                <h3>Hit And Crit</h3>
+                <div id="hitCrit"></div>
+            </div>
+            <div class="result-card">
+                <h3>Damage</h3>
+                <div id="damage"></div>
+            </div>
+            <div class="result-card">
+                <h3>ATB And Cast</h3>
+                <div id="atb"></div>
+            </div>
+        </section>
+    </main>
+    <script src="pl-battlesystem-math-calculator.js"></script>
+</body>
+</html>
