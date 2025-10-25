@@ -305,10 +305,12 @@ function rollOnce()
     }
 
     out("hitCrit").innerHTML =
-        `<div>Hit Chance: <strong>${pct(hc)}</strong>${cannotMiss ? ' <span class="good">(cannot miss)</span>' : ''}</div>
-         <div>Crit Chance: <strong>${pct(cc)}</strong></div>
-         <div>${connects ? '<span class="good">Attack connected</span>' : '<span class="warn">Missed</span>'} (Roll: ${hitRoll.toFixed(2)})</div>
-         <div>${connects ? (isCrit ? '<span class="good">CRITICAL!</span>' : 'Normal hit') : ''} ${connects ? `(Crit roll: ${critRoll.toFixed(2)})` : ''}</div>`;
+    `<div>Hit Chance: <strong>${pct(hc)}</strong>${cannotMiss ? ' <span class="good">(cannot miss)</span>' : ''}</div>
+     <div>Crit Chance: <strong>${pct(cc)}</strong></div>
+     <div>${connects ? '<span class="good">Attack connected</span>' : '<span class="warn">Missed</span>'}
+          (Hit Roll: ${hitRoll.toFixed(2)} < ${pct(hc)})</div>
+     <div>${connects ? (isCrit ? '<span class="good">CRITICAL!</span>' : 'Normal hit') : ''}
+          ${connects ? `(Crit Roll: ${critRoll.toFixed(2)} < ${pct(cc)})` : ''}</div>`;
 
     out("damage").innerHTML =
         connects
