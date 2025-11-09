@@ -16,13 +16,29 @@
         text-underline-offset: 5px;
       }
 
+      #game-layout
+      {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 40px;
+        margin-bottom: 40px;
+      }
+
+      #unity-container
+      {
+        margin: 0 auto 10px auto;
+      }
+
       #performance-warning
       {
         color: yellow;
         text-align: center;
         font-weight: bold;
         margin-top: 10px;
+        margin-bottom: 30px;
         font-family: sans-serif;
+        max-width: 640px;
       }
 
       .download-section
@@ -109,6 +125,18 @@
       {
         margin: 4px 0;
       }
+
+      @media (max-width: 1200px)
+      {
+        #controls-panel,
+        #changelog
+        {
+          position: static;
+          width: auto;
+          max-width: 640px;
+          margin: 15px auto;
+        }
+      }
     </style>
   </head>
   <body style="background-color: #231f20;">
@@ -123,28 +151,30 @@
       <p><strong>Shift:</strong> Move faster</p>
     </div>
 
-    <div id="unity-container" class="unity-desktop">
-      <canvas id="unity-canvas" width="1024" height="768" tabindex="-1"></canvas>
-      <div id="unity-loading-bar">
-        <div id="unity-logo" style="text-align: center;">
-          <img src="game_icon.png" alt="Game Icon" style="width: 128px; height: auto; display: inline-block;">
+    <div id="game-layout">
+      <div id="unity-container" class="unity-desktop">
+        <canvas id="unity-canvas" width="1024" height="768" tabindex="-1"></canvas>
+        <div id="unity-loading-bar">
+          <div id="unity-logo" style="text-align: center;">
+            <img src="game_icon.png" alt="Game Icon" style="width: 128px; height: auto; display: inline-block;">
+          </div>
+          <div id="unity-progress-bar-empty">
+            <div id="unity-progress-bar-full"></div>
+          </div>
         </div>
-        <div id="unity-progress-bar-empty">
-          <div id="unity-progress-bar-full"></div>
-        </div>
+        <div id="unity-warning"> </div>
+        <div id="unity-footer" style="display: none;"></div>
       </div>
-      <div id="unity-warning"> </div>
-      <div id="unity-footer" style="display: none;"></div>
-    </div>
 
-    <div id="performance-warning">
-      <u>⚠️ For the best experience, download the <strong>Windows build</strong> instead, it runs with significantly better performance!</u>
+      <div id="performance-warning">
+        <u>⚠️ For the best experience, download the <strong>Windows build</strong> instead, it runs with significantly better performance!</u>
 
-      <div class="download-section">
-        <a class="download-button" href="EXCAVATOR_Windows.zip" download>
-          <i class="fa-solid fa-download download-icon"></i>
-          <span>Download Windows ZIP</span>
-        </a>
+        <div class="download-section">
+          <a class="download-button" href="EXCAVATOR_Windows.zip" download>
+            <i class="fa-solid fa-download download-icon"></i>
+            <span>Download Windows ZIP</span>
+          </a>
+        </div>
       </div>
     </div>
 
@@ -158,6 +188,46 @@
 
     <script>
       var canvas = document.querySelector("#unity-canvas");
+      var aspectRatio = 4 / 3;
+
+      function resizeUnityCanvas()
+      {
+        var container = document.querySelector("#unity-container");
+
+        var availableWidth = window.innerWidth;
+        var availableHeight = window.innerHeight;
+
+        if (availableWidth > 1200)
+        {
+          availableWidth = availableWidth - 640;
+        }
+
+        availableHeight = availableHeight - 160;
+
+        var newWidth = availableWidth;
+        var newHeight = newWidth / aspectRatio;
+
+        if (newHeight > availableHeight)
+        {
+          newHeight = availableHeight;
+          newWidth = newHeight * aspectRatio;
+        }
+
+        if (newWidth < 320)
+        {
+          newWidth = 320;
+          newHeight = newWidth / aspectRatio;
+        }
+
+        canvas.style.width = newWidth + "px";
+        canvas.style.height = newHeight + "px";
+
+        if (container)
+        {
+          container.style.width = newWidth + "px";
+          container.style.height = newHeight + "px";
+        }
+      }
 
       function unityShowBanner(msg, type)
       {
@@ -165,22 +235,22 @@
 
         function updateBannerVisibility()
         {
-          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+          warningBanner.style.display = warningBanner.children.length ? "block" : "none";
         }
 
-        var div = document.createElement('div');
+        var div = document.createElement("div");
         div.innerHTML = msg;
         warningBanner.appendChild(div);
 
-        if (type == 'error')
+        if (type == "error")
         {
-          div.style = 'background: red; padding: 10px;';
+          div.style = "background: red; padding: 10px;";
         }
         else
         {
-          if (type == 'warning')
+          if (type == "warning")
           {
-            div.style = 'background: yellow; padding: 10px;';
+            div.style = "background: yellow; padding: 10px;";
           }
 
           setTimeout(function()
@@ -211,33 +281,31 @@
 
       if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent))
       {
-        var meta = document.createElement('meta');
-        meta.name = 'viewport';
-        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-        document.getElementsByTagName('head')[0].appendChild(meta);
+        var meta = document.createElement("meta");
+        meta.name = "viewport";
+        meta.content = "width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes";
+        document.getElementsByTagName("head")[0].appendChild(meta);
         document.querySelector("#unity-container").className = "unity-mobile";
         canvas.className = "unity-mobile";
       }
-      else
-      {
-        canvas.style.width = "1024px";
-        canvas.style.height = "768px";
-      }
+
+      resizeUnityCanvas();
+      window.addEventListener("resize", resizeUnityCanvas);
 
       document.querySelector("#unity-loading-bar").style.display = "block";
 
       var script = document.createElement("script");
       script.src = loaderUrl;
 
-      script.onload = () =>
+      script.onload = function()
       {
-        createUnityInstance(canvas, config, (progress) =>
+        createUnityInstance(canvas, config, function(progress)
         {
           document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
-        }).then((unityInstance) =>
+        }).then(function(unityInstance)
         {
           document.querySelector("#unity-loading-bar").style.display = "none";
-        }).catch((message) =>
+        }).catch(function(message)
         {
           alert(message);
         });
