@@ -6,6 +6,7 @@
     <title>EXCAVATOR</title>
     <!--<link rel="shortcut icon" href="TemplateData/favicon.ico">-->
     <link rel="stylesheet" href="TemplateData/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <style>
 
       u
@@ -22,6 +23,40 @@
         font-weight: bold;
         margin-top: 10px;
         font-family: sans-serif;
+      }
+
+      .download-section
+      {
+        margin-top: 10px;
+      }
+
+      .download-button
+      {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 14px;
+        border-radius: 999px;
+        border: none;
+        background-color: #ffcc00;
+        color: #000;
+        font-family: sans-serif;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background-color 0.2s ease-in-out;
+      }
+
+      .download-button:hover
+      {
+        background-color: #ffd633;
+      }
+
+      .download-icon
+      {
+        font-size: 16px;
+        line-height: 1;
       }
 
       #changelog
@@ -77,10 +112,6 @@
     </style>
   </head>
   <body style="background-color: #231f20;">
-    <div id="performance-warning">
-      <u>⚠️ For the best experience, download the <strong>Windows build</strong> instead, it runs with significantly better performance!</u>
-    </div>
-
     <div id="controls-panel">
       <u><h3>Controls</h3></u>
       <p><strong>WASD:</strong> Move camera</p>
@@ -104,6 +135,17 @@
       </div>
       <div id="unity-warning"> </div>
       <div id="unity-footer" style="display: none;"></div>
+    </div>
+
+    <div id="performance-warning">
+      <u>⚠️ For the best experience, download the <strong>Windows build</strong> instead, it runs with significantly better performance!</u>
+
+      <div class="download-section">
+        <a class="download-button" href="EXCAVATOR_Windows.zip" download>
+          <i class="fa-solid fa-download download-icon"></i>
+          <span>Download Windows ZIP</span>
+        </a>
+      </div>
     </div>
 
     <div id="changelog">
