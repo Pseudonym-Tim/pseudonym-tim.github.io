@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ATB Turn Combat</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="how-to-play">
+    <u><h3>Battle System Info</h3></u>
+    <p>
+        Battles use a shared Active Time Battle (ATB) bar!
+        <br>
+        Choose what action to perform based on the current fill of the bar and the matching action window it is inside
+        <br>
+        Each action can only be used once per cycle but when the bar reaches 100% it resets
+        <br>You may chose to skip an action if you wish, but you will not gain any AP unless you commit
+        <br>
+        Your remaining unspent Action Points (AP) carry over after ATB resets,
+        <br> so you can save up to perform stronger moves if you think you can get away with it!
+    </p>
+<br>
+    <strong>DEFEND (0-25%)</strong> Reduces damage of next incoming hit until you act again
+    <br><strong>ATTACK (25-50%)</strong> Gain AP and use basic attacks
+    <br><strong>SKILL (50-75%)</strong> Gain more AP and use multi-hit skills
+    <br><strong>MAGIC (75-100%)</strong> Gain the most AP and cast powerful magic spells
+<br>
+<br>
+    <u><h3>Enemy Behavior</h3></u>
+    <p>
+        The enemy follows the same ATB rules as you, sometimes skipping actions to stay unpredictable...
+        <br>
+        When your HP is low, it favors stronger attacks and can also defend to reduce the damage your next hit...
+    </p>
+</div>
+
+<div id="game-container">
+    <div id="status-panel">
+        <div class="status-block">
+            <h2>Player</h2>
+            <div>HP: <span id="player-hp">100</span></div>
+        </div>
+        <div class="status-block">
+            <h2>Enemy</h2>
+            <div>HP: <span id="enemy-hp">100</span></div>
+        </div>
+    </div>
+
+    <div id="battlefield">
+        <div id="player-sprite" class="sprite player">:)</div>
+        <div id="enemy-sprite" class="sprite enemy">>:(</div>
+    </div>
+
+    <div id="atb-container">
+        <div id="atb-bar-bg">
+            <div id="atb-bar"></div>
+            <div class="atb-segments">
+                <div class="atb-segment">DEFEND</div>
+                <div class="atb-segment">ATTACK</div>
+                <div class="atb-segment">SKILL</div>
+                <div class="atb-segment">MAGIC</div>
+            </div>
+
+            <div class="atb-dividers">
+                <div class="atb-divider"></div>
+                <div class="atb-divider"></div>
+                <div class="atb-divider"></div>
+            </div>
+        </div>
+        <div id="ap-display">AP: 0</div>
+    </div>
+
+    <div id="control-panel">
+        <div id="action-bar">
+            <button id="defend-button">DEFEND</button>
+            <button id="attack-button">ATTACK</button>
+            <button id="skill-button">SKILL</button>
+            <button id="magic-button">MAGIC</button>
+        </div>
+
+        <div id="sub-menu" class="hidden"></div>
+    </div>
+
+    <div id="gameover-overlay" class="hidden">
+        <div id="gameover-panel">
+            <h1 id="gameover-title">Game Over</h1>
+            <button id="restart-button">Restart</button>
+        </div>
+    </div>
+
+    <div id="message-log"></div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
