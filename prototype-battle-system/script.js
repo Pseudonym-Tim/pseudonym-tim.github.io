@@ -1073,14 +1073,14 @@ class Game
             skill:
             {
                 'Arrow Flurry': 'Fire a volley of arrows, hitting the enemy multiple times',
-                '3 Hit Combo': 'A precise three hits melee combo',
+                '3 Hit Combo': 'A precise three hit melee combo',
                 'Random 1-5 Hits': 'Unpredictable punches of desperation. Can strike once or unleash a longer more devastating combo!'
             },
             magic:
             {
                 'Magic Missile': 'Launch a bolt of pure magical energy',
-                'Fireball': 'Hurl a blazing ball of fire that explodes on impact for good damage',
-                'Meteor Shower': 'Call down multiple meteors from the sky to fall on the enemy'
+                'Fireball': 'Hurl a ball of fire that explodes on impact for good damage',
+                'Meteor Shower': 'Call down multiple meteors from the sky that fall down on the enemy'
             }
         };
     }
