@@ -240,23 +240,24 @@
 <!-- Art Section -->
 <section id="art" class="section">
     <h2>Art</h2>
-    <p>A collection of artwork, mostly low resolution digital paintings and pixel art...</p>
+    <p>A collection of artwork, I mostly do low resolution digital paintings and pixel art...</p>
+    <p class="art-viewer-hint">Click any artwork to view it full size!</p>
     <div class="art-container">
-        <a class="art-item" target="_blank">
-            <img src="img/art/why.png" alt="Funny Dog" style="max-width: 90%;" class="art-image">
-        </a>
-        <a class="art-item">
-            <img src="img/art/deer_girl.jpg" alt="Deer Girl" style="max-width: 80%;" class="art-image">
-        </a>
-        <a class="art-item">
-            <img src="img/art/funny_egypt.jpg" alt="Funny Egypt" class="art-image">
-        </a>
-        <a class="art-item">
-            <img src="img/art/worried.jpg" alt="Worried" style="max-width: 85%;" class="art-image">
-        </a>
-        <a class="art-item">
+        <button class="art-item" type="button" data-art-viewer-image="img/art/new_art/halloween-werewolf-2025.png" data-art-viewer-title="Halloween Werewolf" aria-label="Open in full size">
+            <img src="img/art/new_art/halloween-werewolf-2025.png" alt="Halloween Werewolf" style="max-width: 100%;" class="art-image">
+        </button>
+        <button class="art-item" type="button" data-art-viewer-image="img/art/new_art/mouse-character-finished.png" data-art-viewer-title="Punk Mouse" aria-label="Open artwork in full size">
+            <img src="img/art/new_art/mouse-character-finished.png" alt="Punk Mouse" style="max-width: 100%;" class="art-image">
+        </button>
+        <button class="art-item" type="button" data-art-viewer-image="img/art/new_art/zodiac_wip.png" data-art-viewer-title="Zodiac Mewgenics" aria-label="Open artwork in full size">
+            <img src="img/art/new_art/zodiac_wip.png" alt="Zodiac (Mewgenics)" class="art-image">
+        </button>
+       <!-- <button class="art-item" type="button" data-art-viewer-image="img/art/louie_bomberman.png" data-art-viewer-title="Worried" aria-label="Open Worried artwork in full size">
+            <img src="img/art/louie_bomberman.png" alt="Worried" style="max-width: 85%;" class="art-image">
+        </button>
+        <button class="art-item" type="button" data-art-viewer-image="img/art/ferret_thingy.png" data-art-viewer-title="Ferret" aria-label="Open Ferret artwork in full size">
             <img src="img/art/ferret_thingy.png" alt="Ferret" style="max-width: 105%;" class="art-image">
-        </a>
+        </button> -->
     </div>
 </section>
 
@@ -269,6 +270,21 @@
         <u><br>Discord:</u> <a href="https://discordapp.com/users/303267633338253313">pseudonym_tim</a></p>
     </section>
 </footer>
+
+
+<!-- Art Image Viewer -->
+<div class="art-viewer" id="artViewer" aria-hidden="true">
+    <div class="art-viewer__backdrop" data-art-viewer-close></div>
+    <div class="art-viewer__dialog" role="dialog" aria-modal="true" aria-labelledby="artViewerTitle">
+        <button class="art-viewer__close" id="artViewerClose" type="button" aria-label="Close full-size artwork">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <p class="art-viewer__title" id="artViewerTitle">Artwork preview</p>
+        <div class="art-viewer__image-wrap">
+            <img class="art-viewer__image" id="artViewerImage" src="" alt="">
+        </div>
+    </div>
+</div>
 
 <script defer src="main.js"></script>
 

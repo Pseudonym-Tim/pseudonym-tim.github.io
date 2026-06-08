@@ -27,6 +27,8 @@ document.addEventListener("DOMContentLoaded", function() {
             navLinks.classList.remove('active');
         });
     });
+
+    setupArtViewer();
 });
 
 let currentTrack = null;
@@ -63,3 +65,74 @@ function playMusic(track, trackName, button) {
         currentButton = button;
     }
 }
+
+
+function setupArtViewer() {
+    const viewer = document.getElementById("artViewer");
+    const viewerImage = document.getElementById("artViewerImage");
+    const viewerClose = document.getElementById("artViewerClose");
+    const viewerTitle = document.getElementById("artViewerTitle");
+    const triggers = document.querySelectorAll("[data-art-viewer-image]");
+    let previousFocusedElement = null;
+
+    if (!viewer || !viewerImage || !viewerClose || !viewerTitle || triggers.length === 0) {
+        return;
+    }
+
+    function openViewer(trigger) {
+        const imageSource = trigger.getAttribute("data-art-viewer-image");
+        const imageTitle = trigger.getAttribute("data-art-viewer-title") || "Artwork preview";
+
+        if (!imageSource) {
+            return;
+        }
+
+        previousFocusedElement = trigger;
+        viewerImage.src = imageSource;
+        viewerImage.alt = imageTitle;
+        viewerTitle.textContent = imageTitle;
+        viewer.classList.add("is-open");
+        viewer.setAttribute("aria-hidden", "false");
+        document.body.classList.add("body--art-viewer-open");
+
+        window.requestAnimationFrame(function () {
+            viewerClose.focus();
+        });
+    }
+
+    function closeViewer() {
+        viewer.classList.remove("is-open");
+        viewer.setAttribute("aria-hidden", "true");
+        document.body.classList.remove("body--art-viewer-open");
+
+        window.setTimeout(function () {
+            if (!viewer.classList.contains("is-open")) {
+                viewerImage.src = "";
+                viewerImage.alt = "";
+            }
+        }, 260);
+
+        if (previousFocusedElement instanceof HTMLElement) {
+            previousFocusedElement.focus();
+        }
+    }
+
+    triggers.forEach(function (trigger) {
+        trigger.addEventListener("click", function () {
+            openViewer(trigger);
+        });
+    });
+
+    viewerClose.addEventListener("click", closeViewer);
+
+    viewer.querySelectorAll("[data-art-viewer-close]").forEach(function (element) {
+        element.addEventListener("click", closeViewer);
+    });
+
+    document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape" && viewer.classList.contains("is-open")) {
+            closeViewer();
+        }
+    });
+}
+

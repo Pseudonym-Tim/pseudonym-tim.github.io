@@ -15,6 +15,14 @@ body {
     text-underline-offset: 4px;
 }
 
+.art-viewer-hint {
+    margin-top: -5px;
+    margin-bottom: 20px;
+    color: #bbb;
+    font-size: 0.95em;
+    font-style: italic;
+}
+
 .projects-row-break
 {
     flex-basis: 100%;
@@ -225,27 +233,34 @@ h2 {
 
 .art-item {
     cursor: pointer;
-    display: block;
-    margin: 15px;
-    max-width: 250px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    margin: 15px 6px;
+    width: min(90vw, 520px);
+    height: 360px;
     text-decoration: none;
     color: inherit;
-    transition: background-color 0.3s;
+    background: none;
+    border: none;
+    padding: 0;
 }
 
 .art-image {
-    width: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
     height: auto;
-    box-sizing: border-box;
+    object-fit: contain;
     border-radius: 5px;
     box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.993);
     transition: transform 0.3s ease-in-out, filter 0.3s ease-in-out;
-    image-rendering: optimizeQuality; /* High-quality rendering */
-    will-change: transform, filter; /* Optimize performance */
+    image-rendering: optimizeQuality;
 }
 
 .art-image:hover {
-    transform: scale(1.15);
+    transform: scale(1.05);
 }
 
 .art-item h3 {
@@ -571,5 +586,147 @@ footer {
 @media (max-width: 768px) {
     .mod-card {
         flex: 1 1 100%;
+    }
+}
+
+/* Art Image Viewer */
+body.body--art-viewer-open {
+    overflow: hidden;
+}
+
+.art-item {
+    border: 0;
+    background: transparent;
+    font: inherit;
+    padding: 0;
+}
+
+.art-item:focus-visible {
+    outline: 3px solid #1e90ff;
+    outline-offset: 6px;
+    border-radius: 8px;
+}
+
+.art-viewer {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.26s ease, visibility 0.26s ease;
+}
+
+.art-viewer.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.art-viewer__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(4, 4, 6, 0.86);
+    backdrop-filter: blur(14px);
+}
+
+.art-viewer__dialog {
+    position: relative;
+    width: min(100%, 1100px);
+    max-height: min(90vh, 900px);
+    padding: 48px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 22px;
+    background: linear-gradient(180deg, rgba(22, 22, 24, 0.97), rgba(8, 8, 10, 0.96));
+    box-shadow: 0 30px 90px rgba(0, 0, 0, 0.62);
+    transform: scale(0.96);
+    opacity: 0;
+    transition: transform 0.28s ease, opacity 0.28s ease;
+}
+
+.art-viewer.is-open .art-viewer__dialog {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.art-viewer__close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.art-viewer__close span {
+    font-size: 2rem;
+    line-height: 1;
+}
+
+.art-viewer__close:hover,
+.art-viewer__close:focus-visible {
+    background: rgba(255, 255, 255, 0.13);
+    border-color: rgba(255, 255, 255, 0.32);
+}
+
+.art-viewer__close:focus-visible {
+    outline: 2px solid #1e90ff;
+    outline-offset: 3px;
+}
+
+.art-viewer__title {
+    margin: 0 56px 16px 0;
+    color: #f5f5f5;
+    font-size: 0.95rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.art-viewer__image-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.art-viewer__image {
+    display: block;
+    width: auto;
+    max-width: 100%;
+    max-height: calc(90vh - 145px);
+    object-fit: contain;
+    background: #050505;
+}
+
+@media (max-width: 768px) {
+    .art-viewer {
+        padding: 12px;
+    }
+
+    .art-viewer__dialog {
+        padding: 64px 14px 14px;
+        border-radius: 14px;
+    }
+
+    .art-viewer__title {
+        margin-right: 0;
+        font-size: 0.85rem;
+    }
+
+    .art-viewer__image {
+        max-height: calc(90vh - 125px);
     }
 }
