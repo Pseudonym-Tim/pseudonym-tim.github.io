@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Antiverse Arsenal Prototype</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="game-container"></div>
+
+  <div id="spawn-banner"><span id="spawn-timer">10</span></div>
+
+  <div id="controls-card">
+    <strong id="controls-title"></strong><br>
+    <span id="controls-body"></span>
+  </div>
+
+  <div id="hud">
+    <div id="hull"><span id="hull-label"></span></div>
+    <div id="stability"><span id="stability-label"></span></div>
+    <div id="round"><span id="round-label"></span></div>
+    <div id="score"><span id="score-label"></span></div>
+    <div id="highscore"><span id="highscore-label"></span></div>
+    <div id="next-universe"><span id="next-universe-label"></span></div>
+    <div id="incursions"><span id="incursion-label"></span></div>
+    <div id="warp"><span id="warp-label"></span></div>
+    <div id="dash"><span id="dash-label"></span></div>
+  </div>
+
+  <div id="message-overlay" class="hidden">
+    <div id="message-text"></div>
+  </div>
+
+  <div id="powerup-overlay" class="hidden">
+    <div>
+      <h2 id="shop-title"></h2>
+      <p id="shop-subtitle"></p>
+      <div id="powerup-options"></div>
+    </div>
+  </div>
+
+  <div id="gameover-overlay" class="hidden">
+    <div class="gameover-card">
+      <h1 id="gameover-title"></h1>
+      <p id="final-score-label"></p>
+      <p id="final-highscore-label"></p>
+      <p id="final-wrap-hits-label"></p>
+      <p id="final-highest-wrap-shot-label"></p>
+      <button id="restart-button"></button>
+    </div>
+  </div>
+
+  <script src="scripts/global.js"></script>
+  <script src="scripts/sprites.js"></script>
+  <script src="scripts/dom.js"></script>
+  <script src="scripts/text.js"></script>
+  <script src="scripts/utils.js"></script>
+  <script src="scripts/universe.js"></script>
+  <script src="scripts/entities.js"></script>
+  <script src="scripts/game.js"></script>
+</body>
+</html>
