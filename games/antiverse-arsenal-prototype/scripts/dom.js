@@ -1,5 +1,7 @@
 const container = document.getElementById('game-container');
 const hullValue = document.getElementById('hull-label');
+const hullGauge = document.getElementById('hull-gauge');
+const hullGaugeNeedle = document.getElementById('hull-gauge-needle');
 const stabilityValue = document.getElementById('stability-label');
 const roundValue = document.getElementById('round-label');
 const scoreValue = document.getElementById('score-label');

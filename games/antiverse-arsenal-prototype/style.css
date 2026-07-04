@@ -35,7 +35,7 @@ body.window-dragging {
 .universe {
   position: absolute;
   box-sizing: content-box;
-  border: 2px solid rgba(0,255,255,0.78);
+  border: 2px solid var(--universe-color-glow, rgba(0,255,255,0.78));
   background: #000;
   pointer-events: auto;
   z-index: 1;
@@ -99,12 +99,12 @@ body.window-dragging {
   top: 0;
   left: 0;
   width: 100%;
-  background: linear-gradient(90deg, rgba(0,0,0,0.95), rgba(21,45,75,0.9), rgba(0,0,0,0.95));
+  background: linear-gradient(90deg, rgba(0,0,0,0.95), var(--universe-color-soft, rgba(21,45,75,0.9)), rgba(0,0,0,0.95));
   color: #fff;
   text-align: center;
   user-select: none;
   cursor: crosshair;
-  border-bottom: 1px solid rgba(0,255,255,0.35);
+  border-bottom: 1px solid var(--universe-color-soft, rgba(0,255,255,0.35));
   overflow: hidden;
   white-space: nowrap;
 }
@@ -123,36 +123,233 @@ body.window-dragging {
 #spawn-banner {
   position: absolute;
   z-index: 6;
-  border: 1px solid rgba(0,255,255,0.45);
-  border-radius: 7px;
-  background: var(--panel);
 }
 
 #hud {
-  right: 12px;
-  bottom: 12px;
-  padding: 10px 13px;
-  font-size: 14px;
-  line-height: 1.45;
+  inset: 0;
+  pointer-events: none;
+  color: rgba(218, 252, 255, 0.94);
+  font-size: 12px;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.hud-panel {
+  position: absolute;
+  min-width: 230px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  filter: none;
+  clip-path: none;
+}
+
+.hud-panel::before,
+.hud-panel::after {
+  display: none;
+}
+
+.hud-row {
+  min-height: 19px;
+  padding: 2px 0;
+  color: rgba(218, 252, 255, 0.86);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow: 0 0 7px rgba(114, 247, 255, 0.24);
+}
+
+.hud-score-panel {
+  top: 14px;
+  left: 14px;
+  width: clamp(340px, 21vw, 430px);
+}
+
+.hud-score-primary {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-size: clamp(20px, 2.15vw, 31px);
+  line-height: 1.05;
+  letter-spacing: 1px;
+  text-shadow: 0 0 12px rgba(255, 210, 92, 0.3);
+}
+
+.hud-score-secondary {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  margin-top: 0px;
+  padding-top: 6px;
+  color: rgba(255, 225, 148, 0.8);
+  font-size: 20px;
+  letter-spacing: 0.7px;
+}
+
+.hud-round-panel {
+  top: 14px;
+  right: 14px;
+  width: clamp(250px, 24vw, 360px);
+  text-align: right;
+}
+
+.hud-round-primary {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-size: clamp(17px, 1.6vw, 23px);
+  line-height: 1.1;
+  letter-spacing: 0.7px;
+  margin-bottom: 5px;
+}
+
+.hud-round-panel .hud-row:not(.hud-round-primary) {
+  padding-top: 5px;
+  font-size: 20px;
+  letter-spacing: 0.45px;
+}
+
+.hud-ability-panel {
+  left: 20px;
+  bottom: 20px;
+  width: clamp(240px, 21vw, 330px);
+}
+
+.hud-ability-row {
+  display: flex;
+  align-items: center;
+  min-height: 25px;
+  font-size: 20px;
+}
+
+.hud-hull-module {
+  right: 25px;
+  bottom: 25px;
+  display: grid;
+  grid-template-columns: 112px minmax(110px, 1fr);
+  gap: 11px;
+  align-items: center;
+  width: clamp(220px, 20vw, 280px);
+  min-width: 220px;
+  padding: 0;
+}
+
+.hull-gauge {
+  --hull-ratio: 1;
+  position: relative;
+  width: 112px;
+  height: 62px;
+  filter: drop-shadow(0 0 6px rgba(114, 247, 255, 0.28));
+}
+
+.hull-gauge-face {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 112px;
+  height: 56px;
+  border: 2px solid rgba(114, 247, 255, 0.72);
+  border-bottom: 0;
+  border-radius: 112px 112px 0 0;
+}
+
+.hull-gauge-needle {
+  position: absolute;
+  left: 50%;
+  bottom: 6px;
+  width: 2px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 2px;
+  transform-origin: 50% 100%;
+  transform: translateX(-50%) rotate(90deg);
+  box-shadow: 0 0 8px rgba(114, 247, 255, 0.72);
+}
+
+.hull-gauge-hub {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 11px;
+  height: 11px;
+  border: 2px solid rgba(114, 247, 255, 0.78);
+  border-radius: 50%;
+  background: transparent;
+  transform: translateX(-50%);
+  box-shadow: 0 0 8px rgba(114, 247, 255, 0.48);
+}
+
+.hull-gauge.hull-warning .hull-gauge-face,
+.hull-gauge.hull-warning .hull-gauge-hub { border-color: rgba(255, 210, 92, 0.78); }
+.hull-gauge.hull-warning .hull-gauge-needle { background: rgba(255, 210, 92, 0.95); }
+.hull-gauge.hull-critical .hull-gauge-face,
+.hull-gauge.hull-critical .hull-gauge-hub { border-color: rgba(255, 77, 90, 0.82); }
+.hull-gauge.hull-critical .hull-gauge-needle { background: rgba(255, 77, 90, 0.96); }
+
+.hull-readout {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hull-readout-title {
+  color: rgba(218, 252, 255, 0.72);
+  font-size: 15px;
+  line-height: 1;
+  letter-spacing: 1.5px;
+  white-space: nowrap;
+  text-shadow: 0 0 7px rgba(114, 247, 255, 0.3);
+}
+
+#hull-label {
+  color: #fff;
+  font-size: clamp(21px, 2vw, 28px);
+  line-height: 1;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  text-shadow: 0 0 10px rgba(114, 247, 255, 0.45);
 }
 
 #controls-card {
-  left: 12px;
+  left: 50%;
   bottom: 12px;
-  max-width: min(560px, calc(100vw - 190px));
-  padding: 9px 12px;
-  font-size: 13px;
-  color: rgba(255,255,255,0.88);
+  width: min(800px, calc(100vw - 200px));
+  min-width: 300px;
+  padding: 8px 14px;
+  border: 1px solid rgba(114, 247, 255, 0.2);
+  border-radius: 3px;
+  color: rgba(255, 255, 255, 0.74);
+  background: rgba(0, 0, 0, 0.58);
+  font-size: 15px;
+  text-align: center;
+  line-height: 1.4;
+  transform: translateX(-50%);
+  box-shadow: inset 0 0 12px rgba(114, 247, 255, 0.025);
+}
+
+#controls-title {
+  color: rgba(114, 247, 255, 0.82);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 #spawn-banner {
   left: 50%;
   top: 12px;
-  transform: translateX(-50%);
+  min-width: 96px;
   padding: 8px 16px;
+  border: 1px solid rgba(255, 210, 92, 0.44);
+  border-radius: 3px;
+  color: var(--gold);
+  background: rgba(0, 0, 0, 0.72);
   font-size: 18px;
   letter-spacing: 1px;
-  color: var(--gold);
+  text-align: center;
+  transform: translateX(-50%);
+  box-shadow: 0 0 12px rgba(255, 210, 92, 0.1);
 }
 
 #spawn-banner.warning {
@@ -162,6 +359,82 @@ body.window-dragging {
 
 @keyframes flash {
   50% { color: #fff; background: rgba(80, 20, 0, 0.86); }
+}
+
+@media (max-width: 1050px) {
+  .hud-panel {
+    min-width: 205px;
+  }
+
+  .hud-score-panel,
+  .hud-ability-panel {
+    width: 235px;
+  }
+
+  .hud-round-panel {
+    width: 270px;
+  }
+
+  .hud-hull-module {
+    width: 285px;
+  }
+
+  #controls-card {
+    width: min(420px, calc(100vw - 560px));
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 780px), (max-height: 620px) {
+  .hud-score-panel,
+  .hud-round-panel {
+    top: 8px;
+  }
+
+  .hud-score-panel,
+  .hud-ability-panel {
+    left: 8px;
+    width: 205px;
+  }
+
+  .hud-round-panel,
+  .hud-hull-module {
+    right: 8px;
+    width: 225px;
+    min-width: 225px;
+  }
+
+  .hud-ability-panel {
+    bottom: 8px;
+  }
+
+  .hud-hull-module {
+    bottom: 8px;
+    grid-template-columns: 74px 1fr;
+  }
+
+  .hull-gauge {
+    width: 72px;
+    height: 42px;
+  }
+
+  .hull-gauge-face {
+    width: 72px;
+    height: 36px;
+    border-radius: 72px 72px 0 0;
+  }
+
+  .hull-gauge-needle {
+    height: 29px;
+  }
+
+  #controls-card {
+    display: none;
+  }
+
+  #spawn-banner {
+    top: 8px;
+  }
 }
 
 #message-overlay,
@@ -188,6 +461,8 @@ body.window-dragging {
   max-width: 82%;
   color: var(--gold);
   text-transform: uppercase;
+  text-decoration: underline;
+  text-underline-offset: 8px;
   letter-spacing: 2px;
   animation: messagePulse 0.8s steps(2) infinite;
 }
@@ -252,7 +527,7 @@ body.window-dragging {
 .hidden { display: none !important; }
 
 .universe.collision-nudged {
-  border-color: rgba(255,210,92,0.92);
+  border-color: var(--gold);
 }
 
 .aim-overlay {

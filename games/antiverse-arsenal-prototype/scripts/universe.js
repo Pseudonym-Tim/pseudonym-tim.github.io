@@ -10,6 +10,7 @@ class Universe {
     this.enemies = [];
     this.asteroids = [];
     this.hullPickups = [];
+    this.theme = this.game.getUniverseTheme();
 
     this.element = document.createElement('div');
     this.element.className = collapsed ? 'universe universe-collapsed' : 'universe';
@@ -43,22 +44,31 @@ class Universe {
     });
 
     container.appendChild(this.element);
+    this.applyTheme();
     this.applyScale(this.game.scale);
     this.setPosition(x, y);
     this.setLabel();
   }
 
+  applyTheme() {
+    this.element.style.setProperty('--universe-color', this.theme.color);
+    this.element.style.setProperty('--universe-color-soft', this.theme.soft);
+    this.element.style.setProperty('--universe-color-glow', this.theme.glow);
+  }
+
   applyScale(scale) {
+    this.baseScale = scale;
     this.scale = scale;
-    this.cssWidth = this.width * scale;
-    this.cssHeight = this.height * scale;
-    this.cssHeader = this.headerHeight * scale;
+    this.cssWidth = this.width * this.scale;
+    this.cssHeight = this.height * this.scale;
+    this.cssHeader = this.headerHeight * this.scale;
     this.element.style.width = `${this.cssWidth}px`;
     this.element.style.height = `${this.cssHeight + this.cssHeader}px`;
     this.header.style.height = `${this.cssHeader}px`;
     this.header.style.lineHeight = `${this.cssHeader}px`;
-    this.header.style.fontSize = `${Math.max(10, 14 * scale)}px`;
+    this.header.style.fontSize = `${Math.max(10, 14 * this.scale)}px`;
     this.canvas.style.top = `${this.cssHeader}px`;
+    this.canvas.style.left = '0px';
     this.canvas.style.width = `${this.cssWidth}px`;
     this.canvas.style.height = `${this.cssHeight}px`;
   }
@@ -132,8 +142,7 @@ class Universe {
 
       if (enemy.dead) {
         this.enemies.splice(i, 1);
-        if (!enemy.expired) this.game.onEnemyDestroyed(enemy);
-        else this.game.onEnemyExpired(enemy);
+        this.game.onEnemyDestroyed(enemy);
         continue;
       }
 
@@ -170,7 +179,7 @@ class Universe {
     const ctx = this.ctx;
     ctx.clearRect(0, 0, this.width, this.height);
 
-    const hueShift = (this.id * 42) % 360;
+    const hueShift = this.theme.hue;
     
     if (!drawPixelArtTiled(ctx, pixelArt.universeBackground, 0, 0, this.width, this.height, {
       time: this.game.spriteClock + this.id * 0.19,
@@ -182,12 +191,12 @@ class Universe {
 
     ctx.save();
     ctx.globalCompositeOperation = 'screen';
-    ctx.fillStyle = `hsla(${hueShift}, 100%, 50%, 0.08)`;
+    ctx.fillStyle = `hsla(${hueShift}, 100%, 55%, ${UNIVERSE_TINT_BACKGROUND_ALPHA})`;
 
     ctx.fillRect(0, 0, this.width, this.height);
     ctx.restore();
 
-    ctx.strokeStyle = `hsla(${hueShift}, 100%, 55%, 0.14)`;
+    ctx.strokeStyle = `hsla(${hueShift}, 100%, 62%, ${UNIVERSE_TINT_GRID_ALPHA})`;
     ctx.lineWidth = 1;
 
     for (let x = 0; x <= this.width; x += 40) {

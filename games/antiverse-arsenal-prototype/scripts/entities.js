@@ -347,6 +347,7 @@ class Enemy extends Damageable {
     this.healthBarTimer = 0;
     this.fireTimer = rand(2.0, 3.6);
     this.angle = Math.random() * Math.PI * 2;
+    this.maxWraps = Infinity;
   }
 
   update(dt) {

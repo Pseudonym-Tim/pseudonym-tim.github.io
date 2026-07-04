@@ -17,15 +17,35 @@
   </div>
 
   <div id="hud">
-    <div id="hull"><span id="hull-label"></span></div>
-    <div id="stability"><span id="stability-label"></span></div>
-    <div id="round"><span id="round-label"></span></div>
-    <div id="score"><span id="score-label"></span></div>
-    <div id="highscore"><span id="highscore-label"></span></div>
-    <div id="next-universe"><span id="next-universe-label"></span></div>
-    <div id="incursions"><span id="incursion-label"></span></div>
-    <div id="warp"><span id="warp-label"></span></div>
-    <div id="dash"><span id="dash-label"></span></div>
+    <section class="hud-panel hud-score-panel" aria-label="Score">
+      <div id="score" class="hud-row hud-score-primary"><span id="score-label"></span></div>
+      <div id="highscore" class="hud-row hud-score-secondary"><span id="highscore-label"></span></div>
+    </section>
+
+    <section class="hud-panel hud-round-panel" aria-label="Round information">
+      <div id="round" class="hud-row hud-round-primary"><span id="round-label"></span></div>
+      <div id="next-universe" class="hud-row"><span id="next-universe-label"></span></div>
+      <div id="incursions" class="hud-row"><span id="incursion-label"></span></div>
+      <div id="stability" class="hud-row"><span id="stability-label"></span></div>
+    </section>
+
+    <section class="hud-panel hud-ability-panel" aria-label="Movement abilities">
+      <div id="warp" class="hud-row hud-ability-row"><span id="warp-label"></span></div>
+      <div id="dash" class="hud-row hud-ability-row"><span id="dash-label"></span></div>
+    </section>
+
+    <section id="hull" class="hud-panel hud-hull-module" aria-label="Hull integrity">
+      <div class="hull-gauge" id="hull-gauge">
+        <div class="hull-gauge-face">
+          <div class="hull-gauge-needle" id="hull-gauge-needle"></div>
+          <div class="hull-gauge-hub"></div>
+        </div>
+      </div>
+      <div class="hull-readout">
+        <span class="hull-readout-title">Hull Integrity</span>
+        <span id="hull-label"></span>
+      </div>
+    </section>
   </div>
 
   <div id="message-overlay" class="hidden">

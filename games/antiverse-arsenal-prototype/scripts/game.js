@@ -51,6 +51,7 @@ class Game {
     this.startToken = 0;
     this.roundGraceActive = false;
     this.transitioning = false;
+    this.universeThemes = [];
     this.initInput();
     restartButton.addEventListener('click', () => this.start());
   }
@@ -286,6 +287,7 @@ class Game {
     this.laserCooldown = 0;
     this.roundGraceActive = false;
     this.transitioning = false;
+    this.universeThemes = this.createUniverseThemes();
     this.scale = this.computeScale();
     gameoverOverlay.classList.add('hidden');
     powerupOverlay.classList.add('hidden');
@@ -299,6 +301,28 @@ class Game {
     this.lastTime = performance.now();
     this.updateHUD();
     requestAnimationFrame((t) => this.loop(t));
+  }
+
+  createUniverseThemes() {
+    return UNIVERSE_TINT_HUES.map((hue) => ({
+      hue,
+      color: `hsl(${hue}, 100%, 62%)`,
+      soft: `hsla(${hue}, 100%, 55%, ${UNIVERSE_TINT_HEADER_ALPHA})`,
+      glow: `hsla(${hue}, 100%, 62%, ${UNIVERSE_TINT_BORDER_ALPHA})`
+    }));
+  }
+
+  getUniverseTheme() {
+    const usedThemes = new Set(this.universes.map((universe) => universe.theme));
+    const availableThemes = this.universeThemes.filter((theme) => !usedThemes.has(theme));
+    const choices = availableThemes.length > 0 ? availableThemes : this.universeThemes;
+
+    return choices[Math.floor(Math.random() * choices.length)] || {
+      hue: 190,
+      color: 'hsl(190, 100%, 62%)',
+      soft: `hsla(190, 100%, 55%, ${UNIVERSE_TINT_HEADER_ALPHA})`,
+      glow: `hsla(190, 100%, 62%, ${UNIVERSE_TINT_BORDER_ALPHA})`
+    };
   }
 
   createUniverse(x, y, collapsed = false) {
@@ -505,20 +529,23 @@ class Game {
     this.relaxUniverseLayout(universe);
     this.showMessage(formatText('message.universeMaterializing', { id: universe.id }), 900);
 
+    // Populate the universe before the grow-in animation finishes so its
+    // contents scale into view with the window instead of popping in after it.
+    this.releasePendingThreat(enemyCount);
+    this.spawnEnemies(enemyCount, [universe]);
+    this.roundIncursionDeployed += 1;
+    if (this.totalPrimaryAsteroids() < MAX_PRIMARY_ASTEROIDS) this.spawnAsteroids(1, [universe]);
+    this.maybeSpawnHullPickup(universe);
+    this.updateStabilityFromThreats();
+    this.flashMessage(formatText('message.incursionEntering', { current: this.roundIncursionDeployed, total: this.roundIncursionTotal, universe: universe.id }), 1000);
+
     this.growUniverse(universe).then(() => {
       if (!this.running || this.roundEnding || !this.universes.includes(universe)) {
         this.incursionDeploying = false;
         return;
       }
 
-      this.releasePendingThreat(enemyCount);
-      this.spawnEnemies(enemyCount, [universe]);
-      this.roundIncursionDeployed += 1;
-      if (this.totalPrimaryAsteroids() < MAX_PRIMARY_ASTEROIDS) this.spawnAsteroids(1, [universe]);
-      this.maybeSpawnHullPickup(universe);
       this.incursionDeploying = false;
-      this.updateStabilityFromThreats();
-      this.flashMessage(formatText('message.incursionEntering', { current: this.roundIncursionDeployed, total: this.roundIncursionTotal, universe: universe.id }), 1000);
       if (this.incursionQueue.length > 0) this.scheduleNextIncursion();
       else this.announceFinalIncursion();
     });
@@ -1536,12 +1563,6 @@ class Game {
     this.tryEndRoundFromThreats();
   }
 
-  onEnemyExpired(enemy) {
-    this.clearEnemyThreat(enemy);
-    this.addFloatingText(enemy.universe, clamp(enemy.x, 18, LOGICAL_W - 18), clamp(enemy.y, 18, LOGICAL_H - 18), formatText('float.escaped'), '#ff8a8a', 0.85);
-    this.tryEndRoundFromThreats();
-  }
-
   onAsteroidDestroyed(asteroid) {
     const baseScore = Math.max(1, asteroid.size) * ASTEROID_SCORE_PER_SIZE;
     this.awardPoints(baseScore, asteroid.killMultiplier || 1, asteroid.universe, asteroid.x, asteroid.y, '#aefcff');
@@ -1811,7 +1832,18 @@ class Game {
   }
 
   updateHUD() {
-    hullValue.textContent = formatText('hud.hull', { value: `${this.hp}/${MAX_PLAYER_HULL}` });
+    const hullRatio = clamp(this.hp / MAX_PLAYER_HULL, 0, 1);
+    hullValue.textContent = `${this.hp}/${MAX_PLAYER_HULL}`;
+
+    if (hullGauge) {
+      hullGauge.style.setProperty('--hull-ratio', hullRatio.toFixed(3));
+      hullGauge.classList.toggle('hull-warning', hullRatio > 0.25 && hullRatio <= 0.5);
+      hullGauge.classList.toggle('hull-critical', hullRatio <= 0.25);
+    }
+
+    if (hullGaugeNeedle) {
+      hullGaugeNeedle.style.transform = `translateX(-50%) rotate(${-90 + hullRatio * 180}deg)`;
+    }
     stabilityValue.textContent = formatText('hud.stability', { value: `${Math.floor(this.stability)}%` });
     roundValue.textContent = formatText('hud.round', { value: this.round });
     scoreValue.textContent = formatText('hud.score', { value: Math.floor(this.score) });
