@@ -1,3 +1,4 @@
+// Universe windows...
 class Universe {
   constructor(game, id, x, y, collapsed = false) {
     this.game = game;

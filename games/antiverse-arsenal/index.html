@@ -11,11 +11,6 @@
 
   <div id="spawn-banner"><span id="spawn-timer">10</span></div>
 
-  <div id="controls-card">
-    <strong id="controls-title"></strong><br>
-    <span id="controls-body"></span>
-  </div>
-
   <div id="hud">
     <section class="hud-panel hud-score-panel" aria-label="Score">
       <div id="score" class="hud-row hud-score-primary"><span id="score-label"></span></div>
@@ -60,8 +55,25 @@
     </div>
   </div>
 
+  <div id="pause-overlay" class="hidden">
+    <div class="menu-card pause-card">
+      <h1 id="pause-title"></h1>
+      <button id="resume-button"></button>
+      <button id="controls-button"></button>
+      <button id="pause-restart-button"></button>
+      <button id="quit-button"></button>
+    </div>
+    <div id="controls-panel" class="hidden" role="dialog" aria-modal="true" aria-labelledby="controls-title">
+      <div class="menu-card controls-panel-card">
+        <button id="controls-close-button" aria-label="Close controls">×</button>
+        <h2 id="controls-title"></h2>
+        <p id="controls-body"></p>
+      </div>
+    </div>
+  </div>
+
   <div id="gameover-overlay" class="hidden">
-    <div class="gameover-card">
+    <div class="menu-card gameover-card">
       <h1 id="gameover-title"></h1>
       <p id="final-score-label"></p>
       <p id="final-highscore-label"></p>
@@ -71,13 +83,32 @@
     </div>
   </div>
 
-  <script src="scripts/global.js"></script>
-  <script src="scripts/sprites.js"></script>
-  <script src="scripts/dom.js"></script>
-  <script src="scripts/text.js"></script>
-  <script src="scripts/utils.js"></script>
-  <script src="scripts/universe.js"></script>
-  <script src="scripts/entities.js"></script>
-  <script src="scripts/game.js"></script>
+  <!-- Engine stuff... -->
+  <script src="scripts/engine/sprites.js"></script>
+  <script src="scripts/engine/text.js"></script>
+  <script src="scripts/engine/utils.js"></script>
+  <script src="scripts/engine/window-layout.js"></script>
+  <script src="scripts/engine/space-routing.js"></script>
+  <script src="scripts/engine/universe.js"></script>
+
+  <!-- Game stuff... -->
+  <script src="scripts/game/entities/base/damageable.js"></script>
+  <script src="scripts/game/entities/player.js"></script>
+  <script src="scripts/game/entities/bullet.js"></script>
+  <script src="scripts/game/entities/base/enemy.js"></script>
+  <script src="scripts/game/entities/normal-enemy.js"></script>
+  <script src="scripts/game/entities/shotgun-enemy.js"></script>
+  <script src="scripts/game/entities/machine-gun-enemy.js"></script>
+  <script src="scripts/game/entities/hull-pickup.js"></script>
+  <script src="scripts/game/entities/asteroid.js"></script>
+  <script src="scripts/game/entities/floating-text.js"></script>
+  <script src="scripts/game/global.js"></script>
+  <script src="scripts/game/dom.js"></script>
+  <script src="scripts/game/game.js"></script>
+  <script src="scripts/game/input.js"></script>
+  <script src="scripts/game/universe-manager.js"></script>
+  <script src="scripts/game/warping.js"></script>
+  <script src="scripts/game/laser.js"></script>
+  <script src="scripts/game/runtime.js"></script>
 </body>
 </html>

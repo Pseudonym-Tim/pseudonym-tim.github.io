@@ -1,3 +1,4 @@
+// Text loading and formatting...
 const DEFAULT_GAME_TEXT = {};
 let gameText = DEFAULT_GAME_TEXT;
 
@@ -10,7 +11,7 @@ function formatText(key, placeholders = {}) {
 
 async function loadGameText() {
   try {
-    const response = await fetch('text.json', { cache: 'no-store' });
+    const response = await fetch('assets/text.json', { cache: 'no-store' });
     if (!response.ok) throw new Error(`Unable to load text.json: ${response.status}`);
     gameText = await response.json();
   } catch (error) {
@@ -26,4 +27,9 @@ function applyStaticText() {
   document.getElementById('shop-subtitle').textContent = formatText('shop.subtitle');
   document.getElementById('gameover-title').textContent = formatText('gameover.title');
   restartButton.textContent = formatText('gameover.restart');
+  pauseTitle.textContent = formatText('pause.title');
+  resumeButton.textContent = formatText('pause.resume');
+  controlsButton.textContent = formatText('pause.controls');
+  pauseRestartButton.textContent = formatText('pause.restart');
+  quitButton.textContent = formatText('pause.quit');
 }

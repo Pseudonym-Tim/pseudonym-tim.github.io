@@ -28,8 +28,6 @@
   "status.clear": "CLEAR",
   "status.none": "-",
   "universe.label": "Universe %id%",
-  "message.phaseDash": "Phase dash!",
-  "message.laserCooling": "Laser cooling %seconds%s!",
   "message.universesCollapsing": "Universes collapsing!",
   "message.entryUniverseReconstituting": "Entry universe reconstituting!",
   "message.finalIncursion": "FINAL INCURSION, clear all hostile signatures!",
@@ -66,5 +64,10 @@
   "powerups.speed.name": "Enhanced Thrusters",
   "powerups.speed.desc": "Higher acceleration and top speed!",
   "powerups.lucky.name": "Quantum Boost",
-  "powerups.lucky.desc": "Wrap multipliers grow faster!"
+  "powerups.lucky.desc": "Wrap multipliers grow faster!",
+  "pause.title": "Paused",
+  "pause.resume": "Resume",
+  "pause.restart": "Restart",
+  "pause.quit": "Quit to Main Menu",
+  "pause.controls": "Controls"
 }

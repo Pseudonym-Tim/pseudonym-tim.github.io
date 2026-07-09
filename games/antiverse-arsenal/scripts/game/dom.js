@@ -1,3 +1,4 @@
+// DOM handles...
 const container = document.getElementById('game-container');
 const hullValue = document.getElementById('hull-label');
 const hullGauge = document.getElementById('hull-gauge');
@@ -16,6 +17,14 @@ const messageOverlay = document.getElementById('message-overlay');
 const messageText = document.getElementById('message-text');
 const powerupOverlay = document.getElementById('powerup-overlay');
 const powerupOptions = document.getElementById('powerup-options');
+const pauseOverlay = document.getElementById('pause-overlay');
+const pauseTitle = document.getElementById('pause-title');
+const resumeButton = document.getElementById('resume-button');
+const controlsButton = document.getElementById('controls-button');
+const controlsPanel = document.getElementById('controls-panel');
+const controlsCloseButton = document.getElementById('controls-close-button');
+const pauseRestartButton = document.getElementById('pause-restart-button');
+const quitButton = document.getElementById('quit-button');
 const gameoverOverlay = document.getElementById('gameover-overlay');
 const finalScoreEl = document.getElementById('final-score-label');
 const finalHighscoreEl = document.getElementById('final-highscore-label');
