@@ -17,6 +17,7 @@ class HullPickup {
   collect() {
     if (this.collected || this.game.hp >= MAX_PLAYER_HULL) return false;
     this.collected = true;
+    this.game.sound.play('hullPickup');
     const restored = MAX_PLAYER_HULL - this.game.hp;
     this.game.hp = MAX_PLAYER_HULL;
     this.game.addFloatingText(this.universe, this.x, this.y - 20, formatText('float.fullRepair', { amount: restored }), '#72f7ff');

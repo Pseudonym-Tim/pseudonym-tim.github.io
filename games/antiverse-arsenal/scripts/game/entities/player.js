@@ -22,6 +22,8 @@ class Player {
     this.dashDirY = 0;
     this.dashHitEntities = new Set();
     this.blink = 0;
+    this.damageFlashTimer = 0;
+    this.damageFlashDuration = 0.16;
   }
 
   update(dt) {
@@ -42,6 +44,7 @@ class Player {
     this.warpCooldown = Math.max(0, this.warpCooldown - dt);
     this.dashCooldown = Math.max(0, this.dashCooldown - dt);
     this.blink = Math.max(0, this.blink - dt);
+    this.damageFlashTimer = Math.max(0, this.damageFlashTimer - dt);
 
     if (this.dashing) {
       this.updateDash(dt);
@@ -91,6 +94,7 @@ class Player {
     this.dashElapsed = 0;
     this.dashHitEntities = new Set();
     this.dashing = true;
+    this.game.sound.play('phaseDash');
     this.velX = this.dashDirX * DASH_SPEED;
     this.velY = this.dashDirY * DASH_SPEED;
     this.angle = Math.atan2(this.dashDirY, this.dashDirX);
@@ -145,6 +149,7 @@ class Player {
     const aimAngle = this.angle;
     const hasMultiShot = this.game.hasPowerup('multi');
     const angles = hasMultiShot ? [aimAngle, aimAngle - 0.2, aimAngle + 0.2] : [aimAngle];
+    this.game.sound.play('shoot');
 
     angles.forEach((angle) => {
       const x = this.x + Math.cos(angle) * (this.radius + 3);
@@ -152,13 +157,21 @@ class Player {
       const vx = Math.cos(angle) * BULLET_SPEED + this.velX * 0.15;
       const vy = Math.sin(angle) * BULLET_SPEED + this.velY * 0.15;
       this.game.spawnBullet(this.universe, x, y, vx, vy, 'player', baseMult, {
-        maxWraps: hasMultiShot ? 1 : MAX_WRAPS
+        maxWraps: hasMultiShot ? 1 : MAX_WRAPS,
+        playSound: false
       });
     });
   }
 
+  triggerDamageFlash(duration = this.damageFlashDuration) {
+    this.damageFlashTimer = Math.max(this.damageFlashTimer, duration);
+  }
+
+  getDamageFlashAlpha() {
+    return clamp(this.damageFlashTimer / this.damageFlashDuration, 0, 1);
+  }
+
   draw(ctx) {
-    if (this.blink > 0 && Math.floor(this.blink * 16) % 2 === 0) return;
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(this.angle);
@@ -188,7 +201,8 @@ class Player {
     drawPixelArt(ctx, pixelArt.player, this.radius * 3.1, {
       alpha: this.dashing ? 1 : 0.9,
       time: this.game.spriteClock,
-      scale: 1.1
+      scale: 1.1,
+      flashAlpha: this.getDamageFlashAlpha()
     });
 
     ctx.restore();

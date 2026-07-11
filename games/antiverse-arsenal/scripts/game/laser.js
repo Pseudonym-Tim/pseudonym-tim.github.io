@@ -98,6 +98,7 @@ Object.assign(Game.prototype, {
     }
 
     const plan = this.laserAim;
+    this.sound.play('laserBeam');
     const hitEnemies = new Set();
 
     for (const lock of plan.locks) {

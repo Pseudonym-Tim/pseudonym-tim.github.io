@@ -27,6 +27,7 @@ class Enemy extends Damageable {
 
   update(dt) {
     this.healthBarTimer = Math.max(0, this.healthBarTimer - dt);
+    this.updateDamageFlash(dt);
     this.steerTowardPlayer(dt);
     this.updateWeapon(dt);
     this.move(dt);
@@ -147,7 +148,8 @@ class Enemy extends Damageable {
     const sprite = this.sprite?.ready ? this.sprite : pixelArt.enemyNormal;
     drawPixelArt(ctx, sprite, this.radius * 3.1, {
       time: this.game.spriteClock,
-      scale: this.spriteScale
+      scale: this.spriteScale,
+      flashAlpha: this.getDamageFlashAlpha()
     });
   }
 

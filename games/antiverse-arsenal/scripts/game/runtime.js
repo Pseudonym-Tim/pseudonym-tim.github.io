@@ -73,6 +73,12 @@ Object.assign(Game.prototype, {
       if (text.dead) this.floatingTexts.splice(i, 1);
     }
 
+    for (let i = this.explosions.length - 1; i >= 0; i--) {
+      const explosion = this.explosions[i];
+      explosion.update(worldDt);
+      if (explosion.dead) this.explosions.splice(i, 1);
+    }
+
     this.checkPlayerCollisions();
     this.updateHUD();
   },
@@ -83,6 +89,7 @@ Object.assign(Game.prototype, {
     this.drawLaserPlan(this.laserAim);
     this.drawLaserFlashes();
     this.player.draw(this.player.universe.ctx);
+    for (const explosion of this.explosions) explosion.draw();
     for (const text of this.floatingTexts) text.draw();
   }
 });

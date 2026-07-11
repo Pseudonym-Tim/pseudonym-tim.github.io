@@ -103,9 +103,44 @@ class SpriteAnimation {
     ctx.imageSmoothingEnabled = false;
     if (options.alpha !== undefined) ctx.globalAlpha *= options.alpha;
     ctx.drawImage(this.image, sx, sy, sourceWidth, sourceHeight, -half, -half, drawSize, drawSize);
+
+    const flashAlpha = clamp(options.flashAlpha ?? 0, 0, 1);
+    if (flashAlpha > 0) {
+      const flashCanvas = SpriteAnimation.getFlashCanvas(sourceWidth, sourceHeight);
+      const flashCtx = flashCanvas?.getContext('2d');
+
+      if (flashCtx) {
+        flashCtx.clearRect(0, 0, sourceWidth, sourceHeight);
+        flashCtx.imageSmoothingEnabled = false;
+        flashCtx.globalCompositeOperation = 'source-over';
+        flashCtx.globalAlpha = 1;
+        flashCtx.drawImage(this.image, sx, sy, sourceWidth, sourceHeight, 0, 0, sourceWidth, sourceHeight);
+        flashCtx.globalCompositeOperation = 'source-in';
+        flashCtx.fillStyle = '#ffffff';
+        flashCtx.fillRect(0, 0, sourceWidth, sourceHeight);
+        flashCtx.globalCompositeOperation = 'source-over';
+
+        ctx.globalAlpha *= flashAlpha;
+        ctx.drawImage(flashCanvas, 0, 0, sourceWidth, sourceHeight, -half, -half, drawSize, drawSize);
+      }
+    }
+
     ctx.restore();
 
     return true;
+  }
+
+  static getFlashCanvas(width, height) {
+    if (typeof document === 'undefined') return null;
+
+    if (!SpriteAnimation.flashCanvas) {
+      SpriteAnimation.flashCanvas = document.createElement('canvas');
+    }
+
+    if (SpriteAnimation.flashCanvas.width !== width) SpriteAnimation.flashCanvas.width = width;
+    if (SpriteAnimation.flashCanvas.height !== height) SpriteAnimation.flashCanvas.height = height;
+
+    return SpriteAnimation.flashCanvas;
   }
 
   drawFrame(ctx, x, y, width, height, options = {}) {
@@ -166,8 +201,8 @@ class SpriteAnimation {
 const pixelArt = {
   player: createAnimatedSprite({
     image: 'assets/sprites/player_ship.png',
-    frameWidth: 16,
-    frameHeight: 18,
+    frameWidth: 18,
+    frameHeight: 22,
     frameCount: 3,
     fps: 5,
     defaultAnimation: 'idle',
@@ -177,8 +212,8 @@ const pixelArt = {
   }),
   enemyNormal: createAnimatedSprite({
     image: 'assets/sprites/enemy_normal_ship.png',
-    frameWidth: 16,
-    frameHeight: 18,
+    frameWidth: 20,
+    frameHeight: 22,
     frameCount: 3,
     fps: 5,
     defaultAnimation: 'idle',
@@ -188,8 +223,8 @@ const pixelArt = {
   }),
   enemyShotgun: createAnimatedSprite({
     image: 'assets/sprites/enemy_shotgun_ship.png',
-    frameWidth: 16,
-    frameHeight: 18,
+    frameWidth: 20,
+    frameHeight: 24,
     frameCount: 3,
     fps: 5,
     defaultAnimation: 'idle',
@@ -199,8 +234,8 @@ const pixelArt = {
   }),
   enemyMachineGun: createAnimatedSprite({
     image: 'assets/sprites/enemy_machine_gun_ship.png',
-    frameWidth: 16,
-    frameHeight: 18,
+    frameWidth: 20,
+    frameHeight: 22,
     frameCount: 3,
     fps: 8,
     defaultAnimation: 'idle',
@@ -208,7 +243,30 @@ const pixelArt = {
       idle: { row: 0, frames: 3, fps: 8 }
     }
   }),
-  asteroid: loadSprite('assets/sprites/asteroid_1.png'),
+  asteroids: {
+    big: [
+      loadSprite('assets/sprites/asteroid_big_1.png'),
+      loadSprite('assets/sprites/asteroid_big_2.png'),
+      loadSprite('assets/sprites/asteroid_big_3.png')
+    ],
+    small: [
+      loadSprite('assets/sprites/asteroid_small_1.png'),
+      loadSprite('assets/sprites/asteroid_small_2.png'),
+      loadSprite('assets/sprites/asteroid_small_3.png')
+    ]
+  },  
+  explosionFX: createAnimatedSprite({
+    image: 'assets/sprites/explosion_fx.png',
+    frameWidth: 32,
+    frameHeight: 32,
+    frameCount: 5,
+    fps: 10,
+    loop: false,
+    defaultAnimation: 'explode',
+    animations: {
+      explode: { row: 0, frames: 5, fps: 10, loop: false }
+    }
+  }),
   hullPickup: loadSprite('assets/sprites/hull_pickup.png'),
   playerBullet: loadSprite('assets/sprites/player_bullet.png'),
   enemyBullet: loadSprite('assets/sprites/enemy_bullet.png'),

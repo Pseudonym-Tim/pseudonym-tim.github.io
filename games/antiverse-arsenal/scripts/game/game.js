@@ -6,6 +6,8 @@ class Game {
     this.universes = [];
     this.bullets = [];
     this.floatingTexts = [];
+    this.explosions = [];
+    this.sound = new SoundManager();
     this.player = null;
     this.mouseX = window.innerWidth / 2;
     this.mouseY = window.innerHeight / 2;
@@ -153,6 +155,7 @@ class Game {
     this.universes = [];
     this.bullets = [];
     this.floatingTexts = [];
+    this.explosions = [];
     this.powerups = [];
     this.round = 1;
     this.stability = 0;
@@ -730,6 +733,7 @@ class Game {
   }
 
   spawnBullet(universe, x, y, vx, vy, owner, scoreMultiplier, options = {}) {
+    if (options.playSound !== false) this.sound.play('shoot');
     const bullet = new Bullet(this, universe, x, y, vx, vy, owner, scoreMultiplier, options);
     this.bullets.push(bullet);
     return bullet;
@@ -754,9 +758,10 @@ class Game {
   playerHit(sourceVX = 0, sourceVY = 0) {
     if (this.invulnerable || this.debugInvulnerable || this.player?.dashing || !this.running) return;
     this.hp -= 1;
+    this.sound.play('hitHurt');
     this.player.universe.triggerDamageShake();
     this.invulnerable = true;
-    this.player.blink = 1.1;
+    this.player.triggerDamageFlash();
     this.addFloatingText(this.player.universe, this.player.x, this.player.y - 18, formatText('float.hullDamage'), '#ff4d5a');
     this.triggerHitStop(0.06, 0.28, 0.24);
     setTimeout(() => { this.invulnerable = false; }, 900);
@@ -767,6 +772,14 @@ class Game {
 
     if (this.hp <= 0) {
       this.hp = 0;
+
+      this.spawnExplosion(this.player.universe, this.player.x, this.player.y, {
+        soundEffect: 'explosion',
+        size: this.player.radius * 5.2,
+        velX: this.player.velX * 0.06,
+        velY: this.player.velY * 0.06
+      });
+
       this.gameOver();
     }
   }
@@ -822,7 +835,7 @@ class Game {
 
     if (this.debugInvulnerable) {
       this.invulnerable = false;
-      this.player.blink = 0;
+      this.player.damageFlashTimer = 0;
     }
 
     this.flashMessage(formatText('message.debugInvulnerability', { state: formatText(this.debugInvulnerable ? 'message.debugOn' : 'message.debugOff') }), 750);
@@ -844,6 +857,13 @@ class Game {
   }
 
   onEnemyDestroyed(enemy) {
+    this.spawnExplosion(enemy.universe, enemy.x, enemy.y, {
+      soundEffect: 'explosion',
+      size: enemy.radius * 4.4,
+      velX: enemy.velX * 0.08,
+      velY: enemy.velY * 0.08
+    });
+
     this.clearEnemyThreat(enemy);
     const multiplier = Math.max(1, enemy.killMultiplier || 1);
     this.awardPoints(ENEMY_SCORE, multiplier, enemy.universe, enemy.x, enemy.y + 8, '#ffd25c', formatText('float.destroy'));
@@ -851,6 +871,12 @@ class Game {
   }
 
   onAsteroidDestroyed(asteroid) {
+    this.spawnExplosion(asteroid.universe, asteroid.x, asteroid.y, {
+      size: asteroid.radius * 2.35,
+      velX: asteroid.velX * 0.05,
+      velY: asteroid.velY * 0.05
+    });
+
     const baseScore = Math.max(1, asteroid.size) * ASTEROID_SCORE_PER_SIZE;
     this.awardPoints(baseScore, asteroid.killMultiplier || 1, asteroid.universe, asteroid.x, asteroid.y, '#aefcff');
 
@@ -869,6 +895,14 @@ class Game {
     }
   }
 
+  spawnExplosion(universe, x, y, options = {}) {
+    if (!universe) return null;
+    if (options.soundEffect && options.playSound !== false) this.sound.play(options.soundEffect);
+    const explosion = new ExplosionFX(this, universe, x, y, options);
+    this.explosions.push(explosion);
+    return explosion;
+  }
+
   endRound() {
     if (this.roundEnding) return;
     this.roundEnding = true;
@@ -882,7 +916,9 @@ class Game {
 
       if (!this.running) return;
 
-      this.round = Math.max(1, this.round + 1);
+      const completedRound = this.round;
+      const shopReady = completedRound >= SHOP_ROUND_INTERVAL;
+      this.round = shopReady ? ROUND_RESET_AFTER_SHOP : completedRound + 1;
       this.stability = 0;
       this.roundThreatTotal = 0;
       this.roundThreatCleared = 0;
@@ -900,7 +936,7 @@ class Game {
       const startGrace = () => this.beginRoundGrace(survivor, clamp(2 + this.round, 3, 7));
       while (this.totalPrimaryAsteroids() < this.getRoundAsteroidTarget()) this.spawnAsteroids(1, [survivor]);
 
-      if (this.round % 3 === 0) {
+      if (shopReady) {
         this.showMessage(formatText('message.traderDetected'), 1200);
 
         setTimeout(() => {
@@ -942,6 +978,7 @@ class Game {
       card.innerHTML = `<h3>${option.name}</h3><p>${option.desc}</p>`;
 
       card.addEventListener('click', () => {
+        this.sound.play('powerupSelect');
         this.applyPowerup(option.id);
         powerupOverlay.classList.add('hidden');
         this.keys = {};
