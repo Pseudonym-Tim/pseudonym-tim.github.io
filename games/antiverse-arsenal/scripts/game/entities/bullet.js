@@ -15,6 +15,8 @@ class Bullet {
     this.maxWraps = options.maxWraps ?? MAX_WRAPS;
     this.scoreMultiplier = scoreMultiplier || 1;
     this.multiUniversalWrapCount = 0;
+    this.sprite = options.sprite || null;
+    this.spriteScale = options.spriteScale ?? 1;
   }
 
   update(dt) {
@@ -40,6 +42,10 @@ class Bullet {
     }
   }
 
+  getCollisionShape() {
+    return circleCollisionShape(this.x, this.y, this.radius);
+  }
+
   checkHits() {
     const player = this.game.player;
 
@@ -47,9 +53,7 @@ class Bullet {
       const canHitOwner = this.owner === 'player' && this.age > 0.42;
 
       if (this.owner === 'enemy' || canHitOwner) {
-        const r = this.radius + player.radius;
-
-        if (distSq(this.x, this.y, player.x, player.y) < r * r) {
+        if (collisionShapesOverlap(this.getCollisionShape(), entityCollisionShape(player))) {
           this.game.playerHit(this.velX, this.velY);
           this.dead = true;
           return;
@@ -59,9 +63,7 @@ class Bullet {
 
     for (const asteroid of this.universe.asteroids) {
 
-      const r = this.radius + asteroid.radius;
-
-      if (distSq(this.x, this.y, asteroid.x, asteroid.y) < r * r) {
+      if (collisionShapesOverlap(this.getCollisionShape(), entityCollisionShape(asteroid))) {
         asteroid.takeDamage(1, this.scoreMultiplier);
         this.game.recordWrapShotHit(this);
         this.dead = true;
@@ -73,10 +75,8 @@ class Bullet {
 
       for (const enemy of this.universe.enemies) {
 
-        const r = this.radius + enemy.radius;
-
-        if (distSq(this.x, this.y, enemy.x, enemy.y) < r * r) {
-          enemy.takeDamage(1, this.scoreMultiplier);
+        if (collisionShapesOverlap(this.getCollisionShape(), entityCollisionShape(enemy))) {
+          enemy.takeDamage(1, this.scoreMultiplier, this.x, this.y, this.radius);
           this.game.recordWrapShotHit(this);
           this.game.onEnemyHit(enemy, this.scoreMultiplier);
           this.dead = true;
@@ -91,8 +91,9 @@ class Bullet {
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(Math.atan2(this.velY, this.velX) + Math.PI / 2);
-    const image = this.owner === 'player' ? pixelArt.playerBullet : pixelArt.enemyBullet;
-    drawPixelArt(ctx, image, 16, { time: this.game.spriteClock });
+    const defaultImage = this.owner === 'player' ? pixelArt.playerBullet : pixelArt.enemyBullet;
+    const image = this.sprite?.ready ? this.sprite : defaultImage;
+    drawPixelArt(ctx, image, 16, { time: this.game.spriteClock, scale: this.spriteScale });
     ctx.restore();
   }
 }

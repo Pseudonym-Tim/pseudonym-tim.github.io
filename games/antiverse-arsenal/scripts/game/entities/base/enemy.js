@@ -20,6 +20,11 @@ class Enemy extends Damageable {
     this.spriteScale = config.spriteScale ?? 1.1;
     this.fireTimer = rand(this.fireDelayMin, this.fireDelayMax);
     this.angle = Math.random() * Math.PI * 2;
+    this.roll = 0;
+    this.ignoreRoll = config.ignoreRoll ?? false;
+    this.maxRoll = config.maxRoll ?? 0.48;
+    this.aimResponsiveness = config.aimResponsiveness ?? 8.5;
+    this.rollResponsiveness = config.rollResponsiveness ?? 9.5;
     this.avoidanceX = 0;
     this.avoidanceY = 0;
     this.maxWraps = Infinity;
@@ -40,7 +45,18 @@ class Enemy extends Damageable {
     const dx = them.x - me.x;
     const dy = them.y - me.y;
     const distance = Math.max(1, Math.hypot(dx, dy));
-    this.angle = Math.atan2(dy, dx);
+    const aimAngle = Math.atan2(dy, dx);
+    const turnDelta = angleDelta(aimAngle, this.angle);
+    const aimResponsiveness = 1 - Math.exp(-this.aimResponsiveness * dt);
+    this.angle = lerpAngle(this.angle, aimAngle, aimResponsiveness);
+
+    if (this.ignoreRoll) {
+      this.roll = 0;
+    } else {
+      const rollResponsiveness = 1 - Math.exp(-this.rollResponsiveness * dt);
+      const targetRoll = clamp(turnDelta * 1.35, -this.maxRoll, this.maxRoll);
+      this.roll += (targetRoll - this.roll) * rollResponsiveness;
+    }
 
     const avoidance = this.getEnemyAvoidance();
     const avoidanceSmoothing = 1 - Math.exp(-7.5 * dt);

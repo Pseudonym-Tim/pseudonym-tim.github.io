@@ -50,6 +50,7 @@ class Game {
     this.roundEnding = false;
     this.invulnerable = false;
     this.debugInvulnerable = false;
+    this.debugShowCollisions = false;
     this.powerups = [];
     this.spriteClock = 0;
     this.scale = this.computeScale();
@@ -61,6 +62,13 @@ class Game {
     this.loopToken = 0;
     this.roundGraceActive = false;
     this.transitioning = false;
+    this.bossActive = false;
+    this.bossPending = false;
+    this.bossDefeated = false;
+    this.bossUniverse = null;
+    this.boss = null;
+    this.bossEncounterCount = 0;
+    this.wrappingDisabled = false;
     this.universeThemes = [];
     this.initInput();
     restartButton.addEventListener('click', () => this.start());
@@ -88,14 +96,12 @@ class Game {
 
     for (const asteroid of universe.asteroids) {
       if (asteroid.dead) continue;
-      const radius = player.radius + asteroid.radius;
-      if (distSq(player.x, player.y, asteroid.x, asteroid.y) < radius * radius) return true;
+      if (entitiesOverlap(player, asteroid)) return true;
     }
 
     for (const enemy of universe.enemies) {
       if (enemy.dead || enemy.expired) continue;
-      const radius = player.radius + enemy.radius;
-      if (distSq(player.x, player.y, enemy.x, enemy.y) < radius * radius) return true;
+      if (entitiesOverlap(player, enemy)) return true;
     }
 
     return false;
@@ -108,9 +114,9 @@ class Game {
 
     for (const asteroid of universe.asteroids) {
       if (asteroid.dead || hitSet.has(asteroid)) continue;
-      const radius = player.radius + asteroid.radius + 2;
+      const dashShape = circleCollisionShape(player.x, player.y, player.radius + 2);
 
-      if (distSq(player.x, player.y, asteroid.x, asteroid.y) < radius * radius) {
+      if (collisionShapesOverlap(dashShape, entityCollisionShape(asteroid))) {
         hitSet.add(asteroid);
         asteroid.takeDamage(DASH_DAMAGE, 1);
         this.addFloatingText(universe, asteroid.x, asteroid.y - 12, formatText('float.dashDamage', { damage: DASH_DAMAGE }), '#72f7ff');
@@ -119,9 +125,9 @@ class Game {
 
     for (const enemy of universe.enemies) {
       if (enemy.dead || enemy.expired || hitSet.has(enemy)) continue;
-      const radius = player.radius + enemy.radius + 2;
+      const dashShape = circleCollisionShape(player.x, player.y, player.radius + 2);
 
-      if (distSq(player.x, player.y, enemy.x, enemy.y) < radius * radius) {
+      if (collisionShapesOverlap(dashShape, entityCollisionShape(enemy))) {
         hitSet.add(enemy);
         enemy.takeDamage(DASH_DAMAGE, 1);
         this.addFloatingText(universe, enemy.x, enemy.y - 16, formatText('float.dashDamage', { damage: DASH_DAMAGE }), '#72f7ff');
@@ -187,6 +193,7 @@ class Game {
     this.clearAllInput();
     this.invulnerable = false;
     this.debugInvulnerable = false;
+    this.debugShowCollisions = false;
     this.running = true;
     this.timeScale = 1;
     this.laserCharging = false;
@@ -195,6 +202,13 @@ class Game {
     this.laserCooldown = 0;
     this.roundGraceActive = false;
     this.transitioning = false;
+    this.bossActive = false;
+    this.bossPending = false;
+    this.bossDefeated = false;
+    this.bossUniverse = null;
+    this.boss = null;
+    this.bossEncounterCount = 0;
+    this.wrappingDisabled = false;
     this.universeThemes = this.createUniverseThemes();
     this.scale = this.computeScale();
     gameoverOverlay.classList.add('hidden');
@@ -203,10 +217,11 @@ class Game {
     controlsPanel.classList.add('hidden');
 
     const firstSlot = this.randomUniversePosition();
-    const u = this.createUniverse(firstSlot.x, firstSlot.y);
+    const u = this.createUniverse(firstSlot.x, firstSlot.y, true);
     this.player = new Player(this, u, LOGICAL_W / 2, LOGICAL_H / 2);
     this.spawnAsteroids(this.getRoundAsteroidSpawnCount(), [u]);
     this.maybeSpawnHullPickup(u);
+    this.growUniverse(u);
     this.beginRoundGrace(u, 3);
     this.lastTime = performance.now();
     this.updateHUD();
@@ -389,6 +404,20 @@ class Game {
   }
 
   updateSpawnCountdown(dt) {
+    if (this.bossDefeated && this.round === BOSS_ROUND && !this.roundEnding) {
+      spawnBanner.textContent = formatText('message.bossDefeated');
+      nextUniverseValue.textContent = formatText('hud.nextIncursion', { value: formatText('status.clear') });
+      spawnBanner.classList.remove('warning');
+      return;
+    }
+
+    if (this.bossActive || this.bossPending) {
+      spawnBanner.textContent = this.bossActive ? formatText('message.bossStatus') : formatText('message.bossDetected');
+      nextUniverseValue.textContent = formatText('hud.nextIncursion', { value: formatText('status.final') });
+      spawnBanner.classList.add('warning');
+      return;
+    }
+
     if (this.roundEnding || this.isShopOpen() || this.transitioning) return;
 
     if (this.roundGraceActive || !this.encounterActive) {
@@ -438,7 +467,141 @@ class Game {
     spawnBanner.textContent = formatText('message.stabilizingSector', { seconds: remaining.toFixed(1) });
     nextUniverseValue.textContent = formatText('hud.nextIncursion', { value: formatText('status.clear') });
     spawnBanner.classList.remove('warning');
-    if (this.encounterClearTimer >= ENCOUNTER_CLEAR_DURATION) this.endRound();
+    if (this.encounterClearTimer >= ENCOUNTER_CLEAR_DURATION) {
+      if (this.shouldStartBossEncounter()) this.startBossEncounter();
+      else this.endRound();
+    }
+  }
+
+  shouldStartBossEncounter() {
+    return this.round === BOSS_ROUND && !this.bossActive && !this.bossPending && !this.bossDefeated;
+  }
+
+  startBossEncounter() {
+    if (!this.running || this.bossActive || this.bossPending) return;
+    const universe = this.player.universe;
+    this.prepareBossSummonUniverse(universe);
+    this.bossPending = true;
+    this.encounterClearTimer = 0;
+    this.spawnTimer = Infinity;
+    this.showMessage(formatText('message.bossDetected'), 2200);
+    spawnBanner.textContent = formatText('message.bossStatus');
+    spawnBanner.classList.add('warning');
+
+    setTimeout(async () => {
+      if (!this.running || this.round !== BOSS_ROUND || !this.bossPending) return;
+      await this.expandUniverseForBoss(universe);
+      if (!this.running || this.round !== BOSS_ROUND || !this.bossPending) return;
+      this.activateBossEncounter(universe);
+    }, 900);
+  }
+
+  prepareBossSummonUniverse(universe) {
+    if (!universe || !this.universes.includes(universe)) return;
+
+    for (const other of [...this.universes]) {
+      if (other !== universe) other.element.remove();
+    }
+
+    this.universes = [universe];
+    universe.id = 1;
+    universe.setLabel();
+    this.bullets = this.bullets.filter((bullet) => bullet.universe === universe);
+    this.pendingEnemySpawns = [];
+    this.incursionQueue = [];
+    this.incursionDeploying = false;
+    this.roundPendingThreat = 0;
+    this.roundIncursionTotal = Math.max(1, this.roundIncursionTotal);
+    this.roundIncursionDeployed = this.roundIncursionTotal;
+  }
+
+  async expandUniverseForBoss(universe, duration = 1150) {
+    if (!universe || !this.universes.includes(universe)) return;
+    const startW = universe.width;
+    const startH = universe.height;
+    const start = performance.now();
+    while (this.running && this.bossPending) {
+      const elapsed = performance.now() - start;
+      const t = clamp(elapsed / duration, 0, 1);
+      const eased = 1 - Math.pow(1 - t, 3);
+      const width = Math.round(startW + (BOSS_LOGICAL_W - startW) * eased);
+      const height = Math.round(startH + (BOSS_LOGICAL_H - startH) * eased);
+      universe.setLogicalSize(width, height);
+      universe.setPosition((window.innerWidth - universe.cssWidth) / 2, (window.innerHeight - universe.cssHeight - universe.cssHeader) / 2);
+      this.draw();
+      if (t >= 1) break;
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+    }
+
+    universe.setLogicalSize(BOSS_LOGICAL_W, BOSS_LOGICAL_H);
+    universe.setPosition((window.innerWidth - universe.cssWidth) / 2, (window.innerHeight - universe.cssHeight - universe.cssHeader) / 2);
+    this.draw();
+  }
+
+  resetUniverseToDefaultSize(universe) {
+    if (!universe || (universe.width === LOGICAL_W && universe.height === LOGICAL_H)) return;
+    universe.setLogicalSize(LOGICAL_W, LOGICAL_H);
+    universe.setPosition((window.innerWidth - universe.cssWidth) / 2, (window.innerHeight - universe.cssHeight - universe.cssHeader) / 2);
+
+    if (this.player?.universe === universe) {
+      this.player.x = clamp(this.player.x, this.player.radius, universe.width - this.player.radius);
+      this.player.y = clamp(this.player.y, this.player.radius, universe.height - this.player.radius);
+    }
+  }
+
+  availableBossClasses() {
+    return [DreadnoughtBoss];
+  }
+
+  chooseBossClass() {
+    const bosses = this.availableBossClasses();
+    if (this.bossEncounterCount <= 0) return DreadnoughtBoss;
+    return bosses[Math.floor(Math.random() * bosses.length)] || DreadnoughtBoss;
+  }
+
+  activateBossEncounter(universe) {
+    if (!universe || !this.universes.includes(universe)) return;
+    this.bossPending = false;
+    this.bossActive = true;
+    this.wrappingDisabled = true;
+    this.bossUniverse = universe;
+
+    for (const other of [...this.universes]) {
+      if (other !== universe) other.element.remove();
+    }
+    this.universes = [universe];
+    universe.id = 1;
+    universe.setLabel();
+    if (universe.width !== BOSS_LOGICAL_W || universe.height !== BOSS_LOGICAL_H) {
+      universe.setLogicalSize(BOSS_LOGICAL_W, BOSS_LOGICAL_H);
+      universe.setPosition((window.innerWidth - universe.cssWidth) / 2, (window.innerHeight - universe.cssHeight - universe.cssHeader) / 2);
+    }
+    this.player.universe = universe;
+    this.player.x = clamp(this.player.x, this.player.radius, universe.width - this.player.radius);
+    this.player.y = clamp(this.player.y, this.player.radius, universe.height - this.player.radius);
+
+    const BossClass = this.chooseBossClass();
+    const boss = new BossClass(this, universe);
+    this.bossEncounterCount += 1;
+    this.boss = boss;
+    this.registerEnemyThreat(boss);
+    universe.enemies.push(boss);
+    this.updateStabilityFromThreats();
+  }
+
+  finishBossEncounter() {
+    this.bossActive = false;
+    this.bossPending = false;
+    this.bossDefeated = true;
+    this.boss = null;
+    this.timeScale = Math.min(this.timeScale, 0.18);
+    this.showMessage(formatText('message.bossDefeated'), 3200);
+    spawnBanner.textContent = formatText('message.bossDefeated');
+    nextUniverseValue.textContent = formatText('hud.nextIncursion', { value: formatText('status.clear') });
+    spawnBanner.classList.remove('warning');
+    setTimeout(() => {
+      if (this.running) this.endRound({ showStabilizedMessage: false });
+    }, 1800);
   }
 
   maybeSpawnHullPickup(universe) {
@@ -829,6 +992,84 @@ class Game {
     this.flashMessage(formatText('message.debugKilledEnemies', { count: killed }), 650);
   }
 
+  debugStartBossEncounter() {
+    if (!this.running || this.bossActive || this.bossPending) return;
+    const universe = this.player?.universe || this.universes[0];
+    if (!universe) return;
+
+    this.round = BOSS_ROUND;
+    this.bossDefeated = false;
+    this.roundEnding = false;
+    this.roundGraceActive = false;
+    this.encounterActive = true;
+    this.encounterClearTimer = 0;
+    this.incursionQueue = [];
+    this.incursionDeploying = false;
+    this.pendingEnemySpawns = [];
+    this.roundPendingThreat = 0;
+    this.roundIncursionTotal = 1;
+    this.roundIncursionDeployed = 1;
+
+    this.roundThreatTotal = 0;
+    this.roundThreatCleared = 0;
+    this.flashMessage('DEBUG: Boss test encounter', 700);
+    this.startBossEncounter();
+    this.updateHUD();
+  }
+
+  toggleDebugCollisionView() {
+    if (!this.running) return;
+    this.debugShowCollisions = !this.debugShowCollisions;
+    this.flashMessage(`DEBUG: Collision view ${this.debugShowCollisions ? 'ON' : 'OFF'}`, 700);
+  }
+
+  drawCollisionDebug() {
+    if (!this.debugShowCollisions) return;
+
+    for (const universe of this.universes) {
+      const ctx = universe.ctx;
+      ctx.save();
+      ctx.strokeStyle = '#39ff14';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 4]);
+
+      const drawEntityShape = (entity) => {
+        if (!entity || entity.dead || entity.expired || entity.universe !== universe) return;
+        this.drawCollisionShape(ctx, entityCollisionShape(entity));
+      };
+
+      if (this.player?.universe === universe) drawEntityShape(this.player);
+      for (const asteroid of universe.asteroids) drawEntityShape(asteroid);
+      for (const pickup of universe.hullPickups) drawEntityShape(pickup);
+      for (const enemy of universe.enemies) {
+        drawEntityShape(enemy);
+        if (enemy.getPartCollisionShape && enemy.parts) {
+          for (const part of enemy.parts) {
+            if (!part.destroyed) this.drawCollisionShape(ctx, enemy.getPartCollisionShape(part));
+          }
+        }
+      }
+      for (const bullet of this.bullets) drawEntityShape(bullet);
+
+      ctx.restore();
+    }
+  }
+
+  drawCollisionShape(ctx, shape) {
+    if (!shape) return;
+    if (Array.isArray(shape)) {
+      for (const item of shape) this.drawCollisionShape(ctx, item);
+      return;
+    }
+    ctx.beginPath();
+    if (shape.type === 'box') {
+      ctx.rect(shape.x, shape.y, shape.w, shape.h);
+    } else if (shape.type === 'circle') {
+      ctx.arc(shape.x, shape.y, shape.radius, 0, Math.PI * 2);
+    }
+    ctx.stroke();
+  }
+
   toggleDebugInvulnerability() {
     if (!this.running) return;
     this.debugInvulnerable = !this.debugInvulnerable;
@@ -865,6 +1106,10 @@ class Game {
     });
 
     this.clearEnemyThreat(enemy);
+    if (enemy === this.boss || enemy.enemyType === 'boss') {
+      this.finishBossEncounter();
+      return;
+    }
     const multiplier = Math.max(1, enemy.killMultiplier || 1);
     this.awardPoints(ENEMY_SCORE, multiplier, enemy.universe, enemy.x, enemy.y + 8, '#ffd25c', formatText('float.destroy'));
     this.tryEndRoundFromThreats();
@@ -903,21 +1148,48 @@ class Game {
     return explosion;
   }
 
-  endRound() {
+  async createFreshRoundUniverse() {
+    for (const universe of [...this.universes]) universe.element.remove();
+    this.universes = [];
+    this.bullets = [];
+    this.floatingTexts = [];
+    this.explosions = [];
+
+    const slot = this.randomUniversePosition();
+    const freshUniverse = this.createUniverse(slot.x, slot.y, true);
+    this.player.universe = freshUniverse;
+    this.player.velX = 0;
+    this.player.velY = 0;
+    this.player.warpCooldown = 0;
+    this.player.dashCooldown = 0;
+    this.player.dashing = false;
+    this.player.dashHitEntities.clear();
+
+    while (this.totalPrimaryAsteroids() < this.getRoundAsteroidTarget()) this.spawnAsteroids(1, [freshUniverse]);
+    this.maybeSpawnHullPickup(freshUniverse);
+    const safe = this.safeWarpPosition(freshUniverse);
+    this.player.x = safe.x;
+    this.player.y = safe.y;
+
+    await this.growUniverse(freshUniverse);
+    return freshUniverse;
+  }
+
+  endRound(options = {}) {
     if (this.roundEnding) return;
     this.roundEnding = true;
-    this.showMessage(formatText('message.sectorStabilized'), 1300);
+    this.timeScale = Math.min(this.timeScale, 0.18);
+    if (options.showStabilizedMessage !== false) this.showMessage(formatText('message.sectorStabilized'), 1300);
 
     setTimeout(async () => {
       if (!this.running) return;
 
-      const survivor = this.player.universe;
-      await this.playRoundTransition(survivor);
-
-      if (!this.running) return;
-
       const completedRound = this.round;
       const shopReady = completedRound >= SHOP_ROUND_INTERVAL;
+
+      await Promise.all(this.universes.map((universe) => this.shrinkUniverse(universe)));
+      if (!this.running) return;
+
       this.round = shopReady ? ROUND_RESET_AFTER_SHOP : completedRound + 1;
       this.stability = 0;
       this.roundThreatTotal = 0;
@@ -933,17 +1205,26 @@ class Game {
       this.encounterClearTimer = 0;
       this.spawnTimer = Infinity;
       this.roundEnding = false;
-      const startGrace = () => this.beginRoundGrace(survivor, clamp(2 + this.round, 3, 7));
-      while (this.totalPrimaryAsteroids() < this.getRoundAsteroidTarget()) this.spawnAsteroids(1, [survivor]);
+
+      const startFreshRound = async () => {
+        if (!this.running) return;
+        const freshUniverse = await this.createFreshRoundUniverse();
+        if (!this.running) return;
+        this.wrappingDisabled = false;
+        this.timeScale = 1;
+        this.transitioning = false;
+        this.beginRoundGrace(freshUniverse, clamp(2 + this.round, 3, 7));
+      };
 
       if (shopReady) {
         this.showMessage(formatText('message.traderDetected'), 1200);
 
         setTimeout(() => {
-          if (this.running) this.showPowerupSelection(startGrace);
+          if (!this.running) return;
+          this.showPowerupSelection(startFreshRound);
         }, 1250);
       } else {
-        startGrace();
+        await startFreshRound();
       }
     }, 1250);
   }
@@ -1126,9 +1407,7 @@ class Game {
 
     for (const pickup of u.hullPickups) {
       if (pickup.collected) continue;
-      const r = this.player.radius + pickup.radius;
-
-      if (distSq(this.player.x, this.player.y, pickup.x, pickup.y) < r * r) {
+      if (entitiesOverlap(this.player, pickup)) {
         pickup.collect();
       }
     }
@@ -1138,9 +1417,7 @@ class Game {
     for (const asteroid of u.asteroids) {
       if (asteroid.dead) continue;
 
-      const r = this.player.radius + asteroid.radius;
-
-      if (distSq(this.player.x, this.player.y, asteroid.x, asteroid.y) < r * r) {
+      if (entitiesOverlap(this.player, asteroid)) {
         const dx = this.player.x - asteroid.x;
         const dy = this.player.y - asteroid.y;
         const len = Math.max(1, Math.hypot(dx, dy));
@@ -1153,9 +1430,12 @@ class Game {
     for (const enemy of u.enemies) {
       if (enemy.dead || enemy.expired) continue;
 
-      const r = this.player.radius + enemy.radius;
-
-      if (distSq(this.player.x, this.player.y, enemy.x, enemy.y) < r * r) {
+      if (entitiesOverlap(this.player, enemy)) {
+        if (enemy.enemyType === 'boss') {
+          this.hp = 1;
+          this.playerHit(0, 300);
+          return;
+        }
         const dx = this.player.x - enemy.x;
         const dy = this.player.y - enemy.y;
         const len = Math.max(1, Math.hypot(dx, dy));

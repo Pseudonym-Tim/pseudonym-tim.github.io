@@ -35,6 +35,51 @@ function pointInRect(px, py, rect) {
   return px >= rect.x && px <= rect.x + rect.w && py >= rect.y && py <= rect.y + rect.h;
 }
 
+function circleCollisionShape(x, y, radius) {
+  return { type: 'circle', x, y, radius };
+}
+
+function boxCollisionShape(x, y, width, height) {
+  return { type: 'box', x: x - width / 2, y: y - height / 2, w: width, h: height };
+}
+
+function entityCollisionShape(entity) {
+  if (entity?.getCollisionShape) return entity.getCollisionShape();
+  return circleCollisionShape(entity.x, entity.y, entity.radius || 0);
+}
+
+function collisionShapesOverlap(a, b) {
+  if (!a || !b) return false;
+
+  if (Array.isArray(a)) return a.some((shape) => collisionShapesOverlap(shape, b));
+  if (Array.isArray(b)) return b.some((shape) => collisionShapesOverlap(a, shape));
+
+  if (a.type === 'circle' && b.type === 'circle') {
+    const radius = a.radius + b.radius;
+    return distSq(a.x, a.y, b.x, b.y) < radius * radius;
+  }
+
+  if (a.type === 'box' && b.type === 'box') {
+    return rectsOverlap(a, b);
+  }
+
+  const circle = a.type === 'circle' ? a : b;
+  const box = a.type === 'box' ? a : b;
+  const closest = closestPointToRect(circle.x, circle.y, box);
+  return distSq(circle.x, circle.y, closest.x, closest.y) < circle.radius * circle.radius;
+}
+
+function pointInCollisionShape(x, y, shape) {
+  if (!shape) return false;
+  if (shape.type === 'box') return pointInRect(x, y, shape);
+  if (shape.type === 'circle') return distSq(x, y, shape.x, shape.y) <= shape.radius * shape.radius;
+  return false;
+}
+
+function entitiesOverlap(a, b) {
+  return collisionShapesOverlap(entityCollisionShape(a), entityCollisionShape(b));
+}
+
 function normalizeVector(x, y) {
   const length = Math.hypot(x, y);
   if (length < 0.00001) return null;

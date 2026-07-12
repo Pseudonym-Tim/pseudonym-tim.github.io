@@ -57,6 +57,17 @@ class Universe {
     this.element.style.setProperty('--universe-color-glow', this.theme.glow);
   }
 
+  setLogicalSize(width, height) {
+    this.width = width;
+    this.height = height;
+    this.canvas.width = this.width;
+    this.canvas.height = this.height;
+    this.ctx = this.canvas.getContext('2d');
+    this.ctx.imageSmoothingEnabled = false;
+    this.applyScale(this.scale || this.game.scale);
+    this.setPosition(this.x, this.y);
+  }
+
   applyScale(scale) {
     this.baseScale = scale;
     this.scale = scale;

@@ -12,12 +12,34 @@ Object.assign(Game.prototype, {
   wrapEntity(entity, options = {}) {
     const u = entity.universe;
     const radius = entity.radius || 0;
+
+    if (this.wrappingDisabled && entity === this.player) {
+      const clampedX = clamp(entity.x, radius, u.width - radius);
+      const clampedY = clamp(entity.y, radius, u.height - radius);
+      const hitHorizontalWall = clampedX !== entity.x;
+      const hitVerticalWall = clampedY !== entity.y;
+
+      if (!hitHorizontalWall && !hitVerticalWall) return false;
+
+      entity.x = clampedX;
+      entity.y = clampedY;
+      if (hitHorizontalWall) entity.velX = 0;
+      if (hitVerticalWall) entity.velY = 0;
+      return true;
+    }
+
     const outLeft = entity.x < -radius;
     const outRight = entity.x > u.width + radius;
     const outTop = entity.y < -radius;
     const outBottom = entity.y > u.height + radius;
 
     if (!(outLeft || outRight || outTop || outBottom)) return false;
+
+    if (this.wrappingDisabled) {
+      entity.dead = true;
+      entity.expired = true;
+      return true;
+    }
 
     if (options.countWrap) {
       entity.wrapCount = (entity.wrapCount || 0) + 1;

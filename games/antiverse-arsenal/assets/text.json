@@ -69,5 +69,13 @@
   "pause.resume": "Resume",
   "pause.restart": "Restart",
   "pause.quit": "Quit to Main Menu",
-  "pause.controls": "Controls"
+  "pause.controls": "Controls",
+  "message.bossDetected": "Boss class enemy detected!",
+  "message.bossDefeated": "Boss destroyed! Sector secure!",
+  "message.bossStatus": "Boss encounter active \u2014 dimensional wrapping disabled!",
+  "boss.dreadnought.name": "Dreadnought",
+  "boss.part.core": "Core",
+  "boss.part.leftLauncher": "Left launcher",
+  "boss.part.rightLauncher": "Right launcher",
+  "boss.hp": "%name% - HP: %hp%/%maxHp%"
 }

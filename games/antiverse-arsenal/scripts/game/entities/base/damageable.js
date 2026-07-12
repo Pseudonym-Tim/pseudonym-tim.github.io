@@ -19,6 +19,10 @@ class Damageable {
     this.killMultiplier = 1;
   }
 
+  getCollisionShape() {
+    return circleCollisionShape(this.x, this.y, this.radius);
+  }
+
   takeDamage(amount, multiplier = 1) {
     if (this.dead) return;
     this.hp -= amount;

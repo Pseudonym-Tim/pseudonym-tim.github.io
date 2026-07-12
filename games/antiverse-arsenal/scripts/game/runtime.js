@@ -90,6 +90,7 @@ Object.assign(Game.prototype, {
     this.drawLaserFlashes();
     this.player.draw(this.player.universe.ctx);
     for (const explosion of this.explosions) explosion.draw();
+    this.drawCollisionDebug();
     for (const text of this.floatingTexts) text.draw();
   }
 });

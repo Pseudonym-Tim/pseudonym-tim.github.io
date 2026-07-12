@@ -105,6 +105,7 @@ class SpriteAnimation {
     ctx.drawImage(this.image, sx, sy, sourceWidth, sourceHeight, -half, -half, drawSize, drawSize);
 
     const flashAlpha = clamp(options.flashAlpha ?? 0, 0, 1);
+
     if (flashAlpha > 0) {
       const flashCanvas = SpriteAnimation.getFlashCanvas(sourceWidth, sourceHeight);
       const flashCtx = flashCanvas?.getContext('2d');
@@ -156,6 +157,29 @@ class SpriteAnimation {
     ctx.imageSmoothingEnabled = false;
     if (options.alpha !== undefined) ctx.globalAlpha *= options.alpha;
     ctx.drawImage(this.image, sx, sy, sourceWidth, sourceHeight, x, y, drawWidth, drawHeight);
+
+    const flashAlpha = clamp(options.flashAlpha ?? 0, 0, 1);
+    
+    if (flashAlpha > 0) {
+      const flashCanvas = SpriteAnimation.getFlashCanvas(sourceWidth, sourceHeight);
+      const flashCtx = flashCanvas?.getContext('2d');
+
+      if (flashCtx) {
+        flashCtx.clearRect(0, 0, sourceWidth, sourceHeight);
+        flashCtx.imageSmoothingEnabled = false;
+        flashCtx.globalCompositeOperation = 'source-over';
+        flashCtx.globalAlpha = 1;
+        flashCtx.drawImage(this.image, sx, sy, sourceWidth, sourceHeight, 0, 0, sourceWidth, sourceHeight);
+        flashCtx.globalCompositeOperation = 'source-in';
+        flashCtx.fillStyle = '#ffffff';
+        flashCtx.fillRect(0, 0, sourceWidth, sourceHeight);
+        flashCtx.globalCompositeOperation = 'source-over';
+
+        ctx.globalAlpha *= flashAlpha;
+        ctx.drawImage(flashCanvas, 0, 0, sourceWidth, sourceHeight, x, y, drawWidth, drawHeight);
+      }
+    }
+
     ctx.restore();
 
     return true;
@@ -243,6 +267,44 @@ const pixelArt = {
       idle: { row: 0, frames: 3, fps: 8 }
     }
   }),
+  bossDreadnought: {
+    intact: createAnimatedSprite({
+      image: 'assets/sprites/boss/boss_dreadnought_intact.png',
+      frameWidth: 96,
+      frameHeight: 66,
+      frameCount: 1,
+      fps: 1,
+      defaultAnimation: 'idle',
+      animations: { idle: { row: 0, frames: 1, fps: 1 } }
+    }),
+    leftLauncherBroken: createAnimatedSprite({
+      image: 'assets/sprites/boss/boss_dreadnought_left_launcher_broken.png',
+      frameWidth: 96,
+      frameHeight: 66,
+      frameCount: 1,
+      fps: 1,
+      defaultAnimation: 'idle',
+      animations: { idle: { row: 0, frames: 1, fps: 1 } }
+    }),
+    rightLauncherBroken: createAnimatedSprite({
+      image: 'assets/sprites/boss/boss_dreadnought_right_launcher_broken.png',
+      frameWidth: 96,
+      frameHeight: 66,
+      frameCount: 1,
+      fps: 1,
+      defaultAnimation: 'idle',
+      animations: { idle: { row: 0, frames: 1, fps: 1 } }
+    }),
+    bothLaunchersBroken: createAnimatedSprite({
+      image: 'assets/sprites/boss/boss_dreadnought_both_launchers_broken.png',
+      frameWidth: 96,
+      frameHeight: 66,
+      frameCount: 1,
+      fps: 1,
+      defaultAnimation: 'idle',
+      animations: { idle: { row: 0, frames: 1, fps: 1 } }
+    })
+  },
   asteroids: {
     big: [
       loadSprite('assets/sprites/asteroid_big_1.png'),
@@ -270,6 +332,7 @@ const pixelArt = {
   hullPickup: loadSprite('assets/sprites/hull_pickup.png'),
   playerBullet: loadSprite('assets/sprites/player_bullet.png'),
   enemyBullet: loadSprite('assets/sprites/enemy_bullet.png'),
+  bossShotgunBullet: loadSprite('assets/sprites/boss_shotgun_bullet.png'),
   universeBackground: createAnimatedSprite({
     image: 'assets/sprites/universe_background.png',
     frameWidth: 64,

@@ -24,6 +24,13 @@ class Player {
     this.blink = 0;
     this.damageFlashTimer = 0;
     this.damageFlashDuration = 0.16;
+    this.roll = 0;
+    this.maxRoll = 0.52;
+    this.rollResponsiveness = 12;
+  }
+
+  getCollisionShape() {
+    return circleCollisionShape(this.x, this.y, this.radius);
   }
 
   update(dt) {
@@ -36,8 +43,14 @@ class Player {
     const aimAngle = this.game.getMouseAimAngle();
 
     if (aimAngle !== null && !this.dashing) {
-      const aimResponsiveness = 1 - Math.exp(-28 * dt);
+      const turnDelta = angleDelta(aimAngle, this.angle);
+      const aimResponsiveness = 1 - Math.exp(-16 * dt);
+      const rollResponsiveness = 1 - Math.exp(-this.rollResponsiveness * dt);
+      this.roll += (clamp(turnDelta * 1.45, -this.maxRoll, this.maxRoll) - this.roll) * rollResponsiveness;
       this.angle = lerpAngle(this.angle, aimAngle, aimResponsiveness);
+    } else {
+      const rollReset = 1 - Math.exp(-this.rollResponsiveness * dt);
+      this.roll += (0 - this.roll) * rollReset;
     }
 
     this.cooldown -= dt;
@@ -98,6 +111,7 @@ class Player {
     this.velX = this.dashDirX * DASH_SPEED;
     this.velY = this.dashDirY * DASH_SPEED;
     this.angle = Math.atan2(this.dashDirY, this.dashDirX);
+    this.roll = 0;
     return true;
   }
 
@@ -114,6 +128,7 @@ class Player {
       this.velX = this.dashDirX * DASH_SPEED;
       this.velY = this.dashDirY * DASH_SPEED;
       this.angle = Math.atan2(this.dashDirY, this.dashDirX);
+      this.roll = 0;
       this.dashElapsed += stepDt;
       remainingDt -= stepDt;
       safetySteps += 1;

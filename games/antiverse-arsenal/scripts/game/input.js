@@ -46,6 +46,8 @@ Object.assign(Game.prototype, {
       if (e.code === 'KeyN' && !e.repeat) this.debugNextRound();
       if (e.code === 'KeyK' && !e.repeat) this.debugKillAllEnemies();
       if (e.code === 'KeyI' && !e.repeat) this.toggleDebugInvulnerability();
+      if (e.code === 'KeyB' && !e.repeat) this.debugStartBossEncounter();
+      if (e.code === 'KeyO' && !e.repeat) this.toggleDebugCollisionView();
     });
 
     window.addEventListener('keyup', (e) => {
