@@ -8,7 +8,8 @@ class Bullet {
     this.velX = vx;
     this.velY = vy;
     this.owner = owner;
-    this.radius = 3;
+    this.radius = options.radius ?? 3;
+    this.damage = options.damage ?? 1;
     this.age = 0;
     this.dead = false;
     this.wrapCount = 0;
@@ -64,7 +65,7 @@ class Bullet {
     for (const asteroid of this.universe.asteroids) {
 
       if (collisionShapesOverlap(this.getCollisionShape(), entityCollisionShape(asteroid))) {
-        asteroid.takeDamage(1, this.scoreMultiplier);
+        asteroid.takeDamage(this.damage, this.scoreMultiplier);
         this.game.recordWrapShotHit(this);
         this.dead = true;
         return;
@@ -76,7 +77,7 @@ class Bullet {
       for (const enemy of this.universe.enemies) {
 
         if (collisionShapesOverlap(this.getCollisionShape(), entityCollisionShape(enemy))) {
-          enemy.takeDamage(1, this.scoreMultiplier, this.x, this.y, this.radius);
+          enemy.takeDamage(this.damage, this.scoreMultiplier, this.x, this.y, this.radius);
           this.game.recordWrapShotHit(this);
           this.game.onEnemyHit(enemy, this.scoreMultiplier);
           this.dead = true;

@@ -15,6 +15,8 @@ Object.assign(Game.prototype, {
 
       if (e.code === 'Escape' && !e.repeat) {
         e.preventDefault();
+        e.stopPropagation();
+        this.lockFullscreenEscape();
         this.togglePause();
         return;
       }
@@ -48,6 +50,7 @@ Object.assign(Game.prototype, {
       if (e.code === 'KeyI' && !e.repeat) this.toggleDebugInvulnerability();
       if (e.code === 'KeyB' && !e.repeat) this.debugStartBossEncounter();
       if (e.code === 'KeyO' && !e.repeat) this.toggleDebugCollisionView();
+      if (e.code === 'KeyP' && !e.repeat) this.debugGiveSniperPowerup();
     });
 
     window.addEventListener('keyup', (e) => {

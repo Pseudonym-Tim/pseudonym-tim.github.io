@@ -71,11 +71,68 @@ class Game {
     this.wrappingDisabled = false;
     this.universeThemes = [];
     this.initInput();
+    this.initFullscreenMode();
     restartButton.addEventListener('click', () => this.start());
     resumeButton.addEventListener('click', () => this.resumeGame());
     controlsButton.addEventListener('click', () => this.showControlsPanel());
     controlsCloseButton.addEventListener('click', () => this.hideControlsPanel());
     pauseRestartButton.addEventListener('click', () => this.start());
+    quitButton.addEventListener('click', () => this.quitGame());
+  }
+
+  initFullscreenMode() {
+    this.enterFullscreenMode = () => {
+      if (this.isFullscreenActive()) {
+        this.updateFullscreenClass();
+        this.lockFullscreenEscape();
+        return Promise.resolve(true);
+      }
+
+      const root = document.documentElement;
+      const requestFullscreen = root.requestFullscreen || root.webkitRequestFullscreen;
+      if (!requestFullscreen) return Promise.resolve(false);
+
+      return Promise.resolve(requestFullscreen.call(root, { navigationUI: 'hide' }))
+        .then(() => {
+          this.updateFullscreenClass();
+          this.lockFullscreenEscape();
+          return true;
+        })
+        .catch(() => false);
+    };
+
+    document.addEventListener('fullscreenchange', () => {
+      this.updateFullscreenClass();
+      if (this.isFullscreenActive()) this.lockFullscreenEscape();
+      else this.unlockFullscreenEscape();
+    });
+    document.addEventListener('webkitfullscreenchange', () => {
+      this.updateFullscreenClass();
+      if (this.isFullscreenActive()) this.lockFullscreenEscape();
+      else this.unlockFullscreenEscape();
+    });
+    this.updateFullscreenClass();
+  }
+
+  isFullscreenActive() {
+    return Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+  }
+
+  lockFullscreenEscape() {
+    if (!this.isFullscreenActive()) return;
+    const keyboard = navigator.keyboard;
+    if (!keyboard?.lock) return;
+    keyboard.lock(['Escape']).catch(() => {});
+  }
+
+  unlockFullscreenEscape() {
+    const keyboard = navigator.keyboard;
+    if (!keyboard?.unlock) return;
+    keyboard.unlock();
+  }
+
+  updateFullscreenClass() {
+    document.body.classList.toggle('fullscreen-active', this.isFullscreenActive());
   }
 
   canStartDash() {
@@ -1023,6 +1080,16 @@ class Game {
     this.flashMessage(`DEBUG: Collision view ${this.debugShowCollisions ? 'ON' : 'OFF'}`, 700);
   }
 
+  debugGiveSniperPowerup() {
+    if (!this.running) return;
+    const alreadyInstalled = this.hasPowerup('sniper');
+
+    if (!alreadyInstalled) this.applyPowerup('sniper');
+
+    const state = alreadyInstalled ? formatText('message.debugOn') : formatText('message.powerupInstalled', { name: formatText('powerups.sniper.name') });
+    this.flashMessage(formatText('message.debugSniperPowerup', { state }), 750);
+  }
+
   drawCollisionDebug() {
     if (!this.debugShowCollisions) return;
 
@@ -1239,7 +1306,8 @@ class Game {
       { id: 'multi', name: formatText('powerups.multi.name'), desc: formatText('powerups.multi.desc') },
       { id: 'shield', name: formatText('powerups.shield.name'), desc: formatText('powerups.shield.desc') },
       { id: 'speed', name: formatText('powerups.speed.name'), desc: formatText('powerups.speed.desc') },
-      { id: 'lucky', name: formatText('powerups.lucky.name'), desc: formatText('powerups.lucky.desc') }
+      { id: 'lucky', name: formatText('powerups.lucky.name'), desc: formatText('powerups.lucky.desc') },
+      { id: 'sniper', name: formatText('powerups.sniper.name'), desc: formatText('powerups.sniper.desc') }
     ];
 
     const pool = all.filter((p) => !this.powerups.includes(p.id));
@@ -1353,6 +1421,25 @@ class Game {
 
     if (this.isPauseMenuOpen()) this.resumeGame();
     else this.pauseGame();
+  }
+
+  quitGame() {
+    this.running = false;
+    this.loopToken += 1;
+    this.paused = false;
+    this.clearAllInput();
+    this.unlockFullscreenEscape();
+
+    if (document.exitFullscreen && this.isFullscreenActive()) {
+      document.exitFullscreen().catch(() => {});
+    }
+
+    window.open('', '_self');
+    window.close();
+
+    setTimeout(() => {
+      if (!window.closed) window.location.replace('about:blank');
+    }, 80);
   }
 
   applyPowerup(id) {
@@ -1496,5 +1583,24 @@ window.addEventListener('load', async () => {
   applyStaticText();
   spawnBanner.innerHTML = formatText('spawn.nextUniverseIn', { seconds: '<span id="spawn-timer">10</span>' });
   const game = new Game();
-  game.start();
+
+  focusOverlay.classList.remove('hidden');
+  focusOverlay.focus();
+
+  let focusStarted = false;
+  const beginFocusedGame = async () => {
+    if (focusStarted) return;
+    focusStarted = true;
+    document.body.classList.remove('focus-pending');
+    focusOverlay.classList.add('hidden');
+    await game.enterFullscreenMode();
+    game.start();
+  };
+
+  focusOverlay.addEventListener('click', beginFocusedGame);
+  focusOverlay.addEventListener('keydown', (e) => {
+    if (e.code !== 'Enter' && e.code !== 'Space') return;
+    e.preventDefault();
+    beginFocusedGame();
+  });
 });

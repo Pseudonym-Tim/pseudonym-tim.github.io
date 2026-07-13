@@ -6,8 +6,14 @@
   <title>Antiverse Arsenal Prototype</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="focus-pending">
   <div id="game-container"></div>
+  <div id="focus-overlay" role="button" tabindex="0">
+    <div class="menu-card focus-card">
+      <h1 id="focus-title"></h1>
+      <p id="focus-body"></p>
+    </div>
+  </div>
 
   <div id="spawn-banner"><span id="spawn-timer">10</span></div>
 

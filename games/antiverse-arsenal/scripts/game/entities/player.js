@@ -79,8 +79,13 @@ class Player {
     }
 
     if (firing && !this.game.laserCharging && this.cooldown <= 0) {
-      this.fire();
-      this.cooldown = this.fireRate;
+      if (this.game.hasPowerup('sniper')) {
+        this.fireSniperShot();
+        this.cooldown = SNIPER_COOLDOWN;
+      } else {
+        this.fire();
+        this.cooldown = this.fireRate;
+      }
     }
 
     this.prevX = this.x;
@@ -175,6 +180,22 @@ class Player {
         maxWraps: hasMultiShot ? 1 : MAX_WRAPS,
         playSound: false
       });
+    });
+  }
+
+  fireSniperShot() {
+    const angle = this.angle;
+    const x = this.x + Math.cos(angle) * (this.radius + 3);
+    const y = this.y + Math.sin(angle) * (this.radius + 3);
+    const vx = Math.cos(angle) * SNIPER_SPEED + this.velX * 0.08;
+    const vy = Math.sin(angle) * SNIPER_SPEED + this.velY * 0.08;
+    this.game.sound.play('shoot');
+    this.game.spawnBullet(this.universe, x, y, vx, vy, 'player', 1, {
+      damage: SNIPER_DAMAGE,
+      maxWraps: 0,
+      playSound: false,
+      radius: 4,
+      spriteScale: 1.35
     });
   }
 

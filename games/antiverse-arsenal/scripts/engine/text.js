@@ -21,6 +21,8 @@ async function loadGameText() {
 
 function applyStaticText() {
   document.title = formatText('page.title');
+  focusTitle.textContent = formatText('focus.title');
+  focusBody.textContent = formatText('focus.body');
   document.getElementById('controls-title').textContent = formatText('controls.title');
   document.getElementById('controls-body').textContent = formatText('controls.body');
   document.getElementById('shop-title').textContent = formatText('shop.title');
