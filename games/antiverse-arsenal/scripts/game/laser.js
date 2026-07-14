@@ -171,10 +171,18 @@ Object.assign(Game.prototype, {
     ctx.moveTo(0, lock.enemy.radius + 5);
     ctx.lineTo(0, lock.enemy.radius + 16);
     ctx.stroke();
-    ctx.font = '12px "Lucida Console", monospace';
+    ctx.restore();
+
+    const wrapText = `${lock.wraps}/${MAX_WRAPS} WRAP`;
+    const wrapTextX = Math.round(lock.x);
+    const wrapTextY = Math.round(lock.y - lock.enemy.radius - 22);
+    ctx.save();
+    ctx.font = '16px "Press Start 2P", "Lucida Console", monospace';
     ctx.textAlign = 'center';
+    ctx.fillStyle = '#000000';
+    ctx.fillText(wrapText, wrapTextX - 2, wrapTextY + 2);
     ctx.fillStyle = '#fffb8f';
-    ctx.fillText(`${lock.wraps}/${MAX_WRAPS} WRAP`, 0, -lock.enemy.radius - 22);
+    ctx.fillText(wrapText, wrapTextX, wrapTextY);
     ctx.restore();
   },
 

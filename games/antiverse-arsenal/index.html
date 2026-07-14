@@ -30,12 +30,10 @@
       <div id="stability" class="hud-row"><span id="stability-label"></span></div>
     </section>
 
-    <section class="hud-panel hud-ability-panel" aria-label="Movement abilities">
-      <div id="warp" class="hud-row hud-ability-row"><span id="warp-label"></span></div>
-      <div id="dash" class="hud-row hud-ability-row"><span id="dash-label"></span></div>
-    </section>
+  </div>
 
-    <section id="hull" class="hud-panel hud-hull-module" aria-label="Hull integrity">
+  <section id="player-hud" class="player-hud-panel" aria-label="Player systems HUD">
+    <div id="hull" class="player-hud-hull" aria-label="Hull integrity">
       <div class="hull-gauge" id="hull-gauge">
         <div class="hull-gauge-face">
           <div class="hull-gauge-needle" id="hull-gauge-needle"></div>
@@ -43,11 +41,29 @@
         </div>
       </div>
       <div class="hull-readout">
-        <span class="hull-readout-title">Hull Integrity</span>
+        <span class="hull-readout-title">Hull</span>
         <span id="hull-label"></span>
       </div>
-    </section>
-  </div>
+    </div>
+
+    <div class="player-hud-cooldowns" aria-label="Player ability cooldowns">
+      <div id="dash" class="ability-cooldown" data-ready="true">
+        <div class="ability-cooldown-ring" id="dash-ring"><span>D</span></div>
+        <span class="ability-cooldown-label">Dash</span>
+        <span id="dash-label" class="ability-cooldown-value"></span>
+      </div>
+      <div id="warp" class="ability-cooldown" data-ready="true">
+        <div class="ability-cooldown-ring" id="warp-ring"><span>W</span></div>
+        <span class="ability-cooldown-label">Warp</span>
+        <span id="warp-label" class="ability-cooldown-value"></span>
+      </div>
+      <div id="laser" class="ability-cooldown" data-ready="true">
+        <div class="ability-cooldown-ring" id="laser-ring"><span>L</span></div>
+        <span class="ability-cooldown-label">Laser</span>
+        <span id="laser-label" class="ability-cooldown-value"></span>
+      </div>
+    </div>
+  </section>
 
   <div id="message-overlay" class="hidden">
     <div id="message-text"></div>
@@ -71,7 +87,7 @@
     </div>
     <div id="controls-panel" class="hidden" role="dialog" aria-modal="true" aria-labelledby="controls-title">
       <div class="menu-card controls-panel-card">
-        <button id="controls-close-button" aria-label="Close controls">×</button>
+        <button id="controls-close-button" aria-label="Close controls">x</button>
         <h2 id="controls-title"></h2>
         <p id="controls-body"></p>
       </div>
@@ -111,6 +127,7 @@
   <script src="scripts/game/entities/asteroid.js"></script>
   <script src="scripts/game/entities/floating-text.js"></script>
   <script src="scripts/game/explosion-fx.js"></script>
+  <script src="scripts/game/warp-particle-fx.js"></script>
   <script src="scripts/game/global.js"></script>
   <script src="scripts/game/dom.js"></script>
   <script src="scripts/game/game.js"></script>

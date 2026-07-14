@@ -116,12 +116,35 @@ Object.assign(Game.prototype, {
 
   tryWarpTo(universe, x, y) {
     if (this.paused || !this.player || this.player.warpCooldown > 0 || !this.universes.includes(universe)) return;
+    
+    const startUniverse = this.player.universe;
+    const startX = this.player.x;
+    const startY = this.player.y;
+    const warpDir = normalizeVector(this.player.velX, this.player.velY);
+
+    this.spawnWarpParticles(startUniverse, startX, startY, {
+      count: 30,
+      dirX: -(warpDir?.x || 0),
+      dirY: -(warpDir?.y || 0),
+      radius: this.player.radius * 2.2
+    });
+
+    this.sound.play('warp');
+    
     this.player.universe = universe;
     this.player.x = clamp(x, this.player.radius, universe.width - this.player.radius);
     this.player.y = clamp(y, this.player.radius, universe.height - this.player.radius);
     this.player.velX *= 0.35;
     this.player.velY *= 0.35;
     this.player.warpCooldown = 3.5;
+
+    this.spawnWarpParticles(universe, this.player.x, this.player.y, {
+      count: 42,
+      dirX: warpDir?.x || 0,
+      dirY: warpDir?.y || 0,
+      radius: this.player.radius * 2.8
+    });
+
     this.flashMessage(formatText('message.warpedToUniverse', { id: universe.id }), 650);
   },
 

@@ -28,14 +28,15 @@ class FloatingText {
     const t = clamp(this.age / this.life, 0, 1);
     ctx.save();
     ctx.globalAlpha = 1 - t;
-    ctx.font = '16px "Lucida Console", monospace';
+    const textX = Math.round(this.x);
+    const textY = Math.round(this.y);
+    ctx.font = '16px "Press Start 2P", "Lucida Console", monospace';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.lineWidth = 4;
-    ctx.strokeStyle = 'rgba(0,0,0,0.78)';
+    ctx.fillStyle = '#000000';
+    ctx.fillText(this.text, textX - 2, textY + 2);
     ctx.fillStyle = this.color;
-    ctx.strokeText(this.text, this.x, this.y);
-    ctx.fillText(this.text, this.x, this.y);
+    ctx.fillText(this.text, textX, textY);
     ctx.restore();
   }
 

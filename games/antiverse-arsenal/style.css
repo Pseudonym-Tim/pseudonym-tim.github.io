@@ -1,9 +1,14 @@
+@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
+
 :root {
   --cyan: #00ffff;
   --gold: #ffd25c;
   --red: #ff4d5a;
   --green: #89ff77;
   --panel: rgba(0, 0, 0, 0.68);
+  --text-underlay-x: -3px;
+  --text-underlay-y: 3px;
+  --text-underlay: var(--text-underlay-x) var(--text-underlay-y) 0 #000;
 }
 
 * { box-sizing: border-box; }
@@ -20,11 +25,36 @@ body {
   overflow: hidden;
   min-height: 100vh;
   user-select: none;
-  font-family: "Lucida Console", monospace;
+  font-family: "Press Start 2P", "Lucida Console", monospace;
+  font-size: 16px;
+  text-transform: uppercase;
+  text-shadow: var(--text-underlay);
+  font-synthesis: none;
+  font-kerning: none;
+  font-variant-ligatures: none;
+  font-feature-settings: "kern" 0, "liga" 0, "clig" 0, "calt" 0;
+  text-rendering: optimizeSpeed;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 5px;
   color: #ffffff;
   background:
     repeating-radial-gradient(circle at 50% 50%, rgba(255,255,255,0.035) 0 2px, transparent 2px 10px),
     #02010e;
+}
+
+
+h1,
+h2 {
+  --text-underlay-x: -4px;
+  --text-underlay-y: 4px;
+  font-size: 32px;
+  line-height: 40px;
+}
+
+h3,
+p,
+button {
+  font-size: 16px;
 }
 
 body.fullscreen-active {
@@ -32,7 +62,8 @@ body.fullscreen-active {
 }
 
 body.focus-pending #hud,
-body.focus-pending #spawn-banner {
+body.focus-pending #spawn-banner,
+body.focus-pending #player-hud {
   display: none;
 }
 
@@ -57,9 +88,14 @@ body.window-dragging {
   image-rendering: pixelated;
   cursor: crosshair;
   user-select: none;
-  transform: rotate(var(--drag-tilt, 0deg));
+  transform: none;
   transform-origin: center center;
   transition: transform 140ms ease-out, left 95ms ease-out, top 95ms ease-out;
+}
+
+.universe canvas {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
 }
 
 .universe.damage-shake {
@@ -76,6 +112,7 @@ body.window-dragging {
 
 .universe.dragging {
   cursor: grabbing;
+  transform: rotate(var(--drag-tilt, 0deg));
   transition: transform 50ms linear;
 }
 
@@ -134,7 +171,8 @@ body.window-dragging {
 }
 
 #hud,
-#spawn-banner {
+#spawn-banner,
+#player-hud {
   position: absolute;
   z-index: 6;
 }
@@ -143,15 +181,15 @@ body.window-dragging {
   inset: 0;
   pointer-events: none;
   color: rgba(218, 252, 255, 0.94);
-  font-size: 12px;
-  line-height: 1.25;
+  font-size: 16px;
+  line-height: 20px;
   text-transform: uppercase;
 }
 
 .hud-panel {
   position: absolute;
   min-width: 230px;
-  padding: 0;
+  padding: 5;
   border: 0;
   background: transparent;
   box-shadow: none;
@@ -168,103 +206,203 @@ body.window-dragging {
   min-height: 19px;
   padding: 2px 0;
   color: rgba(218, 252, 255, 0.86);
-  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  text-shadow: 0 0 7px rgba(114, 247, 255, 0.24);
+  text-shadow: var(--text-underlay);
 }
 
 .hud-score-panel {
   top: 14px;
   left: 14px;
-  width: clamp(340px, 21vw, 430px);
+  width: clamp(840px, 21vw, 430px);
 }
 
 .hud-score-primary {
   color: #fff;
   text-decoration: underline;
-  text-underline-offset: 3px;
-  font-size: clamp(20px, 2.15vw, 31px);
-  line-height: 1.05;
+  --text-underlay-x: -4px;
+  --text-underlay-y: 4px;
+  text-underline-offset: 5px;
+  text-decoration-thickness: 3px;
+  font-size: 32px;
+  line-height: 50px;
   letter-spacing: 1px;
-  text-shadow: 0 0 12px rgba(255, 210, 92, 0.3);
+  text-shadow: var(--text-underlay);
 }
 
 .hud-score-secondary {
   text-decoration: underline;
-  text-underline-offset: 3px;
+  text-underline-offset: 5px;
+  text-decoration-thickness: 3px;
   margin-top: 0px;
   padding-top: 6px;
   color: rgba(255, 225, 148, 0.8);
-  font-size: 20px;
-  letter-spacing: 0.7px;
+  font-size: 16px;
+  letter-spacing: 1px;
 }
 
 .hud-round-panel {
   top: 14px;
   right: 14px;
-  width: clamp(250px, 24vw, 360px);
+  width: clamp(550px, 24vw, 360px);
   text-align: right;
 }
 
 .hud-round-primary {
   color: #fff;
   text-decoration: underline;
-  text-underline-offset: 3px;
-  font-size: clamp(17px, 1.6vw, 23px);
-  line-height: 1.1;
-  letter-spacing: 0.7px;
+  --text-underlay-x: -2px;
+  --text-underlay-y: 2px;
+  text-underline-offset: 5px;
+  text-decoration-thickness: 3px;
+  font-size: 16px;
+  line-height: 18px;
+  letter-spacing: 1px;
   margin-bottom: 5px;
 }
 
 .hud-round-panel .hud-row:not(.hud-round-primary) {
   padding-top: 5px;
-  font-size: 20px;
-  letter-spacing: 0.45px;
+  font-size: 16px;
+  letter-spacing: 1px;
 }
 
-.hud-ability-panel {
-  left: 20px;
-  bottom: 20px;
-  width: clamp(240px, 21vw, 330px);
-}
-
-.hud-ability-row {
-  display: flex;
-  align-items: center;
-  min-height: 25px;
-  font-size: 20px;
-}
-
-.hud-hull-module {
-  right: 25px;
-  bottom: 25px;
+#player-hud {
+  left: 10px;
+  bottom: 10px;
   display: grid;
-  grid-template-columns: 112px minmax(110px, 1fr);
-  gap: 11px;
+  grid-template-columns: auto auto;
+  gap: 4px;
   align-items: center;
-  width: clamp(220px, 20vw, 280px);
-  min-width: 220px;
+  width: max-content;
+  max-width: calc(100% - 20px);
+  box-sizing: border-box;
   padding: 0;
+  border: 0;
+  border-radius: 0;
+  color: rgba(218, 252, 255, 0.78);
+  background: transparent;
+  box-shadow: none;
+  pointer-events: none;
+  visibility: hidden;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.player-hud-hull {
+  display: grid;
+  grid-template-columns: 82px minmax(38px, auto);
+  gap: 6px;
+  align-items: center;
+  min-width: 0;
+  opacity: 1;
+}
+
+.player-hud-cooldowns {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  opacity: 1;
+}
+
+.ability-cooldown {
+  --cooldown-ratio: 1;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-width: 46px;
+}
+
+.ability-cooldown-ring {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  position: relative;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: 0 0 7px var(--universe-color-soft, rgba(114, 247, 255, 0.14));
+  opacity: 1;
+}
+
+.ability-cooldown-ring span {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.82);
+  position: relative;
+  z-index: 1;
+  background: transparent;
+  font-size: 16px;
+  line-height: 16px;
+
+  text-align: center;
+  text-shadow: 0 2px 0 #000;
+  transform: translateX(1px);
+}
+
+.ability-cooldown-ring::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(var(--universe-color-glow, #72f7ff) calc(var(--cooldown-ratio) * 1turn), rgba(255,255,255,0.08) 0);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 0);
+  mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 0);
+}
+
+.ability-cooldown-ring span {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.82);
+  position: relative;
+  z-index: 1;
+  background: transparent;
+  font-size: 16px;
+  line-height: 16px;
+  text-shadow: var(--text-underlay);
+}
+
+.ability-cooldown[data-ready="false"] .ability-cooldown-ring {
+  filter: saturate(0.55);
+}
+
+.ability-cooldown-label {
+  color: rgba(218, 252, 255, 0.58);
+  letter-spacing: 1px;
+  font-size: 16px;
+  line-height: 16px;
+}
+
+.ability-cooldown-value {
+  min-height: 10px;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 8px;
+  line-height: 16px;
 }
 
 .hull-gauge {
   --hull-ratio: 1;
   position: relative;
-  width: 112px;
-  height: 62px;
-  filter: drop-shadow(0 0 6px rgba(114, 247, 255, 0.28));
+  width: 82px;
+  height: 46px;
+  filter: drop-shadow(0 0 5px var(--universe-color-soft, rgba(114, 247, 255, 0.16)));
 }
 
 .hull-gauge-face {
   position: absolute;
   left: 0;
   bottom: 0;
-  width: 112px;
-  height: 56px;
-  border: 2px solid rgba(114, 247, 255, 0.72);
+  width: 82px;
+  height: 41px;
+  border: 2px solid var(--universe-color-glow, rgba(114, 247, 255, 0.48));
   border-bottom: 0;
-  border-radius: 112px 112px 0 0;
+  border-radius: 82px 82px 0 0;
 }
 
 .hull-gauge-needle {
@@ -272,12 +410,11 @@ body.window-dragging {
   left: 50%;
   bottom: 6px;
   width: 2px;
-  height: 40px;
-  background: rgba(255, 255, 255, 0.92);
+  height: 30px;
+  background: var(--universe-color-glow, rgba(255, 255, 255, 0.72));
   border-radius: 2px;
   transform-origin: 50% 100%;
   transform: translateX(-50%) rotate(90deg);
-  box-shadow: 0 0 8px rgba(114, 247, 255, 0.72);
 }
 
 .hull-gauge-hub {
@@ -286,19 +423,12 @@ body.window-dragging {
   bottom: 0;
   width: 11px;
   height: 11px;
-  border: 2px solid rgba(114, 247, 255, 0.78);
+  border: 2px solid var(--universe-color-glow, rgba(114, 247, 255, 0.5));
   border-radius: 50%;
   background: transparent;
   transform: translateX(-50%);
-  box-shadow: 0 0 8px rgba(114, 247, 255, 0.48);
+  box-shadow: 0 0 6px var(--universe-color-soft, rgba(114, 247, 255, 0.26));
 }
-
-.hull-gauge.hull-warning .hull-gauge-face,
-.hull-gauge.hull-warning .hull-gauge-hub { border-color: rgba(255, 210, 92, 0.78); }
-.hull-gauge.hull-warning .hull-gauge-needle { background: rgba(255, 210, 92, 0.95); }
-.hull-gauge.hull-critical .hull-gauge-face,
-.hull-gauge.hull-critical .hull-gauge-hub { border-color: rgba(255, 77, 90, 0.82); }
-.hull-gauge.hull-critical .hull-gauge-needle { background: rgba(255, 77, 90, 0.96); }
 
 .hull-readout {
   display: flex;
@@ -308,25 +438,26 @@ body.window-dragging {
 }
 
 .hull-readout-title {
-  color: rgba(218, 252, 255, 0.72);
-  font-size: 15px;
-  line-height: 1;
-  letter-spacing: 1.5px;
+  color: var(--universe-color-glow, rgba(218, 252, 255, 0.52));
+  font-size: 16px;
+  line-height: 16px;
+  letter-spacing: 2px;
   white-space: nowrap;
-  text-shadow: 0 0 7px rgba(114, 247, 255, 0.3);
+  text-shadow: var(--text-underlay);
 }
 
 #hull-label {
-  color: #fff;
-  font-size: clamp(21px, 2vw, 28px);
-  line-height: 1;
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 16px;
+  line-height: 16px;
   letter-spacing: 1px;
   white-space: nowrap;
-  text-shadow: 0 0 10px rgba(114, 247, 255, 0.45);
+  text-shadow: var(--text-underlay);
 }
 
 #spawn-banner {
-  left: 50%;
+  left: 0;
+  right: 0;
   top: 12px;
   min-width: 96px;
   padding: 8px 16px;
@@ -334,10 +465,12 @@ body.window-dragging {
   border-radius: 3px;
   color: var(--gold);
   background: rgba(0, 0, 0, 0.72);
-  font-size: 18px;
+  font-size: 16px;
   letter-spacing: 1px;
   text-align: center;
-  transform: translateX(-50%);
+  width: max-content;
+  margin: 0 auto;
+  transform: none;
   box-shadow: 0 0 12px rgba(255, 210, 92, 0.1);
 }
 
@@ -353,8 +486,7 @@ body.window-dragging {
     min-width: 205px;
   }
 
-  .hud-score-panel,
-  .hud-ability-panel {
+  .hud-score-panel {
     width: 235px;
   }
 
@@ -362,9 +494,6 @@ body.window-dragging {
     width: 270px;
   }
 
-  .hud-hull-module {
-    width: 285px;
-  }
 }
 
 @media (max-width: 780px), (max-height: 620px) {
@@ -373,27 +502,17 @@ body.window-dragging {
     top: 8px;
   }
 
-  .hud-score-panel,
-  .hud-ability-panel {
+  .hud-score-panel {
     left: 8px;
     width: 205px;
   }
 
-  .hud-round-panel,
-  .hud-hull-module {
+  .hud-round-panel {
     right: 8px;
     width: 225px;
     min-width: 225px;
   }
 
-  .hud-ability-panel {
-    bottom: 8px;
-  }
-
-  .hud-hull-module {
-    bottom: 8px;
-    grid-template-columns: 74px 1fr;
-  }
 
   .hull-gauge {
     width: 72px;
@@ -448,7 +567,7 @@ body.window-dragging {
   margin-top: 0;
   color: var(--cyan);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 1px;
 }
 
 .focus-card p {
@@ -483,10 +602,12 @@ body.window-dragging {
   color: #fff6d8;
   background: linear-gradient(180deg, rgba(15, 13, 34, 0.58), rgba(4, 5, 18, 0.44));
   box-shadow: 0 14px 40px rgba(0, 0, 0, 0.3), 0 0 22px rgba(255, 210, 92, 0.12);
-  font-size: clamp(20px, 2.7vw, 38px);
-  line-height: 1.18;
+  --text-underlay-x: -4px;
+  --text-underlay-y: 4px;
+  font-size: 32px;
+  line-height: 38px;
   text-transform: uppercase;
-  letter-spacing: 1.4px;
+  letter-spacing: 1px;
 }
 
 @keyframes messageSlideIn {
@@ -559,14 +680,15 @@ body.window-dragging {
   letter-spacing: 1px;
   text-transform: uppercase;
   text-decoration: underline;
-  text-underline-offset: 3px;
+  text-underline-offset: 5px;
+  text-decoration-thickness: 3px;
 }
 
 #controls-body {
   margin: 0;
   color: rgba(255, 255, 255, 0.82);
-  font-size: 17px;
-  line-height: 1.6;
+  font-size: 16px;
+  line-height: 26px;
 }
 
 .gameover-card {
@@ -611,7 +733,7 @@ body.window-dragging {
   display: flex;
   align-items: center;
   justify-content: center;
-  line-height: 1;
+  line-height: 16px;
 }
 
 #controls-close-button:hover {

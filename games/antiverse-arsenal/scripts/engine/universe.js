@@ -78,7 +78,8 @@ class Universe {
     this.element.style.height = `${this.cssHeight + this.cssHeader}px`;
     this.header.style.height = `${this.cssHeader}px`;
     this.header.style.lineHeight = `${this.cssHeader}px`;
-    this.header.style.fontSize = `${Math.max(10, 14 * this.scale)}px`;
+    const headerFontSize = Math.max(16, Math.round((16 * this.scale) / 16) * 16);
+    this.header.style.fontSize = `${headerFontSize}px`;
     this.canvas.style.top = `${this.cssHeader}px`;
     this.canvas.style.left = '0px';
     this.canvas.style.width = `${this.cssWidth}px`;

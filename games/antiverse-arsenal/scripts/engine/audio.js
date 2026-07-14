@@ -6,7 +6,8 @@ const SOUND_EFFECTS = {
   laserBeam: 'assets/audio/sfx/laserShoot.wav',
   phaseDash: 'assets/audio/sfx/phaseDash.wav',
   powerupSelect: 'assets/audio/sfx/powerupSelect.wav',
-  shoot: 'assets/audio/sfx/shoot.wav'
+  shoot: 'assets/audio/sfx/shoot.wav',
+  warp: 'assets/audio/sfx/warp.wav'
 };
 
 const SOUND_DEFAULTS = {
@@ -16,7 +17,8 @@ const SOUND_DEFAULTS = {
   laserBeam: { volume: 0.3, poolSize: 3, pitchRange: [0.8, 1.2] },
   phaseDash: { volume: 0.3, poolSize: 3, pitchRange: [0.8, 1.2] },
   powerupSelect: { volume: 0.6, poolSize: 3, pitchRange: [0.8, 1.2] },
-  shoot: { volume: 0.1, poolSize: 8, pitchRange: [0.7, 1.2] }
+  shoot: { volume: 0.1, poolSize: 8, pitchRange: [0.7, 1.2] },
+  warp: { volume: 0.1, poolSize: 3, pitchRange: [1.0, 1.2] }
 };
 
 class SoundManager {

@@ -4,9 +4,10 @@ let gameText = DEFAULT_GAME_TEXT;
 
 function formatText(key, placeholders = {}) {
   const template = gameText[key] ?? DEFAULT_GAME_TEXT[key] ?? key;
-  return template.replace(/%([a-zA-Z0-9_]+)%/g, (match, name) => (
+  const formatted = template.replace(/%([a-zA-Z0-9_]+)%/g, (match, name) => (
     Object.prototype.hasOwnProperty.call(placeholders, name) ? String(placeholders[name]) : match
   ));
+  return formatted;
 }
 
 async function loadGameText() {

@@ -1215,6 +1215,13 @@ class Game {
     return explosion;
   }
 
+  spawnWarpParticles(universe, x, y, options = {}) {
+    if (!universe) return null;
+    const burst = new WarpParticleFX(this, universe, x, y, options);
+    this.explosions.push(burst);
+    return burst;
+  }
+
   async createFreshRoundUniverse() {
     for (const universe of [...this.universes]) universe.element.remove();
     this.universes = [];
@@ -1536,12 +1543,6 @@ class Game {
     const hullRatio = clamp(this.hp / MAX_PLAYER_HULL, 0, 1);
     hullValue.textContent = `${this.hp}/${MAX_PLAYER_HULL}`;
 
-    if (hullGauge) {
-      hullGauge.style.setProperty('--hull-ratio', hullRatio.toFixed(3));
-      hullGauge.classList.toggle('hull-warning', hullRatio > 0.25 && hullRatio <= 0.5);
-      hullGauge.classList.toggle('hull-critical', hullRatio <= 0.25);
-    }
-
     if (hullGaugeNeedle) {
       hullGaugeNeedle.style.transform = `translateX(-50%) rotate(${-90 + hullRatio * 180}deg)`;
     }
@@ -1555,10 +1556,39 @@ class Game {
       incursionValue.textContent = formatText('hud.incursions', { value: this.roundIncursionTotal > 0 ? `${deployed}/${this.roundIncursionTotal}` : formatText('status.none') });
     }
 
+    if (playerHud) {
+      if (this.player?.universe) {
+        if (playerHud.parentElement !== this.player.universe.element) {
+          this.player.universe.element.appendChild(playerHud);
+        }
+        playerHud.style.visibility = 'visible';
+      } else {
+        playerHud.style.visibility = 'hidden';
+      }
+    }
+
+    const setAbilityCooldown = (element, label, cooldown, maxCooldown, activeLabel = null) => {
+      const ready = cooldown <= 0 && !activeLabel;
+      const ratio = activeLabel ? 1 : 1 - clamp(cooldown / maxCooldown, 0, 1);
+
+      if (element) {
+        element.style.setProperty('--cooldown-ratio', ratio.toFixed(3));
+        element.dataset.ready = String(ready);
+      }
+
+      if (label) {
+        label.textContent = activeLabel || (ready ? formatText('status.ready') : `${cooldown.toFixed(1)}s`);
+      }
+    };
+
     const warp = this.player ? this.player.warpCooldown : 0;
-    warpValue.textContent = formatText('hud.warp', { value: warp <= 0 ? formatText('status.ready') : `${warp.toFixed(1)}s` });
-    const dashCooldown = this.player ? this.player.dashCooldown : 0;
-    dashValue.textContent = formatText('hud.dash', { value: this.player?.dashing ? formatText('status.dashing') : (dashCooldown <= 0 ? formatText('status.ready') : `${dashCooldown.toFixed(1)}s`) });
+    setAbilityCooldown(warpCooldown, warpValue, warp, 3.5);
+
+    const dashTime = this.player ? this.player.dashCooldown : 0;
+    setAbilityCooldown(dashCooldown, dashValue, dashTime, DASH_COOLDOWN, this.player?.dashing ? formatText('status.dashing') : null);
+
+    const laserTime = this.laserCooldown || 0;
+    setAbilityCooldown(laserCooldown, laserValue, laserTime, LASER_COOLDOWN, this.laserCharging ? formatText('status.locking') : null);
   }
 
   gameOver() {

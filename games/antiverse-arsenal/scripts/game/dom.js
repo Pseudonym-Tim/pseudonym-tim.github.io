@@ -1,5 +1,6 @@
 // DOM handles...
 const container = document.getElementById('game-container');
+const playerHud = document.getElementById('player-hud');
 const hullValue = document.getElementById('hull-label');
 const hullGauge = document.getElementById('hull-gauge');
 const hullGaugeNeedle = document.getElementById('hull-gauge-needle');
@@ -11,6 +12,10 @@ const nextUniverseValue = document.getElementById('next-universe-label');
 const incursionValue = document.getElementById('incursion-label');
 const warpValue = document.getElementById('warp-label');
 const dashValue = document.getElementById('dash-label');
+const laserValue = document.getElementById('laser-label');
+const dashCooldown = document.getElementById('dash');
+const warpCooldown = document.getElementById('warp');
+const laserCooldown = document.getElementById('laser');
 const spawnTimerValue = document.getElementById('spawn-timer');
 const spawnBanner = document.getElementById('spawn-banner');
 const focusOverlay = document.getElementById('focus-overlay');

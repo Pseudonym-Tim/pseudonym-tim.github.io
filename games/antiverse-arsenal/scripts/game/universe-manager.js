@@ -1,9 +1,7 @@
 // Universe window management...
 Object.assign(Game.prototype, {
   computeScale() {
-    // Scale from a crusty 640x480 target so the whole antiverse circus fits on normal screens...
-    // Smaller screens get squeezed instead of detonating the layout...
-    return computeViewportScale(1920, 1080, 0.46, 1.05);
+    return 1;
   },
 
   createUniverseThemes() {
