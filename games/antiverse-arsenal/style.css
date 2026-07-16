@@ -300,7 +300,7 @@ body.window-dragging {
 
 .player-hud-cooldowns {
   display: flex;
-  gap: 4px;
+  gap: 15px;
   align-items: center;
   opacity: 1;
 }
@@ -744,6 +744,7 @@ body.window-dragging {
 
 .universe.collision-nudged {
   border-color: var(--gold);
+  transition: border-color 90ms ease-out, transform 80ms ease-out;
 }
 
 .aim-overlay {

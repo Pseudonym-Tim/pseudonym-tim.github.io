@@ -17,6 +17,7 @@ class Game {
     this.dragTilt = 0;
     this.dragTiltTarget = 0;
     this.dragLastMouseX = 0;
+    this.dragLastMouseY = 0;
     this.dragLastMoveTime = 0;
     this.timeScale = 1;
     this.laserCharging = false;
@@ -176,7 +177,6 @@ class Game {
       if (collisionShapesOverlap(dashShape, entityCollisionShape(asteroid))) {
         hitSet.add(asteroid);
         asteroid.takeDamage(DASH_DAMAGE, 1);
-        this.addFloatingText(universe, asteroid.x, asteroid.y - 12, formatText('float.dashDamage', { damage: DASH_DAMAGE }), '#72f7ff');
       }
     }
 
@@ -187,7 +187,6 @@ class Game {
       if (collisionShapesOverlap(dashShape, entityCollisionShape(enemy))) {
         hitSet.add(enemy);
         enemy.takeDamage(DASH_DAMAGE, 1);
-        this.addFloatingText(universe, enemy.x, enemy.y - 16, formatText('float.dashDamage', { damage: DASH_DAMAGE }), '#72f7ff');
       }
     }
   }
@@ -1159,8 +1158,7 @@ class Game {
       enemy.universe,
       enemy.x,
       enemy.y - 14,
-      '#fff3a3',
-      formatText('float.hit')
+      '#fff3a3'
     );
   }
 
@@ -1178,7 +1176,7 @@ class Game {
       return;
     }
     const multiplier = Math.max(1, enemy.killMultiplier || 1);
-    this.awardPoints(ENEMY_SCORE, multiplier, enemy.universe, enemy.x, enemy.y + 8, '#ffd25c', formatText('float.destroy'));
+    this.awardPoints(ENEMY_SCORE, multiplier, enemy.universe, enemy.x, enemy.y + 8, '#ffd25c');
     this.tryEndRoundFromThreats();
   }
 
@@ -1471,7 +1469,9 @@ class Game {
 
   addFloatingText(universe, x, y, text, color = '#ffd25c') {
     if (!universe) return;
-    this.floatingTexts.push(new FloatingText(this, universe, x, y, text, color));
+    const floatingText = new FloatingText(this, universe, x, y, text, color);
+    floatingText.avoidOverlaps(this.floatingTexts);
+    this.floatingTexts.push(floatingText);
   }
 
   showMessage(text, duration = 1000) {

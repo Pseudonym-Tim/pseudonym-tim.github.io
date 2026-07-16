@@ -117,6 +117,7 @@ class Player {
     this.velY = this.dashDirY * DASH_SPEED;
     this.angle = Math.atan2(this.dashDirY, this.dashDirX);
     this.roll = 0;
+    this.game.addFloatingText(this.universe, this.x, this.y - 16, formatText('float.dash'), '#72f7ff');
     return true;
   }
 

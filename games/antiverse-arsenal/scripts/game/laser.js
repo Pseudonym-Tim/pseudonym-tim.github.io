@@ -106,7 +106,8 @@ Object.assign(Game.prototype, {
       hitEnemies.add(lock.enemy);
       lock.enemy.takeDamage(LASER_DAMAGE, 1 + lock.wraps);
       this.onEnemyHit(lock.enemy, 1 + lock.wraps);
-      this.addFloatingText(lock.universe, lock.enemy.x, lock.enemy.y - 18, formatText('float.laser', { wraps: lock.wraps }), '#ff4df0');
+      const laserText = lock.wraps > 0 ? formatText('float.laserWraps', { wraps: lock.wraps }) : formatText('float.laser');
+      this.addFloatingText(lock.universe, lock.enemy.x, lock.enemy.y - 18, laserText, '#ff4df0');
     }
 
     for (const segment of plan.segments) {

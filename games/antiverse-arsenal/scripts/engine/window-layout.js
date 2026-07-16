@@ -46,38 +46,61 @@ function findOpenWindowPosition(frames, width, height, padding = 10, attempts = 
   return { x: best?.x ?? padding, y: best?.y ?? padding };
 }
 
-function pushWindowAway(movable, obstacle, frames, padding = 8, anchor = null) {
+function getWindowPushCandidate(movable, movingRect, obstacleRect, padding, dx, dy) {
+  const left = obstacleRect.x - padding - (movingRect.x + movingRect.w);
+  const right = obstacleRect.x + obstacleRect.w + padding - movingRect.x;
+  const up = obstacleRect.y - padding - (movingRect.y + movingRect.h);
+  const down = obstacleRect.y + obstacleRect.h + padding - movingRect.y;
+
+  const candidates = [
+    { x: left, y: 0, axis: 'x' },
+    { x: right, y: 0, axis: 'x' },
+    { x: 0, y: up, axis: 'y' },
+    { x: 0, y: down, axis: 'y' }
+  ].filter((candidate) => Math.abs(candidate.x) > 0.001 || Math.abs(candidate.y) > 0.001);
+
+  if (!candidates.length) return null;
+
+  const preferred = normalizeVector(dx, dy);
+  const movingCenterX = movingRect.x + movingRect.w / 2;
+  const movingCenterY = movingRect.y + movingRect.h / 2;
+  const obstacleCenterX = obstacleRect.x + obstacleRect.w / 2;
+  const obstacleCenterY = obstacleRect.y + obstacleRect.h / 2;
+
+  return candidates.reduce((best, candidate) => {
+    const distance = Math.hypot(candidate.x, candidate.y);
+    const direction = normalizeVector(candidate.x, candidate.y) || { x: 0, y: 0 };
+    const followsPush = preferred ? Math.max(0, direction.x * preferred.x + direction.y * preferred.y) : 0;
+    const separatesCenters = Math.max(0, direction.x * Math.sign(movingCenterX - obstacleCenterX) + direction.y * Math.sign(movingCenterY - obstacleCenterY));
+    const axisPenalty = preferred && ((candidate.axis === 'x') !== (Math.abs(preferred.x) >= Math.abs(preferred.y))) ? 6 : 0;
+    const score = distance - followsPush * 24 - separatesCenters * 3 + axisPenalty;
+    return !best || score < best.score ? { ...candidate, score } : best;
+  }, null);
+}
+
+function pushWindowAway(movable, obstacle, _frames, padding = 8, _anchor = null, pushDirection = null) {
   const movingRect = movable.getRect();
   const obstacleRect = obstacle.getRect();
   if (!rectsOverlap(movingRect, obstacleRect, padding)) return false;
 
-  const candidates = [
-    { x: obstacleRect.x - padding - movingRect.w, y: movable.y },
-    { x: obstacleRect.x + obstacleRect.w + padding, y: movable.y },
-    { x: movable.x, y: obstacleRect.y - padding - movingRect.h },
-    { x: movable.x, y: obstacleRect.y + obstacleRect.h + padding }
-  ];
+  const centerDx = (movingRect.x + movingRect.w / 2) - (obstacleRect.x + obstacleRect.w / 2);
+  const centerDy = (movingRect.y + movingRect.h / 2) - (obstacleRect.y + obstacleRect.h / 2);
+  const candidate = getWindowPushCandidate(
+    movable,
+    movingRect,
+    obstacleRect,
+    padding,
+    pushDirection?.x ?? centerDx,
+    pushDirection?.y ?? centerDy
+  );
+  if (!candidate) return false;
 
-  let best = null;
+  const stepX = candidate.x;
+  const stepY = candidate.y;
+  const pos = getClampedWindowPosition(movable, movable.x + stepX, movable.y + stepY);
 
-  for (const candidate of candidates) {
-    const pos = getClampedWindowPosition(movable, candidate.x, candidate.y);
-    const rect = { x: pos.x, y: pos.y, w: movingRect.w, h: movingRect.h };
-    let overlap = 0;
-
-    for (const frame of frames) {
-      if (frame === movable) continue;
-      const weight = frame === anchor ? 6 : 1;
-      overlap += getWindowOverlapArea(rect, frame.getRect(), padding) * weight;
-    }
-
-    const distance = Math.hypot(pos.x - movable.x, pos.y - movable.y);
-    const score = overlap * 100000 + distance;
-    if (!best || score < best.score) best = { ...pos, score, overlap };
-  }
-
-  if (!best || (Math.abs(best.x - movable.x) < 0.01 && Math.abs(best.y - movable.y) < 0.01)) return false;
-  movable.setPosition(best.x, best.y);
+  if (Math.abs(pos.x - movable.x) < 0.01 && Math.abs(pos.y - movable.y) < 0.01) return false;
+  movable.setPosition(pos.x, pos.y);
   return true;
 }
 

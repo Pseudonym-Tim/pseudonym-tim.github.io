@@ -111,6 +111,7 @@ Object.assign(Game.prototype, {
     this.dragTilt = 0;
     this.dragTiltTarget = 0;
     this.dragLastMouseX = e.clientX;
+    this.dragLastMouseY = e.clientY;
     this.dragLastMoveTime = performance.now();
     universe.element.style.setProperty('--drag-tilt', '0deg');
     universe.element.style.zIndex = 4;
@@ -123,8 +124,8 @@ Object.assign(Game.prototype, {
     return getClampedWindowPosition(universe, x, y);
   },
 
-  pushUniverseAway(movable, obstacle, padding = 8, anchor = null) {
-    const moved = pushWindowAway(movable, obstacle, this.universes, padding, anchor);
+  pushUniverseAway(movable, obstacle, padding = 8, anchor = null, pushDirection = null) {
+    const moved = pushWindowAway(movable, obstacle, this.universes, padding, anchor, pushDirection);
     if (!moved) return false;
 
     movable.element.classList.add('collision-nudged');
@@ -138,7 +139,7 @@ Object.assign(Game.prototype, {
     return true;
   },
 
-  resolveDraggedUniverseCollisions(anchor) {
+  resolveDraggedUniverseCollisions(anchor, dragDelta = null) {
     const padding = Math.max(6, 9 * this.scale);
     const maxIterations = 36;
     const anchorRect = () => anchor.getRect();
@@ -150,7 +151,7 @@ Object.assign(Game.prototype, {
       for (const other of this.universes) {
         if (other === anchor) continue;
         if (rectsOverlap(anchorRect(), other.getRect(), padding)) {
-          moved = this.pushUniverseAway(other, anchor, padding, anchor) || moved;
+          moved = this.pushUniverseAway(other, anchor, padding, anchor, dragDelta) || moved;
         }
       }
 
@@ -173,11 +174,60 @@ Object.assign(Game.prototype, {
           const bDistance = distSq(bCenter.x, bCenter.y, anchorCenter.x, anchorCenter.y);
           const movable = aDistance >= bDistance ? a : b;
           const obstacle = movable === a ? b : a;
-          moved = this.pushUniverseAway(movable, obstacle, padding, anchor) || moved;
+          const dx = movable.x - obstacle.x;
+          const dy = movable.y - obstacle.y;
+          moved = this.pushUniverseAway(movable, obstacle, padding, anchor, { x: dx, y: dy }) || moved;
         }
       }
 
       if (!moved) break;
+    }
+  },
+
+  correctDraggedUniverseOverlap(anchor, axis, delta, padding) {
+    if (Math.abs(delta) < 0.001) return false;
+
+    const anchorRect = anchor.getRect();
+    let x = anchor.x;
+    let y = anchor.y;
+
+    for (const other of this.universes) {
+      if (other === anchor) continue;
+      const otherRect = other.getRect();
+      if (!rectsOverlap(anchorRect, otherRect, padding)) continue;
+
+      if (axis === 'x') {
+        if (delta > 0) x = Math.min(x, otherRect.x - padding - anchorRect.w);
+        else x = Math.max(x, otherRect.x + otherRect.w + padding);
+      } else if (delta > 0) {
+        y = Math.min(y, otherRect.y - padding - anchorRect.h);
+      } else {
+        y = Math.max(y, otherRect.y + otherRect.h + padding);
+      }
+    }
+
+    const corrected = this.getClampedUniversePosition(anchor, x, y);
+    if (Math.abs(corrected.x - anchor.x) < 0.01 && Math.abs(corrected.y - anchor.y) < 0.01) return false;
+
+    anchor.setPosition(corrected.x, corrected.y);
+    return true;
+  },
+
+  moveDraggedUniverseAxis(anchor, axis, delta) {
+    if (Math.abs(delta) < 0.001) return;
+
+    const padding = Math.max(6, 9 * this.scale);
+    const pushDirection = axis === 'x' ? { x: delta, y: 0 } : { x: 0, y: delta };
+    const target = axis === 'x'
+      ? this.getClampedUniversePosition(anchor, anchor.x + delta, anchor.y)
+      : this.getClampedUniversePosition(anchor, anchor.x, anchor.y + delta);
+
+    anchor.setPosition(target.x, target.y);
+    this.resolveDraggedUniverseCollisions(anchor, pushDirection);
+
+    // If the chain can't move far enough, just stop at the contact edge instead of overlapping...
+    if (this.correctDraggedUniverseOverlap(anchor, axis, delta, padding)) {
+      this.resolveDraggedUniverseCollisions(anchor, pushDirection);
     }
   },
 
@@ -187,13 +237,16 @@ Object.assign(Game.prototype, {
 
     const now = performance.now();
     const elapsedMs = clamp(now - this.dragLastMoveTime, 8, 50);
-    const horizontalSpeed = (e.clientX - this.dragLastMouseX) / elapsedMs;
-    this.dragTiltTarget = clamp(horizontalSpeed * 5, -7, 7);
+    const dragDelta = { x: e.clientX - this.dragLastMouseX, y: e.clientY - this.dragLastMouseY };
+    const horizontalSpeed = dragDelta.x / elapsedMs;
+    this.dragTiltTarget = clamp(horizontalSpeed * 4, -5, 5);
     this.dragLastMouseX = e.clientX;
+    this.dragLastMouseY = e.clientY;
     this.dragLastMoveTime = now;
 
-    u.setPosition(e.clientX - this.dragOffsetX, e.clientY - this.dragOffsetY);
-    this.resolveDraggedUniverseCollisions(u);
+    const target = this.getClampedUniversePosition(u, e.clientX - this.dragOffsetX, e.clientY - this.dragOffsetY);
+    this.moveDraggedUniverseAxis(u, 'x', target.x - u.x);
+    this.moveDraggedUniverseAxis(u, 'y', target.y - u.y);
   },
 
   updateDragTilt(dt) {
@@ -225,10 +278,10 @@ Object.assign(Game.prototype, {
     this.dragTilt = 0;
     this.dragTiltTarget = 0;
     this.dragLastMouseX = 0;
+    this.dragLastMouseY = 0;
     this.dragLastMoveTime = 0;
     document.body.classList.remove('window-dragging');
     this.timeScale = 1;
     this.clearMovementInput();
-    this.resolveUniverseLayoutIfNeeded();
   }
 });

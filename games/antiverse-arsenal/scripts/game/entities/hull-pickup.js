@@ -26,19 +26,46 @@ class HullPickup {
   }
 
   draw(ctx) {
-    const pulse = 1 + Math.sin(this.age * 3.5) * 0.08;
-    const glow = 0.55 + Math.sin(this.age * 2.7) * 0.15;
+    const pulse = 0.2 + Math.sin(this.age * 3) * 0.3;
+
     ctx.save();
     ctx.translate(this.x, this.y);
 
-    ctx.globalAlpha = 0.2 + glow * 0.22;
-    ctx.fillStyle = '#72f7ff';
+    ctx.globalCompositeOperation = 'lighter';
+
+    const glowRadius = this.radius + 13 + pulse * 7;
+    
+    const gradient = ctx.createRadialGradient(
+      0, 0, this.radius * 0.25,
+      0, 0, glowRadius
+    );
+
+    gradient.addColorStop(
+      0,
+      `rgba(180, 255, 255, ${0.65 + pulse * 0.2})`
+    );
+    gradient.addColorStop(
+      0.35,
+      `rgba(114, 247, 255, ${0.4 + pulse * 0.2})`
+    );
+
+    gradient.addColorStop(
+      0.7,
+      `rgba(60, 210, 255, ${0.18 + pulse * 0.12})`
+    );
+
+    gradient.addColorStop(1, 'rgba(60, 210, 255, 0)');
+
+    ctx.fillStyle = gradient;
     ctx.beginPath();
-    ctx.arc(0, 0, this.radius + 15, 0, Math.PI * 2);
+    ctx.arc(0, 0, glowRadius, 0, Math.PI * 2);
     ctx.fill();
+
+    ctx.globalCompositeOperation = 'source-over';
     ctx.globalAlpha = 1;
-    ctx.scale(pulse, pulse);
-    drawPixelArt(ctx, pixelArt.hullPickup, this.radius * 2.0, { time: this.game.spriteClock });
+
+    drawPixelArt(ctx, pixelArt.hullPickup, this.radius * 2, { time: this.game.spriteClock });
+
     ctx.restore();
   }
 }
