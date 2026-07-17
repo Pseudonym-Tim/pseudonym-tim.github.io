@@ -38,7 +38,9 @@ class Universe {
         return;
       }
 
-      if (e.button !== 0) return;
+      if (e.button !== 0) {
+        return;
+      }
 
       e.preventDefault();
       this.game.startDraggingUniverse(this, e);
@@ -93,11 +95,7 @@ class Universe {
   warpToPointer(e) {
     const rect = this.getCanvasRect();
 
-    if (e.clientX < rect.x ||
-      e.clientX > rect.x + rect.w ||
-      e.clientY < rect.y ||
-      e.clientY > rect.y + rect.h
-    ) {
+    if (e.clientX < rect.x || e.clientX > rect.x + rect.w || e.clientY < rect.y || e.clientY > rect.y + rect.h) {
       return;
     }
 
@@ -119,7 +117,7 @@ class Universe {
     this.element.classList.remove('damage-shake');
     void this.element.offsetWidth;
     this.element.classList.add('damage-shake');
-    
+
     this.damageShakeTimeout = setTimeout(() => {
       this.element.classList.remove('damage-shake');
       this.damageShakeTimeout = null;
@@ -135,23 +133,20 @@ class Universe {
   }
 
   localToWorld(x, y) {
-    return {
-      x: this.x + x * this.scale,
-      y: this.y + this.cssHeader + y * this.scale
-    };
+    return { x: this.x + x * this.scale, y: this.y + this.cssHeader + y * this.scale };
   }
 
   worldToLocal(x, y) {
-    return {
-      x: (x - this.x) / this.scale,
-      y: (y - this.y - this.cssHeader) / this.scale
-    };
+    return { x: (x - this.x) / this.scale, y: (y - this.y - this.cssHeader) / this.scale };
   }
 
   update(dt) {
     for (let i = this.enemies.length - 1; i >= 0; i--) {
       const enemy = this.enemies[i];
-      if (!enemy.dead) enemy.update(dt);
+      
+      if (!enemy.dead) {
+        enemy.update(dt);
+      }
 
       if (enemy.dead) {
         this.enemies.splice(i, 1);
@@ -167,11 +162,18 @@ class Universe {
 
     for (let i = this.asteroids.length - 1; i >= 0; i--) {
       const asteroid = this.asteroids[i];
-      if (!asteroid.dead) asteroid.update(dt);
+
+      if (!asteroid.dead) {
+        asteroid.update(dt);
+      }
 
       if (asteroid.dead) {
         this.asteroids.splice(i, 1);
-        if (!asteroid.expired) this.game.onAsteroidDestroyed(asteroid);
+
+        if (!asteroid.expired) {
+          this.game.onAsteroidDestroyed(asteroid);
+        }
+
         continue;
       }
 
@@ -184,7 +186,10 @@ class Universe {
     for (let i = this.hullPickups.length - 1; i >= 0; i--) {
       const pickup = this.hullPickups[i];
       pickup.update(dt);
-      if (pickup.collected) this.hullPickups.splice(i, 1);
+
+      if (pickup.collected) {
+        this.hullPickups.splice(i, 1);
+      }
     }
   }
 
@@ -193,11 +198,8 @@ class Universe {
     ctx.clearRect(0, 0, this.width, this.height);
 
     const hueShift = this.theme.hue;
-    
-    if (!drawPixelArtTiled(ctx, pixelArt.universeBackground, 0, 0, this.width, this.height, {
-      time: this.game.spriteClock + this.id * 0.19,
-      scale: UNIVERSE_BACKGROUND_TILE_SCALE
-    })) {
+
+    if (!drawPixelArtTiled(ctx, pixelArt.universeBackground, 0, 0, this.width, this.height, { time: this.game.spriteClock + this.id * 0.19, scale: UNIVERSE_BACKGROUND_TILE_SCALE })) {
       ctx.fillStyle = '#020617';
       ctx.fillRect(0, 0, this.width, this.height);
     }
@@ -227,8 +229,16 @@ class Universe {
     }
 
     // Hull pickups render beneath asteroids so rocks can pass visibly over them...
-    for (const pickup of this.hullPickups) pickup.draw(ctx);
-    for (const asteroid of this.asteroids) asteroid.draw(ctx);
-    for (const enemy of this.enemies) enemy.draw(ctx);
+    for (const pickup of this.hullPickups) {
+      pickup.draw(ctx);
+    }
+
+    for (const asteroid of this.asteroids) {
+      asteroid.draw(ctx);
+    }
+
+    for (const enemy of this.enemies) {
+      enemy.draw(ctx);
+    }
   }
 }

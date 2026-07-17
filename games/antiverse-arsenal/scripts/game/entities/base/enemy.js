@@ -69,7 +69,7 @@ class Enemy extends Damageable {
 
     this.velX += this.avoidanceX * accel * 1.45 * dt;
     this.velY += this.avoidanceY * accel * 1.45 * dt;
-    
+
     const speed = Math.hypot(this.velX, this.velY);
     const maxSpeed = this.maxSpeed + this.game.round * this.maxSpeedPerRound;
 
@@ -103,16 +103,9 @@ class Enemy extends Damageable {
     const them = player.universe.localToWorld(player.x, player.y);
     const angle = Math.atan2(them.y - me.y, them.x - me.x) + angleOffset;
 
-    this.game.spawnBullet(
-      this.universe,
-      this.x + Math.cos(angle) * this.radius,
-      this.y + Math.sin(angle) * this.radius,
-      Math.cos(angle) * speed + this.velX * 0.2,
-      Math.sin(angle) * speed + this.velY * 0.2,
-      'enemy',
-      1,
-      { maxWraps }
-    );
+    // Passing the entire known universe as arguments...
+    // BUT THAT'S TOTALLY OKAY BECAUSE THIS IS A NICE LITTLE WRAPPER FUNCTION, RIGHT?
+    this.game.spawnBullet(this.universe, this.x + Math.cos(angle) * this.radius, this.y + Math.sin(angle) * this.radius, Math.cos(angle) * speed + this.velX * 0.2, Math.sin(angle) * speed + this.velY * 0.2, 'enemy', 1, { maxWraps });
   }
 
   getEnemyAvoidance() {
@@ -122,12 +115,16 @@ class Enemy extends Damageable {
     let pushY = 0;
 
     for (const other of this.universe.enemies) {
-      if (other === this || other.dead || other.expired) continue;
+      if (other === this || other.dead || other.expired) {
+        continue;
+      }
 
       const dx = this.x - other.x;
       const dy = this.y - other.y;
       const dSq = dx * dx + dy * dy;
-      if (dSq >= desiredSpacingSq) continue;
+      if (dSq >= desiredSpacingSq) {
+        continue;
+      }
 
       if (dSq <= 0.0001) {
         pushX += Math.cos(this.angle) * 0.35;
@@ -162,15 +159,13 @@ class Enemy extends Damageable {
 
   drawShip(ctx) {
     const sprite = this.sprite?.ready ? this.sprite : pixelArt.enemyNormal;
-    drawPixelArt(ctx, sprite, this.radius * 3.1, {
-      time: this.game.spriteClock,
-      scale: this.spriteScale,
-      flashAlpha: this.getDamageFlashAlpha()
-    });
+    drawPixelArt(ctx, sprite, this.radius * 3.1, { time: this.game.spriteClock, scale: this.spriteScale, flashAlpha: this.getDamageFlashAlpha() });
   }
 
   drawHealthBar(ctx) {
-    if (this.healthBarTimer <= 0 || this.hp <= 0 || this.hp >= this.maxHp) return;
+    if (this.healthBarTimer <= 0 || this.hp <= 0 || this.hp >= this.maxHp) {
+      return;
+    }
 
     const alpha = clamp(this.healthBarTimer / 0.55, 0, 1);
     const width = 32;

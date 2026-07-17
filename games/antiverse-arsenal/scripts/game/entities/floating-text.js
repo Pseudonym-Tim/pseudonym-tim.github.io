@@ -1,4 +1,3 @@
-
 class FloatingText {
   constructor(game, universe, x, y, text, color = '#ffd25c') {
     this.game = game;
@@ -19,11 +18,16 @@ class FloatingText {
     this.x += this.velX * dt;
     this.y += this.velY * dt;
     this.velY += 16 * dt;
-    if (this.age >= this.life) this.dead = true;
+    if (this.age >= this.life) {
+      this.dead = true;
+    }
   }
 
   draw() {
-    if (!this.universe || !this.universesIncludes()) return;
+    if (!this.universe || !this.universesIncludes()) {
+      return;
+    }
+
     const ctx = this.universe.ctx;
     const t = clamp(this.age / this.life, 0, 1);
     ctx.save();
@@ -43,17 +47,15 @@ class FloatingText {
   getBounds(x = this.x, y = this.y) {
     const width = this.measureWidth();
     const height = FloatingText.FONT_SIZE;
-    return {
-      left: x - width / 2,
-      right: x + width / 2,
-      top: y - height / 2,
-      bottom: y + height / 2
-    };
+    return { left: x - width / 2, right: x + width / 2, top: y - height / 2, bottom: y + height / 2 };
   }
 
   measureWidth() {
     const ctx = this.universe?.ctx;
-    if (!ctx) return this.text.length * FloatingText.FONT_SIZE;
+    if (!ctx) {
+      return this.text.length * FloatingText.FONT_SIZE;
+    }
+
     ctx.save();
     ctx.font = `${FloatingText.FONT_SIZE}px "Press Start 2P", "Lucida Console", monospace`;
     const width = ctx.measureText(this.text).width;
@@ -70,7 +72,9 @@ class FloatingText {
 
   avoidOverlaps(existingTexts) {
     const nearbyTexts = existingTexts.filter((text) => text.universe === this.universe && !text.dead);
-    if (!nearbyTexts.length) return;
+    if (!nearbyTexts.length) {
+      return;
+    }
 
     const originalY = this.y;
     const step = FloatingText.FONT_SIZE + FloatingText.OVERLAP_PADDING;

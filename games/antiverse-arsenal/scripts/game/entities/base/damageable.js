@@ -24,7 +24,10 @@ class Damageable {
   }
 
   takeDamage(amount, multiplier = 1) {
-    if (this.dead) return;
+    if (this.dead) {
+      return;
+    }
+
     this.hp -= amount;
     this.game.sound.play('hitHurt');
 
@@ -34,8 +37,7 @@ class Damageable {
     if (this.hp <= 0) {
       this.hp = 0;
 
-      if (this instanceof Asteroid)
-      {
+      if (this instanceof Asteroid) {
         this.game.sound.play('explosion');
       }
 
@@ -62,8 +64,10 @@ class Damageable {
     this.prevY = this.y;
     this.x += this.velX * dt;
     this.y += this.velY * dt;
+
     if (this.offscreenEntryTimer > 0) {
       this.offscreenEntryTimer = Math.max(0, this.offscreenEntryTimer - dt);
+      
       if (this.x >= this.radius && this.x <= LOGICAL_W - this.radius && this.y >= this.radius && this.y <= LOGICAL_H - this.radius) {
         this.offscreenEntryTimer = 0;
       }

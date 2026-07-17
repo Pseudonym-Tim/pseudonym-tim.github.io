@@ -4,16 +4,17 @@ let gameText = DEFAULT_GAME_TEXT;
 
 function formatText(key, placeholders = {}) {
   const template = gameText[key] ?? DEFAULT_GAME_TEXT[key] ?? key;
-  const formatted = template.replace(/%([a-zA-Z0-9_]+)%/g, (match, name) => (
-    Object.prototype.hasOwnProperty.call(placeholders, name) ? String(placeholders[name]) : match
-  ));
+  const formatted = template.replace(/%([a-zA-Z0-9_]+)%/g, (match, name) => (Object.prototype.hasOwnProperty.call(placeholders, name) ? String(placeholders[name]) : match));
   return formatted;
 }
 
 async function loadGameText() {
   try {
     const response = await fetch('assets/text.json', { cache: 'no-store' });
-    if (!response.ok) throw new Error(`Unable to load text.json: ${response.status}`);
+    if (!response.ok) {
+      throw new Error(`Unable to load text.json: ${response.status}`);
+    }
+
     gameText = await response.json();
   } catch (error) {
     console.error(error);

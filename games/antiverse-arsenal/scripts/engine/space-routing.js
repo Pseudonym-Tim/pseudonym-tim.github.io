@@ -4,7 +4,10 @@ function findRaycastFrame(frames, worldX, worldY, direction, exclude = null, min
   let bestT = Infinity;
 
   for (const frame of frames) {
-    if (frame === exclude) continue;
+    if (frame === exclude) {
+      continue;
+    }
+
     const rect = frame.getCanvasRect();
     const hit = rayEnterRect({ x: worldX, y: worldY }, direction, rect, minT);
 
@@ -22,7 +25,10 @@ function findNearestFrame(frames, worldX, worldY, exclude = null) {
   let bestDistance = Infinity;
 
   for (const frame of frames) {
-    if (frame === exclude) continue;
+    if (frame === exclude) {
+      continue;
+    }
+
     const rect = frame.getCanvasRect();
     const closest = closestPointToRect(worldX, worldY, rect);
     const d = distSq(worldX, worldY, closest.x, closest.y);

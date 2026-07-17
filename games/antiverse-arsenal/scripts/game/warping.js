@@ -1,12 +1,21 @@
 // Aiming, wrapping, and warping behavior...
 Object.assign(Game.prototype, {
   getMouseAimAngle() {
-    if (!this.player?.universe) return null;
-    const origin = this.player.universe.localToWorld(this.player.x, this.player.y);
-    const dx = this.mouseX - origin.x;
-    const dy = this.mouseY - origin.y;
-    if (Math.hypot(dx, dy) < 2) return null;
-    return worldAngleToLocal(Math.atan2(dy, dx), this.player.universe);
+    const { player, mouseX, mouseY } = this;
+    
+    if (!player?.universe) {
+      return null;
+    }
+
+    const origin = player.universe.localToWorld(player.x, player.y);
+    const dx = mouseX - origin.x;
+    const dy = mouseY - origin.y;
+
+    if (Math.hypot(dx, dy) < 2) {
+      return null;
+    }
+
+    return worldAngleToLocal(Math.atan2(dy, dx), player.universe);
   },
 
   wrapEntity(entity, options = {}) {
@@ -19,12 +28,21 @@ Object.assign(Game.prototype, {
       const hitHorizontalWall = clampedX !== entity.x;
       const hitVerticalWall = clampedY !== entity.y;
 
-      if (!hitHorizontalWall && !hitVerticalWall) return false;
+      if (!hitHorizontalWall && !hitVerticalWall) {
+        return false;
+      }
 
       entity.x = clampedX;
       entity.y = clampedY;
-      if (hitHorizontalWall) entity.velX = 0;
-      if (hitVerticalWall) entity.velY = 0;
+
+      if (hitHorizontalWall) {
+        entity.velX = 0;
+      }
+
+      if (hitVerticalWall) {
+        entity.velY = 0;
+      }
+
       return true;
     }
 
@@ -33,7 +51,9 @@ Object.assign(Game.prototype, {
     const outTop = entity.y < -radius;
     const outBottom = entity.y > u.height + radius;
 
-    if (!(outLeft || outRight || outTop || outBottom)) return false;
+    if (!(outLeft || outRight || outTop || outBottom)) {
+      return false;
+    }
 
     if (this.wrappingDisabled) {
       entity.dead = true;
@@ -51,14 +71,11 @@ Object.assign(Game.prototype, {
       }
 
       if (options.scoreMultiplier && entity.scoreMultiplier !== undefined) {
-        entity.scoreMultiplier += 1 + (this.hasPowerup('lucky') ? 0.5 : 0);
+        entity.scoreMultiplier += 1 + (this.hasPowerup('quantum_boost') ? 0.5 : 0);
       }
     }
 
-    const fallbackDirection = normalizeVector(
-      (outRight ? 1 : 0) - (outLeft ? 1 : 0),
-      (outBottom ? 1 : 0) - (outTop ? 1 : 0)
-    );
+    const fallbackDirection = normalizeVector((outRight ? 1 : 0) - (outLeft ? 1 : 0), (outBottom ? 1 : 0) - (outTop ? 1 : 0));
 
     const velocityDirection = normalizeVector(entity.velX || 0, entity.velY || 0);
     const previousWorld = u.localToWorld(entity.prevX ?? clamp(entity.x, 0, u.width), entity.prevY ?? clamp(entity.y, 0, u.height));
@@ -66,6 +83,7 @@ Object.assign(Game.prototype, {
     const frameDirection = normalizeVector(currentWorld.x - previousWorld.x, currentWorld.y - previousWorld.y);
     const direction = velocityDirection || frameDirection || fallbackDirection || { x: 1, y: 0 };
 
+    // Work in screen space here, comparing local coordinates between windows is how you get teleport math that looks like absolute bullshittery...
     const sourceRect = u.getCanvasRect();
     const sourceExit = rayExitRect(previousWorld, direction, sourceRect);
     const clampedLocalX = clamp(entity.x, 0, u.width);
@@ -85,17 +103,25 @@ Object.assign(Game.prototype, {
     }
 
     if (target === u) {
-      if (outLeft) entity.x = u.width - radius;
-      if (outRight) entity.x = radius;
-      if (outTop) entity.y = u.height - radius;
-      if (outBottom) entity.y = radius;
+      if (outLeft) {
+        entity.x = u.width - radius;
+      }
+
+      if (outRight) {
+        entity.x = radius;
+      }
+
+      if (outTop) {
+        entity.y = u.height - radius;
+      }
+
+      if (outBottom) {
+        entity.y = radius;
+      }
     } else {
       const inset = Math.max(2, radius * target.scale + 2);
 
-      const targetLocal = target.worldToLocal(
-        hit.x + direction.x * inset,
-        hit.y + direction.y * inset
-      );
+      const targetLocal = target.worldToLocal(hit.x + direction.x * inset, hit.y + direction.y * inset);
 
       entity.universe = target;
       entity.x = clamp(targetLocal.x, radius + 1, target.width - radius - 1);
@@ -115,22 +141,19 @@ Object.assign(Game.prototype, {
   },
 
   tryWarpTo(universe, x, y) {
-    if (this.paused || !this.player || this.player.warpCooldown > 0 || !this.universes.includes(universe)) return;
-    
+    if (this.paused || !this.player || this.player.warpCooldown > 0 || !this.universes.includes(universe)) {
+      return;
+    }
+
     const startUniverse = this.player.universe;
     const startX = this.player.x;
     const startY = this.player.y;
     const warpDir = normalizeVector(this.player.velX, this.player.velY);
 
-    this.spawnWarpParticles(startUniverse, startX, startY, {
-      count: 30,
-      dirX: -(warpDir?.x || 0),
-      dirY: -(warpDir?.y || 0),
-      radius: this.player.radius * 2.2
-    });
+    this.spawnWarpParticles(startUniverse, startX, startY, { count: 30, dirX: -(warpDir?.x || 0), dirY: -(warpDir?.y || 0), radius: this.player.radius * 2.2 });
 
     this.sound.play('warp');
-    
+
     this.player.universe = universe;
     this.player.x = clamp(x, this.player.radius, universe.width - this.player.radius);
     this.player.y = clamp(y, this.player.radius, universe.height - this.player.radius);
@@ -138,12 +161,7 @@ Object.assign(Game.prototype, {
     this.player.velY *= 0.35;
     this.player.warpCooldown = 3.5;
 
-    this.spawnWarpParticles(universe, this.player.x, this.player.y, {
-      count: 42,
-      dirX: warpDir?.x || 0,
-      dirY: warpDir?.y || 0,
-      radius: this.player.radius * 2.8
-    });
+    this.spawnWarpParticles(universe, this.player.x, this.player.y, { count: 42, dirX: warpDir?.x || 0, dirY: warpDir?.y || 0, radius: this.player.radius * 2.8 });
 
     this.flashMessage(formatText('message.warpedToUniverse', { id: universe.id }), 650);
   },
@@ -155,18 +173,30 @@ Object.assign(Game.prototype, {
       let safe = true;
 
       for (const enemy of universe.enemies) {
-        if (distSq(x, y, enemy.x, enemy.y) < 70 * 70) { safe = false; break; }
+        if (distSq(x, y, enemy.x, enemy.y) < 70 * 70) {
+          safe = false;
+          break;
+        }
       }
 
-      if (!safe) continue;
+      if (!safe) {
+        continue;
+      }
 
       for (const asteroid of universe.asteroids) {
         const min = asteroid.radius + this.player.radius + 24;
-        if (distSq(x, y, asteroid.x, asteroid.y) < min * min) { safe = false; break; }
+
+        if (distSq(x, y, asteroid.x, asteroid.y) < min * min) {
+          safe = false;
+          break;
+        }
       }
 
-      if (safe) return { x, y };
+      if (safe) {
+        return { x, y };
+      }
     }
+
     return { x: universe.width / 2, y: universe.height / 2 };
   }
 });

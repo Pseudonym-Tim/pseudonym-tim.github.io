@@ -15,7 +15,10 @@ class HullPickup {
   }
 
   collect() {
-    if (this.collected || this.game.hp >= MAX_PLAYER_HULL) return false;
+    if (this.collected || this.game.hp >= MAX_PLAYER_HULL) {
+      return false;
+    }
+
     this.collected = true;
     this.game.sound.play('hullPickup');
     const restored = MAX_PLAYER_HULL - this.game.hp;
@@ -34,25 +37,13 @@ class HullPickup {
     ctx.globalCompositeOperation = 'lighter';
 
     const glowRadius = this.radius + 13 + pulse * 7;
-    
-    const gradient = ctx.createRadialGradient(
-      0, 0, this.radius * 0.25,
-      0, 0, glowRadius
-    );
 
-    gradient.addColorStop(
-      0,
-      `rgba(180, 255, 255, ${0.65 + pulse * 0.2})`
-    );
-    gradient.addColorStop(
-      0.35,
-      `rgba(114, 247, 255, ${0.4 + pulse * 0.2})`
-    );
+    const gradient = ctx.createRadialGradient(0, 0, this.radius * 0.25, 0, 0, glowRadius);
 
-    gradient.addColorStop(
-      0.7,
-      `rgba(60, 210, 255, ${0.18 + pulse * 0.12})`
-    );
+    gradient.addColorStop(0, `rgba(180, 255, 255, ${0.65 + pulse * 0.2})`);
+    gradient.addColorStop(0.35, `rgba(114, 247, 255, ${0.4 + pulse * 0.2})`);
+
+    gradient.addColorStop(0.7, `rgba(60, 210, 255, ${0.18 + pulse * 0.12})`);
 
     gradient.addColorStop(1, 'rgba(60, 210, 255, 0)');
 

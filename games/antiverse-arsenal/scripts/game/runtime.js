@@ -1,14 +1,20 @@
 // Frame loop, update, and draw orchestration...
 Object.assign(Game.prototype, {
   triggerHitStop(stopSeconds = 0.035, slowSeconds = 0.16, slowScale = 0.35) {
-    if (!this.running) return;
+    if (!this.running) {
+      return;
+    }
+
     this.hitStopTimer = Math.max(this.hitStopTimer, stopSeconds);
     this.hitSlowTimer = Math.max(this.hitSlowTimer, slowSeconds);
     this.hitSlowScale = Math.min(this.hitSlowTimer > 0 ? this.hitSlowScale : 1, slowScale);
   },
 
   loop(timestamp, loopToken = this.loopToken) {
-    if (!this.running || loopToken !== this.loopToken) return;
+    if (!this.running || loopToken !== this.loopToken) {
+      return;
+    }
+
     const rawDt = Math.min(0.05, (timestamp - this.lastTime) / 1000 || 0);
     this.lastTime = timestamp;
 
@@ -35,7 +41,10 @@ Object.assign(Game.prototype, {
       this.hitStopTimer = Math.max(0, this.hitStopTimer - rawDt);
     } else if (this.hitSlowTimer > 0) {
       this.hitSlowTimer = Math.max(0, this.hitSlowTimer - rawDt);
-      if (this.hitSlowTimer <= 0) this.hitSlowScale = 1;
+      
+      if (this.hitSlowTimer <= 0) {
+        this.hitSlowScale = 1;
+      }
     }
 
     this.updateLaser(rawDt);
@@ -59,38 +68,63 @@ Object.assign(Game.prototype, {
     this.updateSpawnCountdown(worldDt);
     this.player.update(playerDt);
 
-    for (const u of this.universes) u.update(worldDt);
+    for (const u of this.universes) {
+      u.update(worldDt);
+    }
 
     for (let i = this.bullets.length - 1; i >= 0; i--) {
       const bullet = this.bullets[i];
       bullet.update(bullet.owner === 'player' ? playerDt : worldDt);
-      if (bullet.dead) this.bullets.splice(i, 1);
+
+      if (bullet.dead) {
+        this.bullets.splice(i, 1);
+      }
     }
 
     for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
       const text = this.floatingTexts[i];
       text.update(worldDt);
-      if (text.dead) this.floatingTexts.splice(i, 1);
+      
+      if (text.dead) {
+        this.floatingTexts.splice(i, 1);
+      }
     }
 
     for (let i = this.explosions.length - 1; i >= 0; i--) {
       const explosion = this.explosions[i];
       explosion.update(worldDt);
-      if (explosion.dead) this.explosions.splice(i, 1);
+
+      if (explosion.dead) {
+        this.explosions.splice(i, 1);
+      }
     }
 
     this.checkPlayerCollisions();
     this.updateHUD();
   },
 
+  // Main game runtime draw update...
   draw() {
-    for (const u of this.universes) u.draw();
-    for (const bullet of this.bullets) bullet.draw();
+    for (const u of this.universes) {
+      u.draw();
+    }
+
+    for (const bullet of this.bullets) {
+      bullet.draw();
+    }
+
     this.drawLaserPlan(this.laserAim);
     this.drawLaserFlashes();
     this.player.draw(this.player.universe.ctx);
-    for (const explosion of this.explosions) explosion.draw();
+
+    for (const explosion of this.explosions) {
+      explosion.draw();
+    }
+
     this.drawCollisionDebug();
-    for (const text of this.floatingTexts) text.draw();
+
+    for (const text of this.floatingTexts) {
+      text.draw();
+    }
   }
 });

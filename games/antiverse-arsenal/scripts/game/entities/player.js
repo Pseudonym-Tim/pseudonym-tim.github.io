@@ -104,9 +104,15 @@ class Player {
   }
 
   tryDash() {
-    if (!this.game.canStartDash() || this.dashing || this.dashCooldown > 0) return false;
+    if (!this.game.canStartDash() || this.dashing || this.dashCooldown > 0) {
+      return false;
+    }
+
     const direction = this.getDashDirection();
-    if (!direction) return false;
+    if (!direction) {
+      return false;
+    }
+
     this.dashDirX = direction.x;
     this.dashDirY = direction.y;
     this.dashElapsed = 0;
@@ -156,7 +162,10 @@ class Player {
   }
 
   endDash() {
-    if (!this.dashing) return;
+    if (!this.dashing) {
+      return;
+    }
+
     this.dashing = false;
     this.dashCooldown = DASH_COOLDOWN;
     const carrySpeed = 300 + this.extraThrust * 0.3;
@@ -177,10 +186,7 @@ class Player {
       const y = this.y + Math.sin(angle) * (this.radius + 3);
       const vx = Math.cos(angle) * BULLET_SPEED + this.velX * 0.15;
       const vy = Math.sin(angle) * BULLET_SPEED + this.velY * 0.15;
-      this.game.spawnBullet(this.universe, x, y, vx, vy, 'player', baseMult, {
-        maxWraps: hasMultiShot ? 1 : MAX_WRAPS,
-        playSound: false
-      });
+      this.game.spawnBullet(this.universe, x, y, vx, vy, 'player', baseMult, { maxWraps: hasMultiShot ? 1 : MAX_WRAPS, playSound: false });
     });
   }
 
@@ -191,13 +197,7 @@ class Player {
     const vx = Math.cos(angle) * SNIPER_SPEED + this.velX * 0.08;
     const vy = Math.sin(angle) * SNIPER_SPEED + this.velY * 0.08;
     this.game.sound.play('shoot');
-    this.game.spawnBullet(this.universe, x, y, vx, vy, 'player', 1, {
-      damage: SNIPER_DAMAGE,
-      maxWraps: 0,
-      playSound: false,
-      radius: 4,
-      spriteScale: 1.35
-    });
+    this.game.spawnBullet(this.universe, x, y, vx, vy, 'player', 1, { damage: SNIPER_DAMAGE, maxWraps: 0, playSound: false, radius: 4, spriteScale: 1.35 });
   }
 
   triggerDamageFlash(duration = this.damageFlashDuration) {
@@ -235,12 +235,7 @@ class Player {
 
     ctx.rotate(Math.PI / 2);
 
-    drawPixelArt(ctx, pixelArt.player, this.radius * 3.1, {
-      alpha: this.dashing ? 1 : 0.9,
-      time: this.game.spriteClock,
-      scale: 1.1,
-      flashAlpha: this.getDamageFlashAlpha()
-    });
+    drawPixelArt(ctx, pixelArt.player, this.radius * 3.1, { alpha: this.dashing ? 1 : 0.9, time: this.game.spriteClock, scale: 1.1, flashAlpha: this.getDamageFlashAlpha() });
 
     ctx.restore();
   }

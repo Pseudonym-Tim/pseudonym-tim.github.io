@@ -2,9 +2,7 @@
 class SpriteAnimation {
   constructor(srcOrOptions, options = {}) {
     const isImageElement = typeof HTMLImageElement !== 'undefined' && srcOrOptions instanceof HTMLImageElement;
-    const config = typeof srcOrOptions === 'object' && srcOrOptions !== null && !isImageElement
-      ? srcOrOptions
-      : { ...options, image: srcOrOptions };
+    const config = typeof srcOrOptions === 'object' && srcOrOptions !== null && !isImageElement ? srcOrOptions : { ...options, image: srcOrOptions };
 
     this.image = this.createImage(config.image || config.src);
     this.frameWidth = config.frameWidth || null;
@@ -18,15 +16,21 @@ class SpriteAnimation {
   }
 
   createImage(image) {
-    if (typeof HTMLImageElement !== 'undefined' && image instanceof HTMLImageElement) return image;
+    if (typeof HTMLImageElement !== 'undefined' && image instanceof HTMLImageElement) {
+      return image;
+    }
 
     const spriteImage = new Image();
-    if (image) spriteImage.src = image;
+    if (image) {
+      spriteImage.src = image;
+    }
+
     return spriteImage;
   }
 
+  // This is kinda horrendous...
   normalizeAnimations(animations) {
-    return Object.fromEntries(Object.entries(animations).map(([name, animation]) => [
+     return Object.fromEntries(Object.entries(animations).map(([name, animation]) => [
       name,
       {
         row: animation.row || 0,
@@ -47,11 +51,15 @@ class SpriteAnimation {
   }
 
   play(name, time = 0, options = {}) {
-    if (!this.animations[name]) return false;
+    if (!this.animations[name]) {
+      return false;
+    }
+
     if (this.currentAnimationName !== name || options.restart) {
       this.currentAnimationName = name;
       this.animationStartedAt = Math.max(0, time);
     }
+
     return true;
   }
 
@@ -61,7 +69,9 @@ class SpriteAnimation {
 
   getFrameIndex(time = 0, animation = null) {
     const frameCount = animation?.frames ?? this.frameCount;
-    if (frameCount <= 1) return 0;
+    if (frameCount <= 1) {
+      return 0;
+    }
 
     const fps = animation?.fps ?? this.fps;
     const loop = animation?.loop ?? this.loop;
@@ -91,8 +101,13 @@ class SpriteAnimation {
   }
 
   draw(ctx, size, options = {}) {
-    if (!this.ready) return false;
-    if (options.animation) this.play(options.animation, options.time, { restart: options.restartAnimation });
+    if (!this.ready) {
+      return false;
+    }
+
+    if (options.animation) {
+      this.play(options.animation, options.time, { restart: options.restartAnimation });
+    }
 
     const { sx, sy, sourceWidth, sourceHeight } = this.getSourceRect(options.time, options.animation);
     const scale = Math.max(0.0001, options.scale ?? 1);
@@ -101,7 +116,11 @@ class SpriteAnimation {
 
     ctx.save();
     ctx.imageSmoothingEnabled = false;
-    if (options.alpha !== undefined) ctx.globalAlpha *= options.alpha;
+
+    if (options.alpha !== undefined) {
+      ctx.globalAlpha *= options.alpha;
+    }
+
     ctx.drawImage(this.image, sx, sy, sourceWidth, sourceHeight, -half, -half, drawSize, drawSize);
 
     const flashAlpha = clamp(options.flashAlpha ?? 0, 0, 1);
@@ -132,21 +151,33 @@ class SpriteAnimation {
   }
 
   static getFlashCanvas(width, height) {
-    if (typeof document === 'undefined') return null;
+    if (typeof document === 'undefined') {
+      return null;
+    }
 
     if (!SpriteAnimation.flashCanvas) {
       SpriteAnimation.flashCanvas = document.createElement('canvas');
     }
 
-    if (SpriteAnimation.flashCanvas.width !== width) SpriteAnimation.flashCanvas.width = width;
-    if (SpriteAnimation.flashCanvas.height !== height) SpriteAnimation.flashCanvas.height = height;
+    if (SpriteAnimation.flashCanvas.width !== width) {
+      SpriteAnimation.flashCanvas.width = width;
+    }
+
+    if (SpriteAnimation.flashCanvas.height !== height) {
+      SpriteAnimation.flashCanvas.height = height;
+    }
 
     return SpriteAnimation.flashCanvas;
   }
 
   drawFrame(ctx, x, y, width, height, options = {}) {
-    if (!this.ready) return false;
-    if (options.animation) this.play(options.animation, options.time, { restart: options.restartAnimation });
+    if (!this.ready) {
+      return false;
+    }
+
+    if (options.animation) {
+      this.play(options.animation, options.time, { restart: options.restartAnimation });
+    }
 
     const { sx, sy, sourceWidth, sourceHeight } = this.getSourceRect(options.time, options.animation);
     const scale = Math.max(0.0001, options.scale ?? 1);
@@ -155,11 +186,15 @@ class SpriteAnimation {
 
     ctx.save();
     ctx.imageSmoothingEnabled = false;
-    if (options.alpha !== undefined) ctx.globalAlpha *= options.alpha;
+
+    if (options.alpha !== undefined) {
+      ctx.globalAlpha *= options.alpha;
+    }
+
     ctx.drawImage(this.image, sx, sy, sourceWidth, sourceHeight, x, y, drawWidth, drawHeight);
 
     const flashAlpha = clamp(options.flashAlpha ?? 0, 0, 1);
-    
+
     if (flashAlpha > 0) {
       const flashCanvas = SpriteAnimation.getFlashCanvas(sourceWidth, sourceHeight);
       const flashCtx = flashCanvas?.getContext('2d');
@@ -186,8 +221,13 @@ class SpriteAnimation {
   }
 
   drawTiled(ctx, x, y, width, height, options = {}) {
-    if (!this.ready) return false;
-    if (options.animation) this.play(options.animation, options.time, { restart: options.restartAnimation });
+    if (!this.ready) {
+      return false;
+    }
+
+    if (options.animation) {
+      this.play(options.animation, options.time, { restart: options.restartAnimation });
+    }
 
     const { sx, sy, sourceWidth, sourceHeight } = this.getSourceRect(options.time, options.animation);
     const scale = Math.max(0.0001, options.scale ?? 1);
@@ -196,24 +236,17 @@ class SpriteAnimation {
 
     ctx.save();
     ctx.imageSmoothingEnabled = false;
-    if (options.alpha !== undefined) ctx.globalAlpha *= options.alpha;
+    
+    if (options.alpha !== undefined) {
+      ctx.globalAlpha *= options.alpha;
+    }
 
     for (let tileY = y; tileY < y + height; tileY += tileHeight) {
       for (let tileX = x; tileX < x + width; tileX += tileWidth) {
         const drawWidth = Math.min(tileWidth, x + width - tileX);
         const drawHeight = Math.min(tileHeight, y + height - tileY);
-        
-        ctx.drawImage(
-          this.image,
-          sx,
-          sy,
-          Math.floor((drawWidth / tileWidth) * sourceWidth),
-          Math.floor((drawHeight / tileHeight) * sourceHeight),
-          tileX,
-          tileY,
-          drawWidth,
-          drawHeight
-        );
+
+        ctx.drawImage(this.image, sx, sy, Math.floor((drawWidth / tileWidth) * sourceWidth), Math.floor((drawHeight / tileHeight) * sourceHeight), tileX, tileY, drawWidth, drawHeight);
       }
     }
 

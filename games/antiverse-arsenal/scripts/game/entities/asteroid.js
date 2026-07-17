@@ -15,7 +15,7 @@ class Asteroid extends Damageable {
     this.spin = rand(-1.4, 1.4);
     this.rotation = rand(0, Math.PI * 2);
   }
-  
+
   randomSprite() {
     const sprites = this.size > 1 ? pixelArt.asteroids?.big : pixelArt.asteroids?.small;
     return sprites[Math.floor(Math.random() * sprites.length)];
@@ -32,16 +32,15 @@ class Asteroid extends Damageable {
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(this.rotation);
-    drawPixelArt(ctx, this.sprite, this.radius * 2.25, {
-      time: this.game.spriteClock,
-      flashAlpha: this.getDamageFlashAlpha()
-    });
+    drawPixelArt(ctx, this.sprite, this.radius * 2.25, { time: this.game.spriteClock, flashAlpha: this.getDamageFlashAlpha() });
     ctx.restore();
     this.drawHealthBar(ctx);
   }
 
   drawHealthBar(ctx) {
-    if (this.healthBarTimer <= 0 || this.hp <= 0 || this.hp >= this.maxHp) return;
+    if (this.healthBarTimer <= 0 || this.hp <= 0 || this.hp >= this.maxHp) {
+      return;
+    }
 
     const alpha = clamp(this.healthBarTimer / 0.55, 0, 1);
     const width = 32;

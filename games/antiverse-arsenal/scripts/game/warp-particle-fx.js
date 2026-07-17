@@ -39,11 +39,15 @@ class WarpParticleFX {
       particle.y += particle.velY * dt;
     }
 
-    if (this.age >= this.life) this.dead = true;
+    if (this.age >= this.life) {
+      this.dead = true;
+    }
   }
 
   draw() {
-    if (!this.universe || !this.game.universes.includes(this.universe)) return;
+    if (!this.universe || !this.game.universes.includes(this.universe)) {
+      return;
+    }
 
     const ctx = this.universe.ctx;
     const t = clamp(this.age / this.life, 0, 1);

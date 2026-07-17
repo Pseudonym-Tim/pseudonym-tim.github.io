@@ -2,22 +2,23 @@
 Object.assign(Game.prototype, {
   getLaserPlan() {
     const player = this.player;
-    if (!player?.universe) return null;
+    if (!player?.universe) {
+      return null;
+    }
 
     const angle = player.angle;
     const baseLocalDir = normalizeVector(Math.cos(angle), Math.sin(angle));
     const baseWorldAngle = localAngleToWorld(angle, player.universe);
     const worldDir = normalizeVector(Math.cos(baseWorldAngle), Math.sin(baseWorldAngle));
-    if (!baseLocalDir || !worldDir) return null;
+    if (!baseLocalDir || !worldDir) {
+      return null;
+    }
 
     const plan = { segments: [], locks: [] };
     let universe = player.universe;
     let localDir = { ...baseLocalDir };
 
-    let startLocal = {
-      x: player.x + localDir.x * (player.radius + 4),
-      y: player.y + localDir.y * (player.radius + 4)
-    };
+    let startLocal = { x: player.x + localDir.x * (player.radius + 4), y: player.y + localDir.y * (player.radius + 4) };
 
     let wraps = 0;
 
@@ -25,14 +26,13 @@ Object.assign(Game.prototype, {
       const startWorld = universe.localToWorld(startLocal.x, startLocal.y);
       const exitWorld = rayExitRect(startWorld, worldDir, universe.getCanvasRect());
 
-      if (!exitWorld) break;
+      if (!exitWorld) {
+        break;
+      }
 
       const rawEndLocal = universe.worldToLocal(exitWorld.x, exitWorld.y);
 
-      const endLocal = {
-        x: clamp(rawEndLocal.x, 0, universe.width),
-        y: clamp(rawEndLocal.y, 0, universe.height)
-      };
+      const endLocal = { x: clamp(rawEndLocal.x, 0, universe.width), y: clamp(rawEndLocal.y, 0, universe.height) };
 
       const segment = { universe, from: { ...startLocal }, to: endLocal, wraps };
       plan.segments.push(segment);
@@ -43,12 +43,19 @@ Object.assign(Game.prototype, {
       const segDir = { x: segDx / segLen, y: segDy / segLen };
 
       for (const enemy of universe.enemies) {
-        if (enemy.dead || enemy.expired || plan.locks.some((lock) => lock.enemy === enemy)) continue;
+        if (enemy.dead || enemy.expired || plan.locks.some((lock) => lock.enemy === enemy)) {
+          continue;
+        }
+
         const hit = rayCircleHit(startLocal, segDir, enemy, enemy.radius + LASER_LOCK_RADIUS, 0, segLen);
-        if (hit) plan.locks.push({ enemy, universe, wraps, x: enemy.x, y: enemy.y, t: hit.t });
+        if (hit) {
+          plan.locks.push({ enemy, universe, wraps, x: enemy.x, y: enemy.y, t: hit.t });
+        }
       }
 
-      if (wraps >= MAX_WRAPS) break;
+      if (wraps >= MAX_WRAPS) {
+        break;
+      }
 
       const next = this.findRaycastUniverse(exitWorld.x + worldDir.x * 2, exitWorld.y + worldDir.y * 2, worldDir, universe);
       wraps += 1;
@@ -80,12 +87,19 @@ Object.assign(Game.prototype, {
     const active = this.running && !this.isShopOpen() && !this.transitioning && !this.draggingUniverse && this.laserCooldown <= 0 && this.isLaserControlHeld();
     this.laserCharging = active;
     this.laserAim = active ? this.getLaserPlan() : null;
-    if (active) this.timeScale = LASER_CHARGE_TIME_SCALE;
-    else if (!this.draggingUniverse) this.timeScale = 1;
+
+    if (active) {
+      this.timeScale = LASER_CHARGE_TIME_SCALE;
+    } else if (!this.draggingUniverse) {
+      this.timeScale = 1;
+    }
 
     for (let i = this.laserFlash.length - 1; i >= 0; i--) {
       this.laserFlash[i].life -= dt;
-      if (this.laserFlash[i].life <= 0) this.laserFlash.splice(i, 1);
+
+      if (this.laserFlash[i].life <= 0) {
+        this.laserFlash.splice(i, 1);
+      }
     }
   },
 
@@ -93,7 +107,11 @@ Object.assign(Game.prototype, {
     if (!this.laserCharging || !this.laserAim?.locks.length) {
       this.laserCharging = false;
       this.laserAim = null;
-      if (!this.draggingUniverse) this.timeScale = 1;
+
+      if (!this.draggingUniverse) {
+        this.timeScale = 1;
+      }
+
       return;
     }
 
@@ -102,7 +120,10 @@ Object.assign(Game.prototype, {
     const hitEnemies = new Set();
 
     for (const lock of plan.locks) {
-      if (lock.enemy.dead || lock.enemy.expired || hitEnemies.has(lock.enemy)) continue;
+      if (lock.enemy.dead || lock.enemy.expired || hitEnemies.has(lock.enemy)) {
+        continue;
+      }
+
       hitEnemies.add(lock.enemy);
       lock.enemy.takeDamage(LASER_DAMAGE, 1 + lock.wraps);
       this.onEnemyHit(lock.enemy, 1 + lock.wraps);
@@ -111,14 +132,17 @@ Object.assign(Game.prototype, {
     }
 
     for (const segment of plan.segments) {
-      if (segment.universe !== this.player.universe) continue;
+      if (segment.universe !== this.player.universe) {
+        continue;
+      }
+
       const segDx = segment.to.x - segment.from.x;
       const segDy = segment.to.y - segment.from.y;
       const segLen = Math.max(1, Math.hypot(segDx, segDy));
       const segDir = { x: segDx / segLen, y: segDy / segLen };
       const startsAtMuzzle = distSq(segment.from.x, segment.from.y, this.player.x, this.player.y) < (this.player.radius + 8) ** 2;
       const hit = rayCircleHit(segment.from, segDir, this.player, this.player.radius + 3, startsAtMuzzle ? 20 : 0, segLen);
-      
+
       if (hit) {
         this.playerHit(-segDir.x * 260, -segDir.y * 260);
         break;
@@ -130,11 +154,16 @@ Object.assign(Game.prototype, {
     this.triggerHitStop(0.035, 0.18, 0.32);
     this.laserCharging = false;
     this.laserAim = null;
-    if (!this.draggingUniverse) this.timeScale = 1;
+    
+    if (!this.draggingUniverse) {
+      this.timeScale = 1;
+    }
   },
 
   drawLaserPlan(plan) {
-    if (!plan) return;
+    if (!plan) {
+      return;
+    }
 
     for (const segment of plan.segments) {
       const ctx = segment.universe.ctx;
@@ -150,7 +179,9 @@ Object.assign(Game.prototype, {
       ctx.restore();
     }
 
-    for (const lock of plan.locks) this.drawLaserReticle(lock);
+    for (const lock of plan.locks) {
+      this.drawLaserReticle(lock);
+    }
   },
 
   drawLaserReticle(lock) {

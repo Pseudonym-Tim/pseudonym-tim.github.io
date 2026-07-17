@@ -63,7 +63,6 @@ class Bullet {
     }
 
     for (const asteroid of this.universe.asteroids) {
-
       if (collisionShapesOverlap(this.getCollisionShape(), entityCollisionShape(asteroid))) {
         asteroid.takeDamage(this.damage, this.scoreMultiplier);
         this.game.recordWrapShotHit(this);
@@ -73,9 +72,7 @@ class Bullet {
     }
 
     if (this.owner === 'player') {
-
       for (const enemy of this.universe.enemies) {
-
         if (collisionShapesOverlap(this.getCollisionShape(), entityCollisionShape(enemy))) {
           enemy.takeDamage(this.damage, this.scoreMultiplier, this.x, this.y, this.radius);
           this.game.recordWrapShotHit(this);

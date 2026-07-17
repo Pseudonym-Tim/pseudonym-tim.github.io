@@ -12,7 +12,6 @@ Object.assign(Game.prototype, {
 
   initInput() {
     window.addEventListener('keydown', (e) => {
-
       if (e.code === 'Escape' && !e.repeat) {
         e.preventDefault();
         e.stopPropagation();
@@ -35,7 +34,9 @@ Object.assign(Game.prototype, {
       const isLaserControl = e.code === 'ControlLeft' || e.code === 'ControlRight';
       const laserModifierActive = isLaserControl || e.ctrlKey || this.isLaserControlHeld();
 
-      if (e.code === 'Space' || laserModifierActive) e.preventDefault();
+      if (e.code === 'Space' || laserModifierActive) {
+        e.preventDefault();
+      }
 
       const isShift = e.code === 'ShiftLeft' || e.code === 'ShiftRight';
 
@@ -45,35 +46,63 @@ Object.assign(Game.prototype, {
       }
 
       // Debug testing commands...
-      if (e.code === 'KeyN' && !e.repeat) this.debugNextRound();
-      if (e.code === 'KeyK' && !e.repeat) this.debugKillAllEnemies();
-      if (e.code === 'KeyI' && !e.repeat) this.toggleDebugInvulnerability();
-      if (e.code === 'KeyB' && !e.repeat) this.debugStartBossEncounter();
-      if (e.code === 'KeyO' && !e.repeat) this.toggleDebugCollisionView();
-      if (e.code === 'KeyP' && !e.repeat) this.debugGiveSniperPowerup();
+      if (e.code === 'KeyN' && !e.repeat) {
+        this.debugNextRound();
+      }
+
+      if (e.code === 'KeyK' && !e.repeat) {
+        this.debugKillAllEnemies();
+      }
+
+      if (e.code === 'KeyI' && !e.repeat) {
+        this.toggleDebugInvulnerability();
+      }
+
+      if (e.code === 'KeyB' && !e.repeat) {
+        this.debugStartBossEncounter();
+      }
+
+      if (e.code === 'KeyO' && !e.repeat) {
+        this.toggleDebugCollisionView();
+      }
+
+      if (e.code === 'KeyP' && !e.repeat) {
+        this.debugGiveSniperPowerup();
+      }
     });
 
     window.addEventListener('keyup', (e) => {
-
       if (this.paused) {
         this.keys[e.code] = false;
         return;
       }
 
       const wasLaserControl = e.code === 'ControlLeft' || e.code === 'ControlRight';
-      if (wasLaserControl || e.ctrlKey || this.isLaserControlHeld()) e.preventDefault();
+
+      if (wasLaserControl || e.ctrlKey || this.isLaserControlHeld()) {
+        e.preventDefault();
+      }
+
       this.keys[e.code] = false;
-      if (wasLaserControl) this.releaseLaser();
+
+      if (wasLaserControl) {
+        this.releaseLaser();
+      }
     });
 
     document.addEventListener('selectstart', (e) => {
-      if (this.laserCharging || this.isLaserControlHeld()) e.preventDefault();
+      if (this.laserCharging || this.isLaserControlHeld()) {
+        e.preventDefault();
+      }
     });
 
     document.addEventListener('mousemove', (e) => {
       this.mouseX = e.clientX;
       this.mouseY = e.clientY;
-      if (this.draggingUniverse) this.onDrag(e);
+
+      if (this.draggingUniverse) {
+        this.onDrag(e);
+      }
     });
 
     document.addEventListener('mousedown', (e) => {
@@ -82,12 +111,17 @@ Object.assign(Game.prototype, {
     });
 
     document.addEventListener('mouseup', () => {
-      if (this.draggingUniverse) this.stopDraggingUniverse();
+      if (this.draggingUniverse) {
+        this.stopDraggingUniverse();
+      }
     });
 
     const cancelActiveInput = () => {
       this.clearAllInput();
-      if (this.draggingUniverse) this.stopDraggingUniverse();
+      
+      if (this.draggingUniverse) {
+        this.stopDraggingUniverse();
+      }
     };
 
     window.addEventListener('blur', cancelActiveInput);
@@ -95,11 +129,16 @@ Object.assign(Game.prototype, {
     window.addEventListener('pointercancel', cancelActiveInput);
 
     document.addEventListener('visibilitychange', () => {
-      if (document.hidden) cancelActiveInput();
+      if (document.hidden) {
+        cancelActiveInput();
+      }
     });
 
     window.addEventListener('resize', () => {
-      if (!this.running) return;
+      if (!this.running) {
+        return;
+      }
+
       const oldScale = this.scale;
       this.scale = this.computeScale();
 
@@ -110,7 +149,9 @@ Object.assign(Game.prototype, {
         u.setPosition(centerX - u.cssWidth / 2, centerY - (u.cssHeight + u.cssHeader) / 2);
       }
 
-      if (oldScale !== this.scale) this.resolveUniverseLayout();
+      if (oldScale !== this.scale) {
+        this.resolveUniverseLayout();
+      }
     });
   },
 

@@ -28,7 +28,9 @@ class SoundManager {
     this.defaults = defaults;
     this.pools = new Map();
 
-    if (!this.enabled) return;
+    if (!this.enabled) {
+      return;
+    }
 
     for (const [name, src] of Object.entries(this.effects)) {
       const options = this.defaults[name] || {};
@@ -48,9 +50,14 @@ class SoundManager {
   }
 
   play(name, options = {}) {
-    if (!this.enabled) return;
+    if (!this.enabled) {
+      return;
+    }
+
     const pool = this.pools.get(name);
-    if (!pool || pool.items.length === 0) return;
+    if (!pool || pool.items.length === 0) {
+      return;
+    }
 
     const audio = pool.items[pool.index];
     pool.index = (pool.index + 1) % pool.items.length;
@@ -59,7 +66,9 @@ class SoundManager {
     this.applyPitch(audio, options.pitchRange ?? this.defaults[name]?.pitchRange);
 
     const playback = audio.play();
-    if (playback?.catch) playback.catch(() => {});
+    if (playback?.catch) {
+      playback.catch(() => {});
+    }
   }
 
   applyPitch(audio, pitchRange) {
@@ -75,14 +84,19 @@ class SoundManager {
   }
 
   randomPitch(pitchRange) {
-    if (!pitchRange) return 1;
+    if (!pitchRange) {
+      return 1;
+    }
 
     const min = Array.isArray(pitchRange) ? pitchRange[0] : pitchRange.min;
     const max = Array.isArray(pitchRange) ? pitchRange[1] : pitchRange.max;
     const low = Number.isFinite(min) ? min : 1;
     const high = Number.isFinite(max) ? max : low;
 
-    if (high <= low) return Math.max(0.1, low);
+    if (high <= low) {
+      return Math.max(0.1, low);
+    }
+
     return Math.max(0.1, low + Math.random() * (high - low));
   }
 }

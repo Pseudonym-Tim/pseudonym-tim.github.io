@@ -81,7 +81,7 @@ Object.assign(Game.prototype, {
     const w = LOGICAL_W * this.scale;
     const h = (LOGICAL_H + HEADER_H) * this.scale;
 
-    // When the screen is packed, pick the least-awful spot and let layout physics shove crap around...
+    // When the screen is packed, pick the least shitty spot and let layout physics shove stuff around...
     // The relaxation pass can clean up the resulting window pileup...
     return findOpenWindowPosition(this.universes, w, h, 10);
   },
@@ -102,7 +102,10 @@ Object.assign(Game.prototype, {
   },
 
   startDraggingUniverse(universe, e) {
-    if (this.transitioning || this.isShopOpen() || this.paused) return;
+    if (this.transitioning || this.isShopOpen() || this.paused) {
+      return;
+    }
+
     this.draggingUniverse = universe;
     this.clearMovementInput();
     this.keys.Space = false;
@@ -126,7 +129,10 @@ Object.assign(Game.prototype, {
 
   pushUniverseAway(movable, obstacle, padding = 8, anchor = null, pushDirection = null) {
     const moved = pushWindowAway(movable, obstacle, this.universes, padding, anchor, pushDirection);
-    if (!moved) return false;
+
+    if (!moved) {
+      return false;
+    }
 
     movable.element.classList.add('collision-nudged');
     clearTimeout(movable.collisionNudgeTimeout);
@@ -149,24 +155,30 @@ Object.assign(Game.prototype, {
 
       // First, the dragged universe directly pushes anything it touches...
       for (const other of this.universes) {
-        if (other === anchor) continue;
+        if (other === anchor) {
+          continue;
+        }
+
         if (rectsOverlap(anchorRect(), other.getRect(), padding)) {
           moved = this.pushUniverseAway(other, anchor, padding, anchor, dragDelta) || moved;
         }
       }
 
       // Then propagate the displacement through resulting window chain...
-      const anchorCenter = {
-        x: anchor.x + anchor.cssWidth / 2,
-        y: anchor.y + (anchor.cssHeight + anchor.cssHeader) / 2
-      };
+      const anchorCenter = { x: anchor.x + anchor.cssWidth / 2, y: anchor.y + (anchor.cssHeight + anchor.cssHeader) / 2 };
 
       for (let i = 0; i < this.universes.length; i++) {
         for (let j = i + 1; j < this.universes.length; j++) {
           const a = this.universes[i];
           const b = this.universes[j];
-          if (a === anchor || b === anchor) continue;
-          if (!rectsOverlap(a.getRect(), b.getRect(), padding)) continue;
+
+          if (a === anchor || b === anchor) {
+            continue;
+          }
+
+          if (!rectsOverlap(a.getRect(), b.getRect(), padding)) {
+            continue;
+          }
 
           const aCenter = { x: a.x + a.cssWidth / 2, y: a.y + (a.cssHeight + a.cssHeader) / 2 };
           const bCenter = { x: b.x + b.cssWidth / 2, y: b.y + (b.cssHeight + b.cssHeader) / 2 };
@@ -180,25 +192,38 @@ Object.assign(Game.prototype, {
         }
       }
 
-      if (!moved) break;
+      if (!moved) {
+        break;
+      }
     }
   },
 
   correctDraggedUniverseOverlap(anchor, axis, delta, padding) {
-    if (Math.abs(delta) < 0.001) return false;
+    if (Math.abs(delta) < 0.001) {
+      return false;
+    }
 
     const anchorRect = anchor.getRect();
     let x = anchor.x;
     let y = anchor.y;
 
     for (const other of this.universes) {
-      if (other === anchor) continue;
+      if (other === anchor) {
+        continue;
+      }
+
       const otherRect = other.getRect();
-      if (!rectsOverlap(anchorRect, otherRect, padding)) continue;
+
+      if (!rectsOverlap(anchorRect, otherRect, padding)) {
+        continue;
+      }
 
       if (axis === 'x') {
-        if (delta > 0) x = Math.min(x, otherRect.x - padding - anchorRect.w);
-        else x = Math.max(x, otherRect.x + otherRect.w + padding);
+        if (delta > 0) {
+          x = Math.min(x, otherRect.x - padding - anchorRect.w);
+        } else {
+          x = Math.max(x, otherRect.x + otherRect.w + padding);
+        }
       } else if (delta > 0) {
         y = Math.min(y, otherRect.y - padding - anchorRect.h);
       } else {
@@ -207,20 +232,23 @@ Object.assign(Game.prototype, {
     }
 
     const corrected = this.getClampedUniversePosition(anchor, x, y);
-    if (Math.abs(corrected.x - anchor.x) < 0.01 && Math.abs(corrected.y - anchor.y) < 0.01) return false;
+
+    if (Math.abs(corrected.x - anchor.x) < 0.01 && Math.abs(corrected.y - anchor.y) < 0.01) {
+      return false;
+    }
 
     anchor.setPosition(corrected.x, corrected.y);
     return true;
   },
 
   moveDraggedUniverseAxis(anchor, axis, delta) {
-    if (Math.abs(delta) < 0.001) return;
+    if (Math.abs(delta) < 0.001) {
+      return;
+    }
 
     const padding = Math.max(6, 9 * this.scale);
     const pushDirection = axis === 'x' ? { x: delta, y: 0 } : { x: 0, y: delta };
-    const target = axis === 'x'
-      ? this.getClampedUniversePosition(anchor, anchor.x + delta, anchor.y)
-      : this.getClampedUniversePosition(anchor, anchor.x, anchor.y + delta);
+    const target = axis === 'x' ? this.getClampedUniversePosition(anchor, anchor.x + delta, anchor.y) : this.getClampedUniversePosition(anchor, anchor.x, anchor.y + delta);
 
     anchor.setPosition(target.x, target.y);
     this.resolveDraggedUniverseCollisions(anchor, pushDirection);
@@ -233,7 +261,10 @@ Object.assign(Game.prototype, {
 
   onDrag(e) {
     const u = this.draggingUniverse;
-    if (!u) return;
+
+    if (!u) {
+      return;
+    }
 
     const now = performance.now();
     const elapsedMs = clamp(now - this.dragLastMoveTime, 8, 50);
@@ -251,7 +282,10 @@ Object.assign(Game.prototype, {
 
   updateDragTilt(dt) {
     const u = this.draggingUniverse;
-    if (!u) return;
+    
+    if (!u) {
+      return;
+    }
 
     const follow = 1 - Math.exp(-Math.max(0, dt) * 22);
     this.dragTilt += (this.dragTiltTarget - this.dragTilt) * follow;
@@ -267,7 +301,10 @@ Object.assign(Game.prototype, {
 
   stopDraggingUniverse() {
     const u = this.draggingUniverse;
-    if (!u) return;
+
+    if (!u) {
+      return;
+    }
 
     this.resolveDraggedUniverseCollisions(u);
     u.element.classList.remove('dragging');

@@ -40,7 +40,9 @@ function findOpenWindowPosition(frames, width, height, padding = 10, attempts = 
       best = rect;
     }
 
-    if (score === 0) return { x: rect.x, y: rect.y };
+    if (score === 0) {
+      return { x: rect.x, y: rect.y };
+    }
   }
 
   return { x: best?.x ?? padding, y: best?.y ?? padding };
@@ -59,7 +61,9 @@ function getWindowPushCandidate(movable, movingRect, obstacleRect, padding, dx, 
     { x: 0, y: down, axis: 'y' }
   ].filter((candidate) => Math.abs(candidate.x) > 0.001 || Math.abs(candidate.y) > 0.001);
 
-  if (!candidates.length) return null;
+  if (!candidates.length) {
+    return null;
+  }
 
   const preferred = normalizeVector(dx, dy);
   const movingCenterX = movingRect.x + movingRect.w / 2;
@@ -72,7 +76,7 @@ function getWindowPushCandidate(movable, movingRect, obstacleRect, padding, dx, 
     const direction = normalizeVector(candidate.x, candidate.y) || { x: 0, y: 0 };
     const followsPush = preferred ? Math.max(0, direction.x * preferred.x + direction.y * preferred.y) : 0;
     const separatesCenters = Math.max(0, direction.x * Math.sign(movingCenterX - obstacleCenterX) + direction.y * Math.sign(movingCenterY - obstacleCenterY));
-    const axisPenalty = preferred && ((candidate.axis === 'x') !== (Math.abs(preferred.x) >= Math.abs(preferred.y))) ? 6 : 0;
+    const axisPenalty = preferred && (candidate.axis === 'x') !== Math.abs(preferred.x) >= Math.abs(preferred.y) ? 6 : 0;
     const score = distance - followsPush * 24 - separatesCenters * 3 + axisPenalty;
     return !best || score < best.score ? { ...candidate, score } : best;
   }, null);
@@ -81,30 +85,34 @@ function getWindowPushCandidate(movable, movingRect, obstacleRect, padding, dx, 
 function pushWindowAway(movable, obstacle, _frames, padding = 8, _anchor = null, pushDirection = null) {
   const movingRect = movable.getRect();
   const obstacleRect = obstacle.getRect();
-  if (!rectsOverlap(movingRect, obstacleRect, padding)) return false;
 
-  const centerDx = (movingRect.x + movingRect.w / 2) - (obstacleRect.x + obstacleRect.w / 2);
-  const centerDy = (movingRect.y + movingRect.h / 2) - (obstacleRect.y + obstacleRect.h / 2);
-  const candidate = getWindowPushCandidate(
-    movable,
-    movingRect,
-    obstacleRect,
-    padding,
-    pushDirection?.x ?? centerDx,
-    pushDirection?.y ?? centerDy
-  );
-  if (!candidate) return false;
+  if (!rectsOverlap(movingRect, obstacleRect, padding)) {
+    return false;
+  }
+
+  const centerDx = movingRect.x + movingRect.w / 2 - (obstacleRect.x + obstacleRect.w / 2);
+  const centerDy = movingRect.y + movingRect.h / 2 - (obstacleRect.y + obstacleRect.h / 2);
+  const candidate = getWindowPushCandidate(movable, movingRect, obstacleRect, padding, pushDirection?.x ?? centerDx, pushDirection?.y ?? centerDy);
+
+  if (!candidate) {
+    return false;
+  }
 
   const stepX = candidate.x;
   const stepY = candidate.y;
   const pos = getClampedWindowPosition(movable, movable.x + stepX, movable.y + stepY);
 
-  if (Math.abs(pos.x - movable.x) < 0.01 && Math.abs(pos.y - movable.y) < 0.01) return false;
+  if (Math.abs(pos.x - movable.x) < 0.01 && Math.abs(pos.y - movable.y) < 0.01) {
+    return false;
+  }
+
   movable.setPosition(pos.x, pos.y);
   return true;
 }
 
 function relaxWindowLayout(frames, focus = null, scale = 1, padding = Math.max(8, 14 * scale), maxIterations = 90) {
+  // This is intentionally iterative. Shove just moves the damn
+  // overlap somewhere else when windows are packed together...
   for (let iteration = 0; iteration < maxIterations; iteration++) {
     let moved = false;
 
@@ -120,12 +128,21 @@ function relaxWindowLayout(frames, focus = null, scale = 1, padding = Math.max(8
         const bCy = b.y + b.h / 2;
         let dx = bCx - aCx;
         let dy = bCy - aCy;
-        if (Math.abs(dx) < 0.01) dx = rand(-1, 1);
-        if (Math.abs(dy) < 0.01) dy = rand(-1, 1);
+
+        if (Math.abs(dx) < 0.01) {
+          dx = rand(-1, 1);
+        }
+
+        if (Math.abs(dy) < 0.01) {
+          dy = rand(-1, 1);
+        }
 
         const overlapX = (a.w + b.w) / 2 + padding - Math.abs(dx);
         const overlapY = (a.h + b.h) / 2 + padding - Math.abs(dy);
-        if (overlapX <= 0 || overlapY <= 0) continue;
+        
+        if (overlapX <= 0 || overlapY <= 0) {
+          continue;
+        }
 
         const moveFocusWeight = 0.38;
         const aWeight = focus === aFrame ? moveFocusWeight : focus === bFrame ? 1 - moveFocusWeight : 0.5;
@@ -147,6 +164,8 @@ function relaxWindowLayout(frames, focus = null, scale = 1, padding = Math.max(8
       }
     }
 
-    if (!moved) break;
+    if (!moved) {
+      break;
+    }
   }
 }
