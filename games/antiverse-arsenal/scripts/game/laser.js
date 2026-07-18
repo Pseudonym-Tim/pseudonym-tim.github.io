@@ -126,7 +126,7 @@ Object.assign(Game.prototype, {
 
       hitEnemies.add(lock.enemy);
       lock.enemy.takeDamage(LASER_DAMAGE, 1 + lock.wraps);
-      this.onEnemyHit(lock.enemy, 1 + lock.wraps);
+      lock.enemy.registerHit(1 + lock.wraps);
       const laserText = lock.wraps > 0 ? formatText('float.laserWraps', { wraps: lock.wraps }) : formatText('float.laser');
       this.addFloatingText(lock.universe, lock.enemy.x, lock.enemy.y - 18, laserText, '#ff4df0');
     }
@@ -144,7 +144,7 @@ Object.assign(Game.prototype, {
       const hit = rayCircleHit(segment.from, segDir, this.player, this.player.radius + 3, startsAtMuzzle ? 20 : 0, segLen);
 
       if (hit) {
-        this.playerHit(-segDir.x * 260, -segDir.y * 260);
+        this.player.takeDamage(-segDir.x * 260, -segDir.y * 260);
         break;
       }
     }

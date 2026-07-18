@@ -13,6 +13,11 @@ class ShotgunEnemy extends Enemy {
       firePressure: 0.035,
       bulletSpeed: 178,
       bulletMaxWraps: 1,
+      shotLeading: 0.42,
+      maxLeadTime: 1.2,
+      aimError: 0.085,
+      avoidanceSkill: 0.55,
+      avoidanceLookAhead: 1.15,
       sprite: pixelArt.enemyShotgun,
       spriteScale: 1.22
     });

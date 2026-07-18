@@ -104,8 +104,9 @@ class Universe {
   }
 
   setPosition(x, y) {
-    const maxX = Math.max(0, window.innerWidth - this.cssWidth - 4);
-    const maxY = Math.max(0, window.innerHeight - this.cssHeight - this.cssHeader - 4);
+    const size = this.getOuterSize();
+    const maxX = Math.max(0, window.innerWidth - size.w - 4);
+    const maxY = Math.max(0, window.innerHeight - size.h - 4);
     this.x = clamp(x, 4, maxX);
     this.y = clamp(y, 4, maxY);
     this.element.style.left = `${this.x}px`;
@@ -125,7 +126,17 @@ class Universe {
   }
 
   getRect() {
-    return { x: this.x, y: this.y, w: this.cssWidth, h: this.cssHeight + this.cssHeader };
+    const size = this.getOuterSize();
+    return { x: this.x, y: this.y, w: size.w, h: size.h };
+  }
+
+  getOuterSize() {
+    // Include the content-box border while remaining unaffected by the grow/shrink transform...
+    // Layout collision checks must use this, not just the scaled canvas and header dimensions!
+    return {
+      w: this.element.offsetWidth || this.cssWidth,
+      h: this.element.offsetHeight || this.cssHeight + this.cssHeader
+    };
   }
 
   getCanvasRect() {
@@ -150,7 +161,7 @@ class Universe {
 
       if (enemy.dead) {
         this.enemies.splice(i, 1);
-        this.game.onEnemyDestroyed(enemy);
+        enemy.onDestroyed();
         continue;
       }
 
@@ -171,7 +182,7 @@ class Universe {
         this.asteroids.splice(i, 1);
 
         if (!asteroid.expired) {
-          this.game.onAsteroidDestroyed(asteroid);
+          asteroid.onDestroyed();
         }
 
         continue;

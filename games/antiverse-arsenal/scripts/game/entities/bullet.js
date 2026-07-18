@@ -55,7 +55,7 @@ class Bullet {
 
       if (this.owner === 'enemy' || canHitOwner) {
         if (collisionShapesOverlap(this.getCollisionShape(), entityCollisionShape(player))) {
-          this.game.playerHit(this.velX, this.velY);
+          player.takeDamage(this.velX, this.velY);
           this.dead = true;
           return;
         }
@@ -76,7 +76,7 @@ class Bullet {
         if (collisionShapesOverlap(this.getCollisionShape(), entityCollisionShape(enemy))) {
           enemy.takeDamage(this.damage, this.scoreMultiplier, this.x, this.y, this.radius);
           this.game.recordWrapShotHit(this);
-          this.game.onEnemyHit(enemy, this.scoreMultiplier);
+          enemy.registerHit(this.scoreMultiplier);
           this.dead = true;
           return;
         }

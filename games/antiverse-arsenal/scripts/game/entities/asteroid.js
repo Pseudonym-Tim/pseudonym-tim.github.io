@@ -28,6 +28,27 @@ class Asteroid extends Damageable {
     this.move(dt);
   }
 
+  onDestroyed() {
+    this.game.spawnExplosion(this.universe, this.x, this.y, { size: this.radius * 2.35, velX: this.velX * 0.05, velY: this.velY * 0.05 });
+    const baseScore = Math.max(1, this.size) * ASTEROID_SCORE_PER_SIZE;
+    this.game.awardPoints(baseScore, this.killMultiplier || 1, this.universe, this.x, this.y, '#aefcff');
+
+    if (this.size <= 1) {
+      return;
+    }
+
+    const fragments = 2 + Math.floor(Math.random() * 2);
+    for (let i = 0; i < fragments; i++) {
+      const fragment = new Asteroid(this.game, this.universe, this.x, this.y, this.size - 1);
+      fragment.primary = false;
+      const angle = (Math.PI * 2 * i) / fragments + rand(-0.35, 0.35);
+      const speed = rand(70, 130);
+      fragment.velX = Math.cos(angle) * speed + this.velX * 0.25;
+      fragment.velY = Math.sin(angle) * speed + this.velY * 0.25;
+      this.universe.asteroids.push(fragment);
+    }
+  }
+
   draw(ctx) {
     ctx.save();
     ctx.translate(this.x, this.y);

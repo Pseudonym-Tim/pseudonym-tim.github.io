@@ -33,6 +33,33 @@ class Player {
     return circleCollisionShape(this.x, this.y, this.radius);
   }
 
+  takeDamage(sourceVX = 0, sourceVY = 0) {
+    const game = this.game;
+    if (game.invulnerable || game.debugInvulnerable || this.dashing || !game.running) {
+      return;
+    }
+
+    game.hp -= 1;
+    game.sound.play('hitHurt');
+    this.universe.triggerDamageShake();
+    game.invulnerable = true;
+    this.triggerDamageFlash();
+    game.addFloatingText(this.universe, this.x, this.y - 18, formatText('float.hullDamage'), '#ff4d5a');
+    game.triggerHitStop(0.06, 0.28, 0.24);
+
+    setTimeout(() => { game.invulnerable = false; }, 900);
+
+    const force = Math.max(1, Math.hypot(sourceVX, sourceVY));
+    this.velX += (sourceVX / force) * 120;
+    this.velY += (sourceVY / force) * 120;
+
+    if (game.hp <= 0) {
+      game.hp = 0;
+      game.spawnExplosion(this.universe, this.x, this.y, { soundEffect: 'explosion', size: this.radius * 5.2, velX: this.velX * 0.06, velY: this.velY * 0.06 });
+      game.gameOver();
+    }
+  }
+
   update(dt) {
     const keys = this.game.keys;
     const firing = Boolean(keys.Space);

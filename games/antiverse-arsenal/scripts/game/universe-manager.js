@@ -78,8 +78,10 @@ Object.assign(Game.prototype, {
   },
 
   findSpawnLocation() {
-    const w = LOGICAL_W * this.scale;
-    const h = (LOGICAL_H + HEADER_H) * this.scale;
+    const reference = this.universes.find((universe) => universe.width === LOGICAL_W && universe.height === LOGICAL_H);
+    const size = reference?.getOuterSize();
+    const w = size?.w ?? LOGICAL_W * this.scale;
+    const h = size?.h ?? (LOGICAL_H + HEADER_H) * this.scale;
 
     // When the screen is packed, pick the least shitty spot and let layout physics shove stuff around...
     // The relaxation pass can clean up the resulting window pileup...
@@ -99,6 +101,41 @@ Object.assign(Game.prototype, {
 
   relaxUniverseLayout(focus = null) {
     relaxWindowLayout(this.universes, focus, this.scale);
+  },
+
+  makeRoomForSpawn(universe) {
+    const padding = Math.max(6, 9 * this.scale);
+    let relocated = false;
+
+    // Keep spawn point stable and move every older window that intersects
+    // it to a position which is clear of the new universe and all other
+    // windows... Push solver can get pinned against a viewport edge, so
+    // fresh placement search avoids leaving the unresolved overlap behind...
+    for (const other of this.universes) {
+      if (other === universe || !rectsOverlap(universe.getRect(), other.getRect(), padding)) {
+        continue;
+      }
+
+      const obstacles = this.universes.filter((candidate) => candidate !== other);
+      const size = other.getOuterSize();
+      const position = findOpenWindowPosition(obstacles, size.w, size.h, padding);
+      const candidateRect = { x: position.x, y: position.y, w: size.w, h: size.h };
+      const isOpen = obstacles.every((obstacle) => !rectsOverlap(candidateRect, obstacle.getRect(), padding));
+
+      if (isOpen) {
+        other.setPosition(position.x, position.y);
+        relocated = true;
+      }
+    }
+
+    // If there actually is not enough fixed free space for a relocation,
+    // just retain the chain-push/relax fallback so the entire layout can reflow...
+    if (this.universes.some((other) => other !== universe && rectsOverlap(universe.getRect(), other.getRect(), padding))) {
+      this.resolveDraggedUniverseCollisions(universe);
+      this.relaxUniverseLayout(universe);
+    }
+
+    return relocated;
   },
 
   startDraggingUniverse(universe, e) {

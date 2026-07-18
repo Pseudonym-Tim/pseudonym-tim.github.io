@@ -5,8 +5,9 @@ function computeViewportScale(designWidth, designHeight, minScale, maxScale, vie
 }
 
 function getClampedWindowPosition(frame, x, y, viewportWidth = window.innerWidth, viewportHeight = window.innerHeight, inset = 4) {
-  const maxX = Math.max(0, viewportWidth - frame.cssWidth - inset);
-  const maxY = Math.max(0, viewportHeight - frame.cssHeight - frame.cssHeader - inset);
+  const rect = frame.getRect();
+  const maxX = Math.max(0, viewportWidth - rect.w - inset);
+  const maxY = Math.max(0, viewportHeight - rect.h - inset);
   return { x: clamp(x, inset, maxX), y: clamp(y, inset, maxY) };
 }
 
@@ -22,16 +23,16 @@ function findOpenWindowPosition(frames, width, height, padding = 10, attempts = 
   let best = null;
   let bestScore = Infinity;
 
-  for (let attempt = 0; attempt < attempts; attempt++) {
-    const rect = { x: rand(padding, maxX), y: rand(padding, maxY), w: width, h: height };
+  const scorePosition = (x, y) => {
+    const rect = { x, y, w: width, h: height };
     let score = 0;
 
     for (const frame of frames) {
       const other = frame.getRect();
-      if (rectsOverlap(rect, other, 8)) {
-        const ox = Math.min(rect.x + rect.w, other.x + other.w) - Math.max(rect.x, other.x);
-        const oy = Math.min(rect.y + rect.h, other.y + other.h) - Math.max(rect.y, other.y);
-        score += Math.max(0, ox) * Math.max(0, oy);
+
+      if (rectsOverlap(rect, other, padding)) {
+        // Add one so even an edge inside the requested padding can't be mistaken for a completely open position...
+        score += getWindowOverlapArea(rect, other, padding) + 1;
       }
     }
 
@@ -40,8 +41,37 @@ function findOpenWindowPosition(frames, width, height, padding = 10, attempts = 
       best = rect;
     }
 
-    if (score === 0) {
+    return score === 0;
+  };
+
+  for (let attempt = 0; attempt < attempts; attempt++) {
+    const rect = { x: rand(padding, maxX), y: rand(padding, maxY), w: width, h: height };
+    if (scorePosition(rect.x, rect.y)) {
       return { x: rect.x, y: rect.y };
+    }
+  }
+
+  // Random sampling can miss a narrow but valid opening. Any axis-aligned
+  // opening can be reached by sliding its top-left corner toward a viewport
+  // edge, or an existing window edge, so check all of the damn intersections...
+  const xCandidates = [padding];
+  const yCandidates = [padding];
+
+  for (const frame of frames) {
+    const rect = frame.getRect();
+    xCandidates.push(rect.x + rect.w + padding);
+    yCandidates.push(rect.y + rect.h + padding);
+  }
+
+  for (const x of xCandidates) {
+    if (x > maxX) {
+      continue;
+    }
+
+    for (const y of yCandidates) {
+      if (y <= maxY && scorePosition(x, y)) {
+        return { x, y };
+      }
     }
   }
 

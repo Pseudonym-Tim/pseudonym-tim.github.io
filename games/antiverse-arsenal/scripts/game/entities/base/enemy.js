@@ -24,6 +24,13 @@ class Enemy extends Damageable {
     this.ignoreRoll = config.ignoreRoll ?? false;
     this.maxRoll = config.maxRoll ?? 0.48;
     this.aimResponsiveness = config.aimResponsiveness ?? 8.5;
+    this.shotLeading = clamp(config.shotLeading ?? 0.65, 0, 1);
+    this.maxLeadTime = config.maxLeadTime ?? 1.8;
+    this.aimError = config.aimError ?? 0.045;
+    this.aimBias = rand(-this.aimError, this.aimError);
+    this.avoidanceSkill = clamp(config.avoidanceSkill ?? 0.75, 0, 1);
+    this.avoidanceLookAhead = config.avoidanceLookAhead ?? 1.35;
+    this.asteroidCollisionCooldown = 0;
     this.rollResponsiveness = config.rollResponsiveness ?? 9.5;
     this.avoidanceX = 0;
     this.avoidanceY = 0;
@@ -36,6 +43,31 @@ class Enemy extends Damageable {
     this.steerTowardPlayer(dt);
     this.updateWeapon(dt);
     this.move(dt);
+    this.handleAsteroidCollisions(dt);
+  }
+
+  registerHit(multiplier = 1) {
+    if (this.expired) {
+      return;
+    }
+
+    this.game.awardPoints(ENEMY_HIT_SCORE, multiplier, this.universe, this.x, this.y - 14, '#fff3a3');
+  }
+
+  onDestroyed() {
+    this.game.spawnExplosion(this.universe, this.x, this.y, { soundEffect: 'explosion', size: this.radius * 4.4, velX: this.velX * 0.08, velY: this.velY * 0.08 });
+    this.game.clearEnemyThreat(this);
+
+    if (this === this.game.boss || this.enemyType === 'boss') {
+      this.game.finishBossEncounter();
+      return;
+    }
+
+    if (!this.destroyedByAsteroid) {
+      this.game.awardPoints(ENEMY_SCORE, Math.max(1, this.killMultiplier || 1), this.universe, this.x, this.y + 8, '#ffd25c');
+    }
+
+    this.game.tryEndRoundFromThreats();
   }
 
   steerTowardPlayer(dt) {
@@ -67,8 +99,9 @@ class Enemy extends Damageable {
     this.velX += (dx / distance) * accel * dt;
     this.velY += (dy / distance) * accel * dt;
 
-    this.velX += this.avoidanceX * accel * 1.45 * dt;
-    this.velY += this.avoidanceY * accel * 1.45 * dt;
+    const avoidanceForce = 1.5 + this.avoidanceSkill * 2.5;
+    this.velX += this.avoidanceX * accel * avoidanceForce * dt;
+    this.velY += this.avoidanceY * accel * avoidanceForce * dt;
 
     const speed = Math.hypot(this.velX, this.velY);
     const maxSpeed = this.maxSpeed + this.game.round * this.maxSpeedPerRound;
@@ -98,19 +131,51 @@ class Enemy extends Damageable {
   }
 
   fireAtPlayer(angleOffset = 0, speed = this.bulletSpeed, maxWraps = this.bulletMaxWraps) {
-    const player = this.game.player;
-    const me = this.universe.localToWorld(this.x, this.y);
-    const them = player.universe.localToWorld(player.x, player.y);
-    const angle = Math.atan2(them.y - me.y, them.x - me.x) + angleOffset;
+    const angle = this.getPlayerInterceptAngle(speed) + angleOffset;
 
     // Passing the entire known universe as arguments...
     // BUT THAT'S TOTALLY OKAY BECAUSE THIS IS A NICE LITTLE WRAPPER FUNCTION, RIGHT?
     this.game.spawnBullet(this.universe, this.x + Math.cos(angle) * this.radius, this.y + Math.sin(angle) * this.radius, Math.cos(angle) * speed + this.velX * 0.2, Math.sin(angle) * speed + this.velY * 0.2, 'enemy', 1, { maxWraps });
   }
 
+  getPlayerInterceptAngle(projectileSpeed) {
+    const player = this.game.player;
+    const me = this.universe.localToWorld(this.x, this.y);
+    const them = player.universe.localToWorld(player.x, player.y);
+    const shooterScale = this.universe.scale || 1;
+    const playerScale = player.universe.scale || 1;
+    const relativeX = them.x - me.x;
+    const relativeY = them.y - me.y;
+    const projectileWorldSpeed = Math.max(1, projectileSpeed * shooterScale);
+    const targetVX = player.velX * playerScale * this.shotLeading;
+    const targetVY = player.velY * playerScale * this.shotLeading;
+    const inheritedVX = this.velX * shooterScale * 0.2;
+    const inheritedVY = this.velY * shooterScale * 0.2;
+    const velocityX = targetVX - inheritedVX;
+    const velocityY = targetVY - inheritedVY;
+    const a = velocityX * velocityX + velocityY * velocityY - projectileWorldSpeed * projectileWorldSpeed;
+    const b = 2 * (relativeX * velocityX + relativeY * velocityY);
+    const c = relativeX * relativeX + relativeY * relativeY;
+    let interceptTime = 0;
+
+    if (Math.abs(a) < 0.0001) {
+      interceptTime = b < -0.0001 ? -c / b : 0;
+    } else {
+      const discriminant = b * b - 4 * a * c;
+
+      if (discriminant >= 0) {
+        const root = Math.sqrt(discriminant);
+        const first = (-b - root) / (2 * a);
+        const second = (-b + root) / (2 * a);
+        interceptTime = first > 0 && second > 0 ? Math.min(first, second) : Math.max(first, second, 0);
+      }
+    }
+
+    interceptTime = clamp(interceptTime, 0, this.maxLeadTime);
+    return Math.atan2(relativeY + targetVY * interceptTime, relativeX + targetVX * interceptTime) + this.aimBias;
+  }
+
   getEnemyAvoidance() {
-    const desiredSpacing = this.radius * 5.4;
-    const desiredSpacingSq = desiredSpacing * desiredSpacing;
     let pushX = 0;
     let pushY = 0;
 
@@ -119,33 +184,87 @@ class Enemy extends Damageable {
         continue;
       }
 
-      const dx = this.x - other.x;
-      const dy = this.y - other.y;
-      const dSq = dx * dx + dy * dy;
-      if (dSq >= desiredSpacingSq) {
+      const result = this.getObstacleAvoidance(other, this.radius + other.radius + 42, this.avoidanceLookAhead);
+      pushX += result.x * result.weight;
+      pushY += result.y * result.weight;
+    }
+
+    for (const asteroid of this.universe.asteroids) {
+      if (asteroid.dead || asteroid.expired) {
         continue;
       }
 
-      if (dSq <= 0.0001) {
-        pushX += Math.cos(this.angle) * 0.35;
-        pushY += Math.sin(this.angle) * 0.35;
-        continue;
-      }
-
-      const distance = Math.sqrt(dSq);
-      const closeness = 1 - distance / desiredSpacing;
-      const softPush = closeness * closeness;
-      pushX += (dx / distance) * softPush;
-      pushY += (dy / distance) * softPush;
+      const clearance = this.radius + asteroid.radius + 35 + this.avoidanceSkill * 45;
+      const result = this.getObstacleAvoidance(asteroid, clearance, this.avoidanceLookAhead + this.avoidanceSkill * 1.15);
+      pushX += result.x * result.weight * (1.4 + this.avoidanceSkill * 2.4);
+      pushY += result.y * result.weight * (1.4 + this.avoidanceSkill * 2.4);
     }
 
     const pushLength = Math.hypot(pushX, pushY);
+
     if (pushLength > 1) {
       pushX /= pushLength;
       pushY /= pushLength;
     }
 
-    return { x: pushX, y: pushY };
+    return { x: pushX * this.avoidanceSkill, y: pushY * this.avoidanceSkill };
+  }
+
+  getObstacleAvoidance(obstacle, clearance, lookAhead) {
+    const relativeX = obstacle.x - this.x;
+    const relativeY = obstacle.y - this.y;
+    const relativeVX = (obstacle.velX || 0) - this.velX;
+    const relativeVY = (obstacle.velY || 0) - this.velY;
+    const relativeSpeedSq = relativeVX * relativeVX + relativeVY * relativeVY;
+    const closestTime = relativeSpeedSq > 0.01 ? clamp(-(relativeX * relativeVX + relativeY * relativeVY) / relativeSpeedSq, 0, lookAhead) : 0;
+    const closestX = relativeX + relativeVX * closestTime;
+    const closestY = relativeY + relativeVY * closestTime;
+    const closestDistance = Math.hypot(closestX, closestY);
+
+    if (closestDistance >= clearance) {
+      return { x: 0, y: 0, weight: 0 };
+    }
+
+    const fallbackX = Math.cos(this.angle + Math.PI / 2);
+    const fallbackY = Math.sin(this.angle + Math.PI / 2);
+    const inverseDistance = 1 / Math.max(0.001, closestDistance);
+    const urgency = 1 - closestDistance / clearance;
+    const timeUrgency = 1 - closestTime / Math.max(0.001, lookAhead);
+
+    return {
+      x: closestDistance > 0.001 ? -closestX * inverseDistance : fallbackX,
+      y: closestDistance > 0.001 ? -closestY * inverseDistance : fallbackY,
+      weight: urgency * urgency * (1.2 + timeUrgency)
+    };
+  }
+
+  handleAsteroidCollisions(dt) {
+    this.asteroidCollisionCooldown = Math.max(0, this.asteroidCollisionCooldown - dt);
+
+    for (const asteroid of this.universe.asteroids) {
+      if (asteroid.dead || !entitiesOverlap(this, asteroid)) {
+        continue;
+      }
+
+      const dx = this.x - asteroid.x;
+      const dy = this.y - asteroid.y;
+      const distance = Math.max(0.001, Math.hypot(dx, dy));
+      const normalX = Math.abs(dx) + Math.abs(dy) > 0.001 ? dx / distance : Math.cos(this.angle + Math.PI / 2);
+      const normalY = Math.abs(dx) + Math.abs(dy) > 0.001 ? dy / distance : Math.sin(this.angle + Math.PI / 2);
+      const overlap = this.radius + asteroid.radius - distance;
+      this.x += normalX * Math.max(0, overlap + 1);
+      this.y += normalY * Math.max(0, overlap + 1);
+      this.velX += normalX * (80 + asteroid.size * 25);
+      this.velY += normalY * (80 + asteroid.size * 25);
+
+      if (this.asteroidCollisionCooldown <= 0) {
+        this.takeDamage(Math.max(1, asteroid.size - 1), 1);
+        this.destroyedByAsteroid = this.dead;
+        this.asteroidCollisionCooldown = 0.45;
+      }
+      
+      break;
+    }
   }
 
   draw(ctx) {

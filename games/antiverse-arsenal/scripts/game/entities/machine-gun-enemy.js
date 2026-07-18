@@ -13,6 +13,11 @@ class MachineGunEnemy extends Enemy {
       firePressure: 0.065,
       bulletSpeed: 225,
       bulletMaxWraps: 1,
+      shotLeading: 0.94,
+      maxLeadTime: 2.1,
+      aimError: 0.022,
+      avoidanceSkill: 0.96,
+      avoidanceLookAhead: 1.8,
       sprite: pixelArt.enemyMachineGun,
       spriteScale: 1.08
     });
