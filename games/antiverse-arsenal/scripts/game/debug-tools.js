@@ -91,19 +91,19 @@ Object.assign(Game.prototype, {
     this.flashMessage(`DEBUG: Collision view ${this.debugShowCollisions ? 'ON' : 'OFF'}`, 700);
   },
 
-  debugGiveSniperPowerup() {
+  debugGivePowerup() {
     if (!this.running) {
       return;
     }
 
-    const alreadyInstalled = this.hasPowerup('sniper');
+    const powerupID = 'multi';
+    const alreadyGiven = this.hasPowerup(powerupID);
+    const powerupName = formatText(`powerups.${powerupID}.name`);
 
-    if (!alreadyInstalled) {
-      this.applyPowerup('sniper');
+    if (!alreadyGiven) {
+      this.applyPowerup(powerupID);
+      this.flashMessage(formatText('message.debugPowerup', { name: powerupName }), 700);
     }
-
-    const state = alreadyInstalled ? formatText('message.debugOn') : formatText('message.powerupInstalled', { name: formatText('powerups.sniper.name') });
-    this.flashMessage(formatText('message.debugSniperPowerup', { state }), 750);
   },
 
   drawCollisionDebug() {

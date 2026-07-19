@@ -55,7 +55,7 @@ class Bullet {
 
       if (this.owner === 'enemy' || canHitOwner) {
         if (collisionShapesOverlap(this.getCollisionShape(), entityCollisionShape(player))) {
-          player.takeDamage(this.velX, this.velY);
+          player.takeDamage(this.velX, this.velY, this.damage);
           this.dead = true;
           return;
         }
@@ -81,6 +81,102 @@ class Bullet {
           return;
         }
       }
+    }
+  }
+
+  getWrapWarning() {
+    const direction = normalizeVector(this.velX, this.velY);
+
+    // The final wrap deliberately has no preview...
+    if (!direction || this.wrapCount >= this.maxWraps - 1) {
+      return null;
+    }
+
+    const source = this.universe;
+    const worldPosition = source.localToWorld(this.x, this.y);
+    const worldDirection = normalizeVector(direction.x * source.scale, direction.y * source.scale);
+    const exit = rayExitRect(worldPosition, worldDirection, source.getCanvasRect());
+
+    if (!exit) {
+      return null;
+    }
+
+    const distance = Math.hypot(exit.x - worldPosition.x, exit.y - worldPosition.y) / source.scale;
+
+    if (distance > WRAP_WARNING_DISTANCE) {
+      return null;
+    }
+
+    const approach = 1 - distance / WRAP_WARNING_DISTANCE;
+    const sourceExit = source.worldToLocal(exit.x, exit.y);
+    const hit = this.game.findRaycastUniverse(exit.x, exit.y, worldDirection, source);
+    const target = hit?.universe || source;
+    let targetEntry;
+
+    if (hit) {
+      targetEntry = target.worldToLocal(hit.x, hit.y);
+    } else {
+      const hitLeft = sourceExit.x <= 0.001;
+      const hitRight = sourceExit.x >= source.width - 0.001;
+      const hitTop = sourceExit.y <= 0.001;
+      const hitBottom = sourceExit.y >= source.height - 0.001;
+
+      targetEntry = {
+        x: hitLeft ? target.width : hitRight ? 0 : sourceExit.x,
+        y: hitTop ? target.height : hitBottom ? 0 : sourceExit.y
+      };
+    }
+
+    const targetDirection = normalizeVector(worldDirection.x / target.scale, worldDirection.y / target.scale);
+    const travelDistance = 24;
+
+    const slideAlongBorder = (point, universe, localDirection) => {
+      const onVerticalBorder = point.x <= 0.001 || point.x >= universe.width - 0.001;
+      const offset = approach * travelDistance;
+
+      // Warning lights remain on their border and only slide along tangent so you can judge what direction they're travelling roughly...
+      // (Vertical borders follow vertical movement, while horizontal borders follow horizontal movement)...
+      return onVerticalBorder
+        ? { x: point.x, y: point.y + localDirection.y * offset }
+        : { x: point.x + localDirection.x * offset, y: point.y };
+    };
+
+    return {
+      // Each wrap softens the remaining warning so old repeated shots become less distracting..
+      alpha: Math.pow(approach, 1.15) * (1 - this.wrapCount / this.maxWraps),
+      lights: [
+        { universe: source, ...slideAlongBorder(sourceExit, source, direction) },
+        { universe: target, ...slideAlongBorder(targetEntry, target, targetDirection) }
+      ]
+    };
+  }
+
+  drawWrapWarning() {
+    const warning = this.getWrapWarning();
+
+    if (!warning) {
+      return;
+    }
+
+    const [red, green, blue] = this.owner === 'player' ? [143, 255, 143] : [255, 121, 94];
+    const intensity = clamp(warning.alpha * 0.2, 0, 1);
+    const radius = 30 + intensity * 20;
+
+    for (const light of warning.lights) {
+      const ctx = light.universe.ctx;
+      const x = clamp(light.x, WRAP_WARNING_INSET, light.universe.width - WRAP_WARNING_INSET);
+      const y = clamp(light.y, WRAP_WARNING_INSET, light.universe.height - WRAP_WARNING_INSET);
+      const glow = ctx.createRadialGradient(x, y, 0, x, y, radius);
+
+      glow.addColorStop(0, `rgba(${red}, ${green}, ${blue}, ${intensity})`);
+      glow.addColorStop(0.18, `rgba(${red}, ${green}, ${blue}, ${intensity * 0.7})`);
+      glow.addColorStop(1, `rgba(${red}, ${green}, ${blue}, 0)`);
+
+      ctx.save();
+      ctx.globalCompositeOperation = 'screen';
+      ctx.fillStyle = glow;
+      ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+      ctx.restore();
     }
   }
 

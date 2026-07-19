@@ -67,7 +67,7 @@ Object.assign(Game.prototype, {
       }
 
       if (e.code === 'KeyP' && !e.repeat) {
-        this.debugGiveSniperPowerup();
+        this.debugGivePowerup();
       }
     });
 

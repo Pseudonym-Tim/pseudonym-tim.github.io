@@ -41,6 +41,7 @@ class Game {
     this.finalIncursionAnnounced = false;
     this.encounterClearTimer = 0;
     this.hp = MAX_PLAYER_HULL;
+    this.maxHull = MAX_PLAYER_HULL;
     this.score = 0;
     this.wrapShotHits = 0;
     this.highestWrapShotCount = 0;

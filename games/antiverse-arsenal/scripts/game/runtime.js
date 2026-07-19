@@ -109,6 +109,12 @@ Object.assign(Game.prototype, {
       u.draw();
     }
 
+    if (ENABLE_BULLET_WRAP_WARNING) {
+      for (const bullet of this.bullets) {
+        bullet.drawWrapWarning();
+      }
+    }
+
     for (const bullet of this.bullets) {
       bullet.draw();
     }

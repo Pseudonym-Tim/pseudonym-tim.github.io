@@ -15,7 +15,8 @@ Object.assign(Game.prototype, {
     const weights = [
       { EnemyClass: NormalEnemy, weight: Math.max(35, 100 - difficulty * 9) },
       { EnemyClass: ShotgunEnemy, weight: Math.max(0, difficulty * 5) },
-      { EnemyClass: MachineGunEnemy, weight: Math.max(0, difficulty * 4) }
+      { EnemyClass: MachineGunEnemy, weight: Math.max(0, difficulty * 4) },
+      { EnemyClass: SniperEnemy, weight: Math.max(0, (difficulty - 2) * 3) }
     ];
 
     const total = weights.reduce((sum, item) => sum + item.weight, 0);

@@ -38,14 +38,10 @@ class SoundManager {
       const pool = [];
 
       for (let i = 0; i < poolSize; i++) {
-        const audio = new Audio(src);
-        audio.preload = 'auto';
-        audio.volume = options.volume ?? 0.6;
-        this.disablePitchPreservation(audio);
-        pool.push(audio);
+        pool.push(this.createAudio(src, options));
       }
 
-      this.pools.set(name, { index: 0, items: pool });
+      this.pools.set(name, { index: 0, items: pool, maxSize: options.maxPoolSize || poolSize * 2, options, src });
     }
   }
 
@@ -55,20 +51,61 @@ class SoundManager {
     }
 
     const pool = this.pools.get(name);
+
     if (!pool || pool.items.length === 0) {
       return;
     }
 
-    const audio = pool.items[pool.index];
-    pool.index = (pool.index + 1) % pool.items.length;
+    const audio = this.getAvailableAudio(pool);
+
+    if (!audio) {
+      return;
+    }
+
     audio.currentTime = 0;
     audio.volume = options.volume ?? this.defaults[name]?.volume ?? audio.volume;
     this.applyPitch(audio, options.pitchRange ?? this.defaults[name]?.pitchRange);
 
     const playback = audio.play();
+
     if (playback?.catch) {
       playback.catch(() => {});
     }
+  }
+
+  createAudio(src, options) {
+    const audio = new Audio(src);
+    audio.preload = 'auto';
+    audio.volume = options.volume ?? 0.6;
+    this.disablePitchPreservation(audio);
+    return audio;
+  }
+
+  getAvailableAudio(pool) {
+    const { items } = pool;
+
+    // Reusing a playing element restarts it, which can truncate previous SFX...
+    // Search the pool first so overlapping sounds can finish naturally...
+    for (let offset = 0; offset < items.length; offset++) {
+      const index = (pool.index + offset) % items.length;
+
+      if (items[index].paused || items[index].ended) {
+        pool.index = (index + 1) % items.length;
+        return items[index];
+      }
+    }
+
+    // Brief bursts can exceed initial pool size, just Add a channel instead of
+    // stealing one that is still playing, (while retaining a bounded pool)...
+    if (items.length < pool.maxSize) {
+      const audio = this.createAudio(pool.src, pool.options);
+      
+      items.push(audio);
+      pool.index = 0;
+      return audio;
+    }
+
+    return null;
   }
 
   applyPitch(audio, pitchRange) {

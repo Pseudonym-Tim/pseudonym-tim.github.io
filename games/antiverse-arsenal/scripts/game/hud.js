@@ -1,8 +1,8 @@
 // HUD...
 Object.assign(Game.prototype, {
   updateHUD() {
-    const hullRatio = clamp(this.hp / MAX_PLAYER_HULL, 0, 1);
-    hullValue.textContent = `${this.hp}/${MAX_PLAYER_HULL}`;
+    const hullRatio = clamp(this.hp / this.maxHull, 0, 1);
+    hullValue.textContent = `${this.hp}/${this.maxHull}`;
 
     if (hullGaugeNeedle) {
       hullGaugeNeedle.style.transform = `translateX(-50%) rotate(${-90 + hullRatio * 180}deg)`;

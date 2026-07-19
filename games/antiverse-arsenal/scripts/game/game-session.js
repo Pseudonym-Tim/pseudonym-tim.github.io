@@ -28,6 +28,7 @@ Object.assign(Game.prototype, {
     this.hitSlowTimer = 0;
     this.hitSlowScale = 1;
     this.hp = MAX_PLAYER_HULL;
+    this.maxHull = MAX_PLAYER_HULL;
     this.score = 0;
     this.wrapShotHits = 0;
     this.highestWrapShotCount = 0;

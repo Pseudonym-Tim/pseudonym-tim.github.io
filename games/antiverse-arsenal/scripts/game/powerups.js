@@ -1,20 +1,34 @@
 // Powerups...
+const POWERUP_DEFINITIONS = [
+  { id: 'burst', nameKey: 'powerups.burst.name', descKey: 'powerups.burst.desc', isWeaponReplacement: true, canAppearAgain: true, trackOwnership: true },
+  { id: 'multi', nameKey: 'powerups.multi.name', descKey: 'powerups.multi.desc', isWeaponReplacement: true, canAppearAgain: true, trackOwnership: true },
+  { id: 'dual', nameKey: 'powerups.dual.name', descKey: 'powerups.dual.desc', isWeaponReplacement: true, canAppearAgain: true, trackOwnership: true },
+  { id: 'sniper', nameKey: 'powerups.sniper.name', descKey: 'powerups.sniper.desc', isWeaponReplacement: true, canAppearAgain: true, trackOwnership: true },
+  { id: 'repair', nameKey: 'powerups.repair.name', descKey: 'powerups.repair.desc', canAppearAgain: true, trackOwnership: false },
+  { id: 'speed', nameKey: 'powerups.speed.name', descKey: 'powerups.speed.desc', canAppearAgain: true, trackOwnership: true },
+  { id: 'quantum_boost', nameKey: 'powerups.quantum_boost.name', descKey: 'powerups.quantum_boost.desc', canAppearAgain: true, trackOwnership: true },
+  { id: 'reinforced_hull', nameKey: 'powerups.reinforced_hull.name', descKey: 'powerups.reinforced_hull.desc', canAppearAgain: true, trackOwnership: true },
+];
+
 Object.assign(Game.prototype, {
   showPowerupSelection(afterSelection = null) {
     this.keys = {};
     powerupOptions.innerHTML = '';
     powerupOverlay.classList.remove('hidden');
 
-    const all = [
-      { id: 'rapid', name: formatText('powerups.rapid.name'), desc: formatText('powerups.rapid.desc') },
-      { id: 'multi', name: formatText('powerups.multi.name'), desc: formatText('powerups.multi.desc') },
-      { id: 'shield', name: formatText('powerups.shield.name'), desc: formatText('powerups.shield.desc') },
-      { id: 'speed', name: formatText('powerups.speed.name'), desc: formatText('powerups.speed.desc') },
-      { id: 'quantum_boost', name: formatText('powerups.quantum_boost.name'), desc: formatText('powerups.quantum_boost.desc') },
-      { id: 'sniper', name: formatText('powerups.sniper.name'), desc: formatText('powerups.sniper.desc') }
-    ];
+    const all = POWERUP_DEFINITIONS.map((powerup) => ({
+      ...powerup,
+      name: formatText(powerup.nameKey),
+      desc: formatText(powerup.descKey)
+    }));
 
-    const pool = all.filter((p) => !this.powerups.includes(p.id));
+    const pool = all.filter((p) => (
+      (!p.isWeaponReplacement || !this.hasPowerup(p.id))
+      && (p.id !== 'reinforced_hull' || !this.hasPowerup('reinforced_hull'))
+      && (p.canAppearAgain || !this.powerups.includes(p.id))
+      && (p.id !== 'repair' || this.hp < this.maxHull)
+    ));
+
     const choices = [];
 
     while (choices.length < 3 && pool.length) {
@@ -43,7 +57,7 @@ Object.assign(Game.prototype, {
         powerupOverlay.classList.add('hidden');
         this.keys = {};
 
-        this.showMessage(formatText('message.powerupInstalled', { name: option.name }), 900);
+        //this.showMessage(formatText('message.powerupInstalled', { name: option.name }), 900);
 
         if (afterSelection) {
           afterSelection();
@@ -59,13 +73,25 @@ Object.assign(Game.prototype, {
   },
 
   applyPowerup(id) {
-    this.powerups.push(id);
-    if (id === 'rapid') {
-      this.player.fireRate = Math.max(0.08, this.player.fireRate * 0.55);
+    const powerup = POWERUP_DEFINITIONS.find((definition) => definition.id === id);
+
+    if (powerup?.trackOwnership) {
+      if (powerup.isWeaponReplacement) {
+        const weaponReplacementIDs = POWERUP_DEFINITIONS.filter((definition) => definition.isWeaponReplacement).map((definition) => definition.id);
+        this.powerups = this.powerups.filter((ownedId) => !weaponReplacementIDs.includes(ownedId));
+        this.player.fireRate = this.player.baseFireRate;
+      }
+
+      this.powerups.push(id);
+    }
+    
+    if (id === 'repair') {
+      this.hp = this.maxHull;
     }
 
-    if (id === 'shield') {
-      this.hp = MAX_PLAYER_HULL;
+    if (id === 'reinforced_hull') {
+      this.maxHull = REINFORCED_PLAYER_HULL;
+      this.hp = this.maxHull;
     }
 
     if (id === 'speed') {

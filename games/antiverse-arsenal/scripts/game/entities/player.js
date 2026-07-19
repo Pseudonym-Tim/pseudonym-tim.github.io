@@ -10,7 +10,10 @@ class Player {
     this.angle = 0;
     this.radius = 11;
     this.cooldown = 0;
-    this.fireRate = 0.24;
+    this.baseFireRate = 0.24;
+    this.fireRate = this.baseFireRate;
+    this.burstShotsRemaining = 0;
+    this.burstShotTimer = 0;
     this.wrapCount = 0;
     this.maxWraps = MAX_WRAPS;
     this.extraThrust = 0;
@@ -33,13 +36,13 @@ class Player {
     return circleCollisionShape(this.x, this.y, this.radius);
   }
 
-  takeDamage(sourceVX = 0, sourceVY = 0) {
+  takeDamage(sourceVX = 0, sourceVY = 0, damage = 1) {
     const game = this.game;
     if (game.invulnerable || game.debugInvulnerable || this.dashing || !game.running) {
       return;
     }
 
-    game.hp -= 1;
+    game.hp -= damage;
     game.sound.play('hitHurt');
     this.universe.triggerDamageShake();
     game.invulnerable = true;
@@ -91,6 +94,8 @@ class Player {
       return;
     }
 
+    this.updateBurst(dt);
+
     const maxSpeed = 335 + this.extraThrust * 0.55;
 
     if (movement) {
@@ -109,6 +114,9 @@ class Player {
       if (this.game.hasPowerup('sniper')) {
         this.fireSniperShot();
         this.cooldown = SNIPER_COOLDOWN;
+      } else if (this.game.hasPowerup('burst')) {
+        this.startBurst();
+        this.cooldown = BURST_COOLDOWN;
       } else {
         this.fire();
         this.cooldown = this.fireRate;
@@ -121,6 +129,25 @@ class Player {
     this.y += this.velY * dt;
 
     this.game.wrapEntity(this, { sameUniverse: true, countWrap: false, scoreMultiplier: false });
+  }
+
+  updateBurst(dt) {
+    if (this.burstShotsRemaining <= 0) {
+      return;
+    }
+
+    this.burstShotTimer -= dt;
+    while (this.burstShotsRemaining > 0 && this.burstShotTimer <= 0) {
+      this.fire(BURST_BULLET_SPEED);
+      this.burstShotsRemaining -= 1;
+      this.burstShotTimer += BURST_SHOT_INTERVAL;
+    }
+  }
+
+  startBurst() {
+    this.fire(BURST_BULLET_SPEED);
+    this.burstShotsRemaining = BURST_SHOT_COUNT - 1;
+    this.burstShotTimer = BURST_SHOT_INTERVAL;
   }
 
   getDashDirection() {
@@ -201,19 +228,29 @@ class Player {
     this.dashHitEntities.clear();
   }
 
-  fire() {
+  fire(bulletSpeed = NORMAL_BULLET_SPEED) {
     const baseMult = 1;
     const aimAngle = this.angle;
     const hasMultiShot = this.game.hasPowerup('multi');
+    const hasDualShot = this.game.hasPowerup('dual');
     const angles = hasMultiShot ? [aimAngle, aimAngle - 0.2, aimAngle + 0.2] : [aimAngle];
+    const dualShotOffset = 16;
     this.game.sound.play('shoot');
 
     angles.forEach((angle) => {
-      const x = this.x + Math.cos(angle) * (this.radius + 3);
-      const y = this.y + Math.sin(angle) * (this.radius + 3);
-      const vx = Math.cos(angle) * BULLET_SPEED + this.velX * 0.15;
-      const vy = Math.sin(angle) * BULLET_SPEED + this.velY * 0.15;
-      this.game.spawnBullet(this.universe, x, y, vx, vy, 'player', baseMult, { maxWraps: hasMultiShot ? 1 : MAX_WRAPS, playSound: false });
+      const vx = Math.cos(angle) * bulletSpeed + this.velX * 0.15;
+      const vy = Math.sin(angle) * bulletSpeed + this.velY * 0.15;
+      const muzzleX = this.x + Math.cos(angle) * (this.radius + 3);
+      const muzzleY = this.y + Math.sin(angle) * (this.radius + 3);
+      const lateralX = -Math.sin(angle) * dualShotOffset;
+      const lateralY = Math.cos(angle) * dualShotOffset;
+      const offsets = hasDualShot ? [-1, 1] : [0];
+      
+      offsets.forEach((offset) => {
+        // Passing the entire known universe as arguments...
+        // BUT THAT'S TOTALLY OKAY BECAUSE THIS IS A NICE LITTLE WRAPPER FUNCTION, RIGHT?
+        this.game.spawnBullet(this.universe, muzzleX + lateralX * offset, muzzleY + lateralY * offset, vx, vy, 'player', baseMult, { maxWraps: hasMultiShot ? 1 : MAX_WRAPS, playSound: false });
+      });
     });
   }
 
@@ -224,7 +261,7 @@ class Player {
     const vx = Math.cos(angle) * SNIPER_SPEED + this.velX * 0.08;
     const vy = Math.sin(angle) * SNIPER_SPEED + this.velY * 0.08;
     this.game.sound.play('shoot');
-    this.game.spawnBullet(this.universe, x, y, vx, vy, 'player', 1, { damage: SNIPER_DAMAGE, maxWraps: 0, playSound: false, radius: 4, spriteScale: 1.35 });
+    this.game.spawnBullet(this.universe, x, y, vx, vy, 'player', 1, { damage: SNIPER_DAMAGE, maxWraps: 0, playSound: false, });
   }
 
   triggerDamageFlash(duration = this.damageFlashDuration) {
