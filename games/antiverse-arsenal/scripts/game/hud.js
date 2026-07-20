@@ -1,6 +1,10 @@
 // HUD...
 Object.assign(Game.prototype, {
   updateHUD() {
+    for (const universe of this.universes) {
+      universe.element.classList.toggle('player-universe', universe === this.player?.universe);
+    }
+
     const hullRatio = clamp(this.hp / this.maxHull, 0, 1);
     hullValue.textContent = `${this.hp}/${this.maxHull}`;
 

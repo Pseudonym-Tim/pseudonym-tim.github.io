@@ -16,6 +16,7 @@ Object.assign(Game.prototype, {
       { EnemyClass: NormalEnemy, weight: Math.max(35, 100 - difficulty * 9) },
       { EnemyClass: ShotgunEnemy, weight: Math.max(0, difficulty * 5) },
       { EnemyClass: MachineGunEnemy, weight: Math.max(0, difficulty * 4) },
+      { EnemyClass: DoubleShotEnemy, weight: Math.max(0, (difficulty - 1) * 5) },
       { EnemyClass: SniperEnemy, weight: Math.max(0, (difficulty - 2) * 3) }
     ];
 

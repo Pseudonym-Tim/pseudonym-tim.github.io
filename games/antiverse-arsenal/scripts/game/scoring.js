@@ -4,7 +4,7 @@ Object.assign(Game.prototype, {
     const mult = Math.max(1, multiplier || 1);
     const gained = Math.round(basePoints * mult);
     this.score += gained;
-    const amountText = mult > 1 ? `+${gained} (+${basePoints}x${formatMultiplier(mult)})` : `+${gained}`;
+    const amountText = mult > 1 ? `+${basePoints}x${formatMultiplier(mult)}` : `+${gained}`;
     const text = label ? `${label} ${amountText}` : amountText;
     this.addFloatingText(universe, x, y, text, color);
   },

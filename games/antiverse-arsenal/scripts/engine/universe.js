@@ -9,6 +9,7 @@ class Universe {
     this.height = LOGICAL_H;
     this.headerHeight = HEADER_H;
     this.enemies = [];
+    this.shipDebris = [];
     this.asteroids = [];
     this.hullPickups = [];
     this.theme = this.game.getUniverseTheme();
@@ -152,6 +153,15 @@ class Universe {
   }
 
   update(dt) {
+    for (let i = this.shipDebris.length - 1; i >= 0; i--) {
+      const debris = this.shipDebris[i];
+      debris.update(dt);
+
+      if (debris.dead) {
+        this.shipDebris.splice(i, 1);
+      }
+    }
+
     for (let i = this.enemies.length - 1; i >= 0; i--) {
       const enemy = this.enemies[i];
       
@@ -246,6 +256,10 @@ class Universe {
 
     for (const asteroid of this.asteroids) {
       asteroid.draw(ctx);
+    }
+
+    for (const debris of this.shipDebris) {
+      debris.draw(ctx);
     }
 
     for (const enemy of this.enemies) {

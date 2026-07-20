@@ -300,6 +300,17 @@ const pixelArt = {
       idle: { row: 0, frames: 3, fps: 8 }
     }
   }),
+  enemyDoubleShot: createAnimatedSprite({
+    image: 'assets/sprites/enemy_double_shot_ship.png',
+    frameWidth: 20,
+    frameHeight: 22,
+    frameCount: 3,
+    fps: 6,
+    defaultAnimation: 'idle',
+    animations: {
+      idle: { row: 0, frames: 3, fps: 6 }
+    }
+  }),
   enemyChargeSniper: createAnimatedSprite({
     image: 'assets/sprites/enemy_sniper_ship.png',
     frameWidth: 20,

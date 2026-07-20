@@ -58,6 +58,8 @@ class Player {
 
     if (game.hp <= 0) {
       game.hp = 0;
+      this.universe.triggerDamageShake();
+      game.spawnShipDebris(this.universe, this, { initialRotation: this.angle + Math.PI / 2 });
       game.spawnExplosion(this.universe, this.x, this.y, { soundEffect: 'explosion', size: this.radius * 5.2, velX: this.velX * 0.06, velY: this.velY * 0.06 });
       game.gameOver();
     }

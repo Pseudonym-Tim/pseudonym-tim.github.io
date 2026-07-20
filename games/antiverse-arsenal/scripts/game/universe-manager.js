@@ -1,7 +1,7 @@
 // Universe window management...
 Object.assign(Game.prototype, {
   computeScale() {
-    return 1;
+    return UNIVERSE_WINDOW_SCALE;
   },
 
   createUniverseThemes() {

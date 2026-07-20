@@ -55,6 +55,18 @@ class Enemy extends Damageable {
   }
 
   onDestroyed() {
+    if (!this.expired) {
+      this.universe.triggerDamageShake();
+
+      // Holy function parameters Batman!
+      this.game.spawnShipDebris(this.universe, this, this.enemyType === 'boss' ? {
+        initialRotation: this.tilt,
+        sprite: pixelArt.bossDreadnought?.[this.spriteState || this.getDamageSpriteState()] || pixelArt.bossDreadnought?.intact,
+        spriteScale: this.spriteScale,
+        isBoss: true
+      } : { initialRotation: this.angle + Math.PI / 2 });
+    }
+
     this.game.spawnExplosion(this.universe, this.x, this.y, { soundEffect: 'explosion', size: this.radius * 4.4, velX: this.velX * 0.08, velY: this.velY * 0.08 });
     this.game.clearEnemyThreat(this);
 

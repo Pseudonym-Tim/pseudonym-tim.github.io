@@ -1,5 +1,15 @@
 // Combat effects...
 Object.assign(Game.prototype, {
+  spawnShipDebris(universe, source, options = {}) {
+    if (!universe || !source) {
+      return null;
+    }
+
+    const debris = new DestroyedShipDebris(this, universe, source, options);
+    universe.shipDebris.push(debris);
+    return debris;
+  },
+
   spawnExplosion(universe, x, y, options = {}) {
     if (!universe) {
       return null;

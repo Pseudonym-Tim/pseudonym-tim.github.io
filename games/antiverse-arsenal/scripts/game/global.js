@@ -1,6 +1,7 @@
 const LOGICAL_W = 640;
 const LOGICAL_H = 480;
 const HEADER_H = 24;
+const UNIVERSE_WINDOW_SCALE = 0.95;
 const MAX_UNIVERSES = 4;
 const MAX_WRAPS = 4;
 const ENABLE_BULLET_WRAP_WARNING = true;
