@@ -104,10 +104,6 @@ Object.assign(Game.prototype, {
       }
 
       this.round = shopReady ? ROUND_RESET_AFTER_SHOP : completedRound + 1;
-      
-      if (shopReady) {
-        this.multiverse += 1;
-      }
 
       this.stability = 0;
       this.roundThreatTotal = 0;
@@ -123,6 +119,7 @@ Object.assign(Game.prototype, {
       this.encounterClearTimer = 0;
       this.spawnTimer = Infinity;
       this.roundEnding = false;
+      this.transitioning = true;
       this.bossActive = false;
       this.bossPending = false;
       this.bossDefeated = false;
@@ -146,6 +143,14 @@ Object.assign(Game.prototype, {
       };
 
       if (shopReady) {
+        await this.showMultiverseComplete();
+
+        if (!this.running) {
+          return;
+        }
+
+        this.multiverse += 1;
+
         this.showMessage(formatText('message.traderDetected'), 1200);
 
         setTimeout(() => {
@@ -159,6 +164,58 @@ Object.assign(Game.prototype, {
         await startFreshRound();
       }
     }, 1250);
+  },
+
+  showMultiverseComplete() {
+    const token = this.loopToken;
+    const multiplier = this.multiverseWrapShotMultiplier;
+    const earnings = Math.round(multiplier * CASH_PER_WRAP_MULTIPLIER);
+    const moneyBeforeReward = this.money;
+    this.keys = {};
+    multiverseCompleteTitle.textContent = formatText('multiverseComplete.title', { value: this.multiverse });
+    multiverseCompleteWraps.textContent = formatText('multiverseComplete.wraps', { multiplier: formatMultiplier(multiplier) });
+    multiverseCompleteCash.textContent = formatText('multiverseComplete.cash', { cash: 0 });
+    multiverseCompleteContinueButton.textContent = formatText('multiverseComplete.continue');
+    multiverseCompleteContinueButton.disabled = true;
+    multiverseCompleteOverlay.classList.remove('hidden');
+
+    return new Promise((resolve) => {
+      const startedAt = performance.now();
+      const duration = 1200;
+
+      const updateCount = (now) => {
+        if (token !== this.loopToken) {
+          return;
+        }
+
+        const progress = Math.min(1, (now - startedAt) / duration);
+        const displayedCash = Math.round(earnings * progress);
+        this.money = moneyBeforeReward + displayedCash;
+        multiverseCompleteCash.textContent = formatText('multiverseComplete.cash', { cash: displayedCash });
+
+        if (progress < 1) {
+          requestAnimationFrame(updateCount);
+          return;
+        }
+
+        multiverseCompleteContinueButton.disabled = false;
+        multiverseCompleteContinueButton.focus();
+      };
+
+      const continueToShop = () => {
+        if (token !== this.loopToken) {
+          return;
+        }
+
+        multiverseCompleteContinueButton.removeEventListener('click', continueToShop);
+        multiverseCompleteOverlay.classList.add('hidden');
+        this.multiverseWrapShotMultiplier = 0;
+        resolve();
+      };
+
+      multiverseCompleteContinueButton.addEventListener('click', continueToShop);
+      requestAnimationFrame(updateCount);
+    });
   },
 
   async createFreshRoundUniverse() {

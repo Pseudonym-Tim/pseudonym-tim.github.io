@@ -29,8 +29,11 @@ function applyStaticText() {
   document.getElementById('controls-body').textContent = formatText('controls.body');
   document.getElementById('shop-title').textContent = formatText('shop.title');
   document.getElementById('shop-subtitle').textContent = formatText('shop.subtitle');
+  shopContinueButton.textContent = formatText('shop.continue');
   document.getElementById('gameover-title').textContent = formatText('gameover.title');
   restartButton.textContent = formatText('gameover.restart');
+  multiverseCompleteTitle.textContent = formatText('multiverseComplete.title', { value: 1 });
+  multiverseCompleteContinueButton.textContent = formatText('multiverseComplete.continue');
   pauseTitle.textContent = formatText('pause.title');
   resumeButton.textContent = formatText('pause.resume');
   controlsButton.textContent = formatText('pause.controls');

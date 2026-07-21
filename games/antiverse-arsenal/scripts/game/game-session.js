@@ -30,6 +30,10 @@ Object.assign(Game.prototype, {
     this.hp = MAX_PLAYER_HULL;
     this.maxHull = MAX_PLAYER_HULL;
     this.score = 0;
+    this.money = 0;
+    this.multiverseWrapShotMultiplier = 0;
+    this.shopRerolls = 0;
+    this.showShopFeedback('');
     this.wrapShotHits = 0;
     this.highestWrapShotCount = 0;
     this.spawnTimer = UNIVERSE_INTERVAL;
@@ -62,6 +66,7 @@ Object.assign(Game.prototype, {
     this.scale = this.computeScale();
     gameoverOverlay.classList.add('hidden');
     powerupOverlay.classList.add('hidden');
+    multiverseCompleteOverlay.classList.add('hidden');
     pauseOverlay.classList.add('hidden');
     controlsPanel.classList.add('hidden');
 

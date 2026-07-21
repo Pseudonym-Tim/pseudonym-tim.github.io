@@ -21,6 +21,7 @@
     <section class="hud-panel hud-score-panel" aria-label="Score">
       <div id="score" class="hud-row hud-score-primary"><span id="score-label"></span></div>
       <div id="highscore" class="hud-row hud-score-secondary"><span id="highscore-label"></span></div>
+      <div id="money" class="hud-row hud-money"><span id="money-label"></span></div>
     </section>
 
     <section class="hud-panel hud-round-panel" aria-label="Sector information">
@@ -73,8 +74,23 @@
   <div id="powerup-overlay" class="hidden">
     <div>
       <h2 id="shop-title"></h2>
+      <p id="shop-cash" class="shop-cash"></p>
       <p id="shop-subtitle"></p>
+      <p id="shop-feedback" class="shop-feedback" aria-live="polite"></p>
       <div id="powerup-options"></div>
+      <div class="shop-actions">
+        <button id="shop-reroll-button" type="button"></button>
+        <button id="shop-continue-button" type="button"></button>
+      </div>
+    </div>
+  </div>
+
+  <div id="multiverse-complete-overlay" class="hidden">
+    <div class="menu-card multiverse-complete-card">
+      <h1 id="multiverse-complete-title"></h1>
+      <p id="multiverse-complete-wraps"></p>
+      <p id="multiverse-complete-cash"></p>
+      <button id="multiverse-complete-continue-button" type="button"></button>
     </div>
   </div>
 

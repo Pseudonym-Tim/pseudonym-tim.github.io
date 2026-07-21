@@ -268,6 +268,13 @@ body.window-dragging {
   letter-spacing: 1px;
 }
 
+.hud-money {
+  margin-top: 4px;
+  color: rgba(113, 255, 176, 0.92);
+  font-size: 16px;
+  letter-spacing: 1px;
+}
+
 .hud-round-panel {
   position: absolute;
   top: 15px;
@@ -475,6 +482,14 @@ body.window-dragging {
   font-size: 16px;
 }
 
+.shop-feedback {
+  min-height: 24px;
+  margin: 10px 0 0;
+  color: #ff9b9b;
+  font-size: 16px;
+  letter-spacing: 1px;
+}
+
 .hull-readout {
   display: flex;
   min-width: 0;
@@ -581,6 +596,7 @@ body.window-dragging {
 #focus-overlay,
 #message-overlay,
 #powerup-overlay,
+#multiverse-complete-overlay,
 #gameover-overlay,
 #pause-overlay,
 #controls-panel {
@@ -663,6 +679,11 @@ body.window-dragging {
   background: rgba(0, 0, 0, 0.82);
 }
 
+#multiverse-complete-overlay {
+  z-index: 12;
+  background: rgba(0, 0, 0, 0.82);
+}
+
 #powerup-options {
   display: flex;
   flex-wrap: wrap;
@@ -697,6 +718,51 @@ body.window-dragging {
 }
 
 .powerup-card h3 { color: var(--gold); margin-top: 0; }
+
+.powerup-cost {
+  margin-bottom: 0;
+  color: #7dffad;
+  font-size: 18px;
+}
+
+.shop-cash {
+  margin: 10px 0;
+  color: #7dffad;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.shop-actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+#shop-reroll-button,
+#shop-continue-button,
+#multiverse-complete-overlay button {
+  padding: 15px 25px;
+  font-family: inherit;
+  font-size: 16px;
+  color: #000;
+  background: var(--gold);
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#shop-reroll-button:hover,
+#shop-continue-button:hover,
+#multiverse-complete-overlay button:hover:not(:disabled) {
+  background: #fff0a8;
+}
+
+#multiverse-complete-overlay button:disabled {
+  cursor: wait;
+  opacity: 0.56;
+}
 
 .menu-card {
   min-width: 320px;
@@ -744,6 +810,26 @@ body.window-dragging {
 
 .gameover-card {
   border: 1px solid var(--red);
+}
+
+.multiverse-complete-card {
+  min-width: min(440px, calc(100vw - 40px));
+  border: 1px solid var(--gold);
+  box-shadow: 0 0 28px rgba(255, 210, 92, 0.2);
+}
+
+.multiverse-complete-card h1 {
+  text-decoration: underline;
+  text-underline-offset: 5px;
+  text-decoration-thickness: 6px;
+  margin-top: 0;
+  color: var(--gold);
+  text-transform: uppercase;
+}
+
+#multiverse-complete-cash {
+  color: #7dffad;
+  font-size: 16px;
 }
 
 #pause-overlay h1,

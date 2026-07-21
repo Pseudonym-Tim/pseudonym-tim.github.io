@@ -1,20 +1,28 @@
 // Powerups...
 const POWERUP_DEFINITIONS = [
-  { id: 'burst', nameKey: 'powerups.burst.name', descKey: 'powerups.burst.desc', isWeaponReplacement: true, canAppearAgain: true, trackOwnership: true },
-  { id: 'multi', nameKey: 'powerups.multi.name', descKey: 'powerups.multi.desc', isWeaponReplacement: true, canAppearAgain: true, trackOwnership: true },
-  { id: 'dual', nameKey: 'powerups.dual.name', descKey: 'powerups.dual.desc', isWeaponReplacement: true, canAppearAgain: true, trackOwnership: true },
-  { id: 'sniper', nameKey: 'powerups.sniper.name', descKey: 'powerups.sniper.desc', isWeaponReplacement: true, canAppearAgain: true, trackOwnership: true },
-  { id: 'repair', nameKey: 'powerups.repair.name', descKey: 'powerups.repair.desc', canAppearAgain: true, trackOwnership: false },
-  { id: 'speed', nameKey: 'powerups.speed.name', descKey: 'powerups.speed.desc', canAppearAgain: true, trackOwnership: true },
-  { id: 'quantum_boost', nameKey: 'powerups.quantum_boost.name', descKey: 'powerups.quantum_boost.desc', canAppearAgain: true, trackOwnership: true },
-  { id: 'reinforced_hull', nameKey: 'powerups.reinforced_hull.name', descKey: 'powerups.reinforced_hull.desc', canAppearAgain: true, trackOwnership: true },
+  { id: 'burst', nameKey: 'powerups.burst.name', descKey: 'powerups.burst.desc', cost: 250, isWeaponReplacement: true, canAppearAgain: true, trackOwnership: true },
+  { id: 'multi', nameKey: 'powerups.multi.name', descKey: 'powerups.multi.desc', cost: 300, isWeaponReplacement: true, canAppearAgain: true, trackOwnership: true },
+  { id: 'dual', nameKey: 'powerups.dual.name', descKey: 'powerups.dual.desc', cost: 350, isWeaponReplacement: true, canAppearAgain: true, trackOwnership: true },
+  { id: 'sniper', nameKey: 'powerups.sniper.name', descKey: 'powerups.sniper.desc', cost: 400, isWeaponReplacement: true, canAppearAgain: true, trackOwnership: true },
+  { id: 'repair', nameKey: 'powerups.repair.name', descKey: 'powerups.repair.desc', cost: 150, canAppearAgain: true, trackOwnership: false },
+  { id: 'speed', nameKey: 'powerups.speed.name', descKey: 'powerups.speed.desc', cost: 300, canAppearAgain: true, trackOwnership: true },
+  { id: 'quantum_boost', nameKey: 'powerups.quantum_boost.name', descKey: 'powerups.quantum_boost.desc', cost: 450, canAppearAgain: true, trackOwnership: true },
+  { id: 'reinforced_hull', nameKey: 'powerups.reinforced_hull.name', descKey: 'powerups.reinforced_hull.desc', cost: 400, canAppearAgain: true, trackOwnership: true },
 ];
 
 Object.assign(Game.prototype, {
   showPowerupSelection(afterSelection = null) {
     this.keys = {};
-    powerupOptions.innerHTML = '';
     powerupOverlay.classList.remove('hidden');
+    this.shopRerolls = 0;
+    this.shopAfterSelection = afterSelection;
+    this.showShopFeedback('');
+    this.updateShopCash();
+    this.rollPowerupChoices();
+  },
+
+  rollPowerupChoices() {
+    powerupOptions.innerHTML = '';
 
     const all = POWERUP_DEFINITIONS.map((powerup) => ({
       ...powerup,
@@ -38,38 +46,103 @@ Object.assign(Game.prototype, {
     if (!choices.length) {
       powerupOverlay.classList.add('hidden');
 
-      if (afterSelection) {
-        afterSelection();
+      if (this.shopAfterSelection) {
+        this.shopAfterSelection();
       }
 
       return;
     }
 
-    // Holy shit this is cursed, forgive me god...
     for (const option of choices) {
       const card = document.createElement('div');
       card.className = 'powerup-card';
-      card.innerHTML = `<h3>${option.name}</h3><p>${option.desc}</p>`;
+      card.innerHTML = `<h3>${option.name}</h3><p>${option.desc}</p><p class="powerup-cost">$${option.cost}</p>`;
 
       card.addEventListener('click', () => {
+        if (this.money < option.cost) {
+          this.showShopFeedback(formatText('shop.noCash'));
+          return;
+        }
+
+        this.money -= option.cost;
         this.sound.play('powerupSelect');
         this.applyPowerup(option.id);
-        powerupOverlay.classList.add('hidden');
-        this.keys = {};
-
-        //this.showMessage(formatText('message.powerupInstalled', { name: option.name }), 900);
-
-        if (afterSelection) {
-          afterSelection();
-        }
+        this.continueFromPowerupShop();
       });
 
       powerupOptions.appendChild(card);
     }
+
+    this.updateShopRerollButton();
+  },
+
+  updateShopCash() {
+    shopCash.textContent = formatText('shop.cash', { value: Math.floor(this.money) });
+  },
+
+  continueFromPowerupShop() {
+    powerupOverlay.classList.add('hidden');
+    this.keys = {};
+
+    if (this.shopAfterSelection) {
+      this.shopAfterSelection();
+    }
+  },
+
+  updateShopRerollButton() {
+    const remaining = Math.max(0, MAX_SHOP_REROLLS - this.shopRerolls);
+    shopRerollButton.textContent = formatText('shop.reroll', { cost: SHOP_REROLL_COST, remaining });
+    shopRerollButton.disabled = false;
+  },
+
+  rerollPowerupShop() {
+    if (this.shopRerolls >= MAX_SHOP_REROLLS) {
+      this.showShopFeedback(formatText('shop.noRerolls'));
+      return;
+    }
+
+    if (this.money < SHOP_REROLL_COST) {
+      this.showShopFeedback(formatText('shop.noCash'));
+      return;
+    }
+
+    this.money -= SHOP_REROLL_COST;
+    this.shopRerolls += 1;
+    this.updateShopCash();
+    this.sound.play('powerupSelect');
+    this.showShopFeedback('');
+    this.rollPowerupChoices();
+  },
+
+  showShopFeedback(text) {
+    if (this.shopFeedbackTimer) {
+      clearInterval(this.shopFeedbackTimer);
+      this.shopFeedbackTimer = null;
+    }
+
+    shopFeedback.textContent = '';
+    if (!text) {
+      return;
+    }
+
+    let index = 0;
+    this.shopFeedbackTimer = setInterval(() => {
+      shopFeedback.textContent += text[index] || '';
+      index += 1;
+
+      if (index >= text.length) {
+        clearInterval(this.shopFeedbackTimer);
+        this.shopFeedbackTimer = null;
+      }
+    }, 28);
   },
 
   isShopOpen() {
     return !powerupOverlay.classList.contains('hidden');
+  },
+
+  isMultiverseCompleteOpen() {
+    return !multiverseCompleteOverlay.classList.contains('hidden');
   },
 
   applyPowerup(id) {

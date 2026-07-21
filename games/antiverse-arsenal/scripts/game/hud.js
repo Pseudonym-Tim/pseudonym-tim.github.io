@@ -17,6 +17,7 @@ Object.assign(Game.prototype, {
     multiverseValue.textContent = formatText('hud.multiverse', { value: this.multiverse });
     scoreValue.textContent = formatText('hud.score', { value: Math.floor(this.score) });
     highscoreValue.textContent = formatText('hud.highscore', { value: Math.floor(this.highscore) });
+    moneyValue.textContent = formatText('hud.money', { value: Math.floor(this.money) });
 
     if (incursionValue) {
       const deployed = Math.min(this.roundIncursionDeployed, this.roundIncursionTotal);

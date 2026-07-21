@@ -43,6 +43,10 @@ class Game {
     this.hp = MAX_PLAYER_HULL;
     this.maxHull = MAX_PLAYER_HULL;
     this.score = 0;
+    this.money = 0;
+    this.multiverseWrapShotMultiplier = 0;
+    this.shopRerolls = 0;
+    this.shopFeedbackTimer = null;
     this.wrapShotHits = 0;
     this.highestWrapShotCount = 0;
     this.highscore = Number(localStorage.getItem('antiverseHighscore') || 0);
@@ -75,6 +79,8 @@ class Game {
     this.initInput();
     this.initFullscreenMode();
     restartButton.addEventListener('click', () => this.start());
+    shopRerollButton.addEventListener('click', () => this.rerollPowerupShop());
+    shopContinueButton.addEventListener('click', () => this.continueFromPowerupShop());
     resumeButton.addEventListener('click', () => this.resumeGame());
     controlsButton.addEventListener('click', () => this.showControlsPanel());
     controlsCloseButton.addEventListener('click', () => this.hideControlsPanel());

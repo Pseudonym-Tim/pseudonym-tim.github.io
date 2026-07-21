@@ -57,7 +57,7 @@ Object.assign(Game.prototype, {
   },
 
   update(playerDt, worldDt = playerDt) {
-    if (this.isShopOpen() || this.transitioning) {
+    if (this.isShopOpen() || this.isMultiverseCompleteOpen() || this.transitioning) {
       this.updateHUD();
       return;
     }

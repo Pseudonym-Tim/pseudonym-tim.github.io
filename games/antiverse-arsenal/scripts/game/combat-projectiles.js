@@ -25,6 +25,9 @@ Object.assign(Game.prototype, {
 
     if (multiUniversalWraps > 0) {
       this.wrapShotHits += 1;
+
+      // Keep every rewarded multi-universal wrap shot until its boss is defeated...
+      this.multiverseWrapShotMultiplier += bullet.scoreMultiplier || 1;
     }
   }
 });
