@@ -188,7 +188,7 @@ Object.assign(Game.prototype, {
     const ctx = lock.universe.ctx;
     const pulse = 1 + Math.sin(this.spriteClock * 18) * 0.08;
     ctx.save();
-    ctx.translate(lock.x, lock.y);
+    ctx.translate(pixelSnap(lock.x), pixelSnap(lock.y));
     ctx.scale(pulse, pulse);
     ctx.strokeStyle = '#fffb8f';
     ctx.lineWidth = 2;

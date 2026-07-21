@@ -19,7 +19,7 @@ class MachineGunEnemy extends Enemy {
       avoidanceSkill: 0.96,
       avoidanceLookAhead: 1.8,
       sprite: pixelArt.enemyMachineGun,
-      spriteScale: 1.08
+      spritePixelScale: 2
     });
 
     this.burstShotsRemaining = 0;

@@ -108,8 +108,8 @@ class Universe {
     const size = this.getOuterSize();
     const maxX = Math.max(0, window.innerWidth - size.w - 4);
     const maxY = Math.max(0, window.innerHeight - size.h - 4);
-    this.x = clamp(x, 4, maxX);
-    this.y = clamp(y, 4, maxY);
+    this.x = pixelSnap(clamp(x, 4, maxX));
+    this.y = pixelSnap(clamp(y, 4, maxY));
     this.element.style.left = `${this.x}px`;
     this.element.style.top = `${this.y}px`;
   }

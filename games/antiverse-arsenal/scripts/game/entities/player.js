@@ -276,7 +276,7 @@ class Player {
 
   draw(ctx) {
     ctx.save();
-    ctx.translate(this.x, this.y);
+    ctx.translate(pixelSnap(this.x), pixelSnap(this.y));
     ctx.rotate(this.angle);
 
     if (this.dashing) {
@@ -301,7 +301,7 @@ class Player {
 
     ctx.rotate(Math.PI / 2);
 
-    drawPixelArt(ctx, pixelArt.player, this.radius * 3.1, { alpha: this.dashing ? 1 : 0.9, time: this.game.spriteClock, scale: 1.1, flashAlpha: this.getDamageFlashAlpha() });
+    drawPixelArt(ctx, pixelArt.player, { alpha: this.dashing ? 1 : 0.9, time: this.game.spriteClock, pixelScale: 2, flashAlpha: this.getDamageFlashAlpha() });
 
     ctx.restore();
   }

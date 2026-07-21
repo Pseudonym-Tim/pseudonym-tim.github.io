@@ -7,7 +7,9 @@ class Asteroid extends Damageable {
     this.maxHp = this.size > 1 ? 5 : 3;
     this.hp = this.maxHp;
     this.seed = Math.random() * 999;
+    this.spriteVariant = 0;
     this.sprite = this.randomSprite();
+    this.spritePixelScale = 2;
     const angle = Math.random() * Math.PI * 2;
     const speed = rand(20, 62);
     this.velX = Math.cos(angle) * speed;
@@ -18,7 +20,8 @@ class Asteroid extends Damageable {
 
   randomSprite() {
     const sprites = this.size > 1 ? pixelArt.asteroids?.big : pixelArt.asteroids?.small;
-    return sprites[Math.floor(Math.random() * sprites.length)];
+    this.spriteVariant = Math.floor(Math.random() * sprites.length);
+    return sprites[this.spriteVariant];
   }
 
   update(dt) {
@@ -38,6 +41,7 @@ class Asteroid extends Damageable {
     }
 
     const fragments = 2 + Math.floor(Math.random() * 2);
+
     for (let i = 0; i < fragments; i++) {
       const fragment = new Asteroid(this.game, this.universe, this.x, this.y, this.size - 1);
       fragment.primary = false;
@@ -51,9 +55,9 @@ class Asteroid extends Damageable {
 
   draw(ctx) {
     ctx.save();
-    ctx.translate(this.x, this.y);
+    ctx.translate(pixelSnap(this.x), pixelSnap(this.y));
     ctx.rotate(this.rotation);
-    drawPixelArt(ctx, this.sprite, this.radius * 2.25, { time: this.game.spriteClock, flashAlpha: this.getDamageFlashAlpha() });
+    drawPixelArt(ctx, this.sprite, { time: this.game.spriteClock, pixelScale: this.spritePixelScale, flashAlpha: this.getDamageFlashAlpha() });
     ctx.restore();
     this.drawHealthBar(ctx);
   }

@@ -110,9 +110,20 @@ class SpriteAnimation {
     }
 
     const { sx, sy, sourceWidth, sourceHeight } = this.getSourceRect(options.time, options.animation);
-    const scale = Math.max(0.0001, options.scale ?? 1);
-    const drawSize = size * scale;
-    const half = drawSize / 2;
+
+    // Normalize before affecting requested size... fractional scale values are not valid for pixel art...
+    const requestedScale = Math.max(1, pixelSnap(options.scale ?? 1));
+
+    const naturalSize = Math.max(sourceWidth, sourceHeight);
+
+    // A pixel-art image may only be enlarged by a whole-number multiplier...
+    // Rounding the destination bounds alone avoids blur, but still gives source
+    // pixels uneven widths, this preserves both aspect ratio and pixel cadence...
+    const pixelScale = Math.max(1, pixelSnap(options.pixelScale ?? (size * requestedScale) / naturalSize));
+    const drawWidth = sourceWidth * pixelScale;
+    const drawHeight = sourceHeight * pixelScale;
+    const drawX = -Math.floor(drawWidth / 2);
+    const drawY = -Math.floor(drawHeight / 2);
 
     ctx.save();
     ctx.imageSmoothingEnabled = false;
@@ -121,7 +132,7 @@ class SpriteAnimation {
       ctx.globalAlpha *= options.alpha;
     }
 
-    ctx.drawImage(this.image, sx, sy, sourceWidth, sourceHeight, -half, -half, drawSize, drawSize);
+    ctx.drawImage(this.image, sx, sy, sourceWidth, sourceHeight, drawX, drawY, drawWidth, drawHeight);
 
     const flashAlpha = clamp(options.flashAlpha ?? 0, 0, 1);
 
@@ -141,7 +152,7 @@ class SpriteAnimation {
         flashCtx.globalCompositeOperation = 'source-over';
 
         ctx.globalAlpha *= flashAlpha;
-        ctx.drawImage(flashCanvas, 0, 0, sourceWidth, sourceHeight, -half, -half, drawSize, drawSize);
+        ctx.drawImage(flashCanvas, 0, 0, sourceWidth, sourceHeight, drawX, drawY, drawWidth, drawHeight);
       }
     }
 
@@ -180,9 +191,12 @@ class SpriteAnimation {
     }
 
     const { sx, sy, sourceWidth, sourceHeight } = this.getSourceRect(options.time, options.animation);
-    const scale = Math.max(0.0001, options.scale ?? 1);
-    const drawWidth = width * scale;
-    const drawHeight = height * scale;
+    const requestedScale = Math.max(1, pixelSnap(options.scale ?? 1));
+    const pixelScale = Math.max(1, pixelSnap(options.pixelScale ?? (width * requestedScale) / sourceWidth));
+    const drawWidth = sourceWidth * pixelScale;
+    const drawHeight = sourceHeight * pixelScale;
+    const drawX = pixelSnap(x);
+    const drawY = pixelSnap(y);
 
     ctx.save();
     ctx.imageSmoothingEnabled = false;
@@ -191,7 +205,7 @@ class SpriteAnimation {
       ctx.globalAlpha *= options.alpha;
     }
 
-    ctx.drawImage(this.image, sx, sy, sourceWidth, sourceHeight, x, y, drawWidth, drawHeight);
+    ctx.drawImage(this.image, sx, sy, sourceWidth, sourceHeight, drawX, drawY, drawWidth, drawHeight);
 
     const flashAlpha = clamp(options.flashAlpha ?? 0, 0, 1);
 
@@ -211,7 +225,7 @@ class SpriteAnimation {
         flashCtx.globalCompositeOperation = 'source-over';
 
         ctx.globalAlpha *= flashAlpha;
-        ctx.drawImage(flashCanvas, 0, 0, sourceWidth, sourceHeight, x, y, drawWidth, drawHeight);
+        ctx.drawImage(flashCanvas, 0, 0, sourceWidth, sourceHeight, drawX, drawY, drawWidth, drawHeight);
       }
     }
 
@@ -231,8 +245,8 @@ class SpriteAnimation {
 
     const { sx, sy, sourceWidth, sourceHeight } = this.getSourceRect(options.time, options.animation);
     const scale = Math.max(0.0001, options.scale ?? 1);
-    const tileWidth = (options.tileWidth || sourceWidth) * scale;
-    const tileHeight = (options.tileHeight || sourceHeight) * scale;
+    const tileWidth = Math.max(1, pixelSnap((options.tileWidth || sourceWidth) * scale));
+    const tileHeight = Math.max(1, pixelSnap((options.tileHeight || sourceHeight) * scale));
 
     ctx.save();
     ctx.imageSmoothingEnabled = false;
@@ -367,7 +381,7 @@ const pixelArt = {
       loadSprite('assets/sprites/asteroid_big_3.png')
     ],
     small: [
-      loadSprite('assets/sprites/asteroid_small_1.png'),
+      //loadSprite('assets/sprites/asteroid_small_1.png'), // (This one is a bit TOO small)...
       loadSprite('assets/sprites/asteroid_small_2.png'),
       loadSprite('assets/sprites/asteroid_small_3.png')
     ]
@@ -413,8 +427,11 @@ function playPixelArtAnimation(sprite, name, time = 0, options = {}) {
   return sprite?.play(name, time, options) || false;
 }
 
-function drawPixelArt(ctx, sprite, size, options = {}) {
-  return sprite?.draw(ctx, size, options) || false;
+function drawPixelArt(ctx, sprite, sizeOrOptions, options = {}) {
+  const hasExplicitOptions = typeof sizeOrOptions === 'object';
+  const drawOptions = hasExplicitOptions ? sizeOrOptions : options;
+  const size = hasExplicitOptions ? Math.max(sprite?.frameWidth || 1, sprite?.frameHeight || 1) : sizeOrOptions;
+  return sprite?.draw(ctx, size, drawOptions) || false;
 }
 
 function drawPixelArtFrame(ctx, sprite, x, y, width, height, options = {}) {

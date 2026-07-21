@@ -32,7 +32,7 @@ class HullPickup {
     const pulse = 0.2 + Math.sin(this.age * 3) * 0.3;
 
     ctx.save();
-    ctx.translate(this.x, this.y);
+    ctx.translate(pixelSnap(this.x), pixelSnap(this.y));
 
     ctx.globalCompositeOperation = 'lighter';
 
@@ -55,7 +55,7 @@ class HullPickup {
     ctx.globalCompositeOperation = 'source-over';
     ctx.globalAlpha = 1;
 
-    drawPixelArt(ctx, pixelArt.hullPickup, this.radius * 2, { time: this.game.spriteClock });
+    drawPixelArt(ctx, pixelArt.hullPickup, { time: this.game.spriteClock, pixelScale: 2 });
 
     ctx.restore();
   }

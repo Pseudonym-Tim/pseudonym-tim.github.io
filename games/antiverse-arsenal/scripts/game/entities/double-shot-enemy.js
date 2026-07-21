@@ -19,7 +19,7 @@ class DoubleShotEnemy extends Enemy {
       avoidanceSkill: 0.9,
       avoidanceLookAhead: 1.7,
       sprite: pixelArt.enemyDoubleShot,
-      spriteScale: 1.05
+      spritePixelScale: 2
     });
 
     this.shotSpacing = 16;

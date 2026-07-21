@@ -19,7 +19,7 @@ class NormalEnemy extends Enemy {
       avoidanceSkill: 0.78,
       avoidanceLookAhead: 1.45,
       sprite: pixelArt.enemyNormal,
-      spriteScale: 1.1
+      spritePixelScale: 2
     });
   }
 }

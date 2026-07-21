@@ -33,7 +33,7 @@ class ExplosionFX {
     const scale = 0.75 + t * 0.45;
 
     ctx.save();
-    ctx.translate(this.x, this.y);
+    ctx.translate(pixelSnap(this.x), pixelSnap(this.y));
     ctx.rotate(this.rotation);
     ctx.globalCompositeOperation = 'lighter';
     drawPixelArt(ctx, pixelArt.explosionFX, this.size, { time: this.age, scale, alpha: 1 - Math.max(0, t - 0.72) / 0.28, animation: 'explode' });

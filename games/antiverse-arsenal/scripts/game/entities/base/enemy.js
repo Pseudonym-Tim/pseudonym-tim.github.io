@@ -17,7 +17,7 @@ class Enemy extends Damageable {
     this.bulletMaxWraps = config.bulletMaxWraps ?? MAX_WRAPS;
     this.color = config.color || '#ff4d5a';
     this.sprite = config.sprite || pixelArt.enemyNormal;
-    this.spriteScale = config.spriteScale ?? 1.1;
+    this.spritePixelScale = config.spritePixelScale ?? 2;
     this.fireTimer = rand(this.fireDelayMin, this.fireDelayMax);
     this.angle = Math.random() * Math.PI * 2;
     this.roll = 0;
@@ -62,7 +62,7 @@ class Enemy extends Damageable {
       this.game.spawnShipDebris(this.universe, this, this.enemyType === 'boss' ? {
         initialRotation: this.tilt,
         sprite: pixelArt.bossDreadnought?.[this.spriteState || this.getDamageSpriteState()] || pixelArt.bossDreadnought?.intact,
-        spriteScale: this.spriteScale,
+        spritePixelScale: this.spritePixelScale,
         isBoss: true
       } : { initialRotation: this.angle + Math.PI / 2 });
     }
@@ -281,7 +281,7 @@ class Enemy extends Damageable {
 
   draw(ctx) {
     ctx.save();
-    ctx.translate(this.x, this.y);
+    ctx.translate(pixelSnap(this.x), pixelSnap(this.y));
     ctx.rotate(this.angle + Math.PI / 2);
     this.drawShip(ctx);
     ctx.restore();
@@ -290,7 +290,7 @@ class Enemy extends Damageable {
 
   drawShip(ctx) {
     const sprite = this.sprite?.ready ? this.sprite : pixelArt.enemyNormal;
-    drawPixelArt(ctx, sprite, this.radius * 3.1, { time: this.game.spriteClock, scale: this.spriteScale, flashAlpha: this.getDamageFlashAlpha() });
+    drawPixelArt(ctx, sprite, { time: this.game.spriteClock, pixelScale: this.spritePixelScale, flashAlpha: this.getDamageFlashAlpha() });
   }
 
   drawHealthBar(ctx) {

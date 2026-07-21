@@ -14,7 +14,6 @@ class DreadnoughtBoss extends Enemy {
     });
 
     this.name = formatText('boss.dreadnought.name');
-    this.spriteScale = 1;
     this.angle = 0;
     this.y = -150;
     this.targetY = 155;
@@ -160,7 +159,7 @@ class DreadnoughtBoss extends Enemy {
 
       // Passing the entire known universe as arguments...
       // BUT THAT'S TOTALLY OKAY BECAUSE THIS IS A NICE LITTLE WRAPPER FUNCTION, RIGHT?
-      this.game.spawnBullet(this.universe, baseX + Math.cos(angle) * 16, baseY + Math.sin(angle) * 16, Math.cos(angle) * speed + this.velX * 0.05, Math.sin(angle) * speed, 'enemy', 1, { maxWraps: 0, sprite: pixelArt.bossShotgunBullet, spriteScale: 1.15 });
+      this.game.spawnBullet(this.universe, baseX + Math.cos(angle) * 16, baseY + Math.sin(angle) * 16, Math.cos(angle) * speed + this.velX * 0.05, Math.sin(angle) * speed, 'enemy', 1, { maxWraps: 0, sprite: pixelArt.bossShotgunBullet });
     }
   }
 
@@ -270,7 +269,7 @@ class DreadnoughtBoss extends Enemy {
 
   draw(ctx) {
     ctx.save();
-    ctx.translate(this.x, this.y);
+    ctx.translate(pixelSnap(this.x), pixelSnap(this.y));
     ctx.rotate(this.tilt);
     this.drawBossSprite(ctx);
     ctx.restore();
@@ -302,10 +301,7 @@ class DreadnoughtBoss extends Enemy {
     const sprites = pixelArt.bossDreadnought || {};
     const sprite = sprites[state] || sprites.intact;
 
-    const drawWidth = 384 * this.spriteScale;
-    const drawHeight = 264 * this.spriteScale;
-
-    drawPixelArtFrame(ctx, sprite, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight, { time: this.game.spriteClock, flashAlpha: this.getDamageFlashAlpha() });
+    drawPixelArtFrame(ctx, sprite, -192, -132, 384, 264, { time: this.game.spriteClock, pixelScale: 4, flashAlpha: this.getDamageFlashAlpha() });
   }
 
   drawPartHealthBars(ctx) {

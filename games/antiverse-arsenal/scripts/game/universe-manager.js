@@ -182,6 +182,41 @@ Object.assign(Game.prototype, {
     return true;
   },
 
+  hasUniverseOverlaps(padding = Math.max(6, 9 * this.scale)) {
+    for (let i = 0; i < this.universes.length; i++) {
+      for (let j = i + 1; j < this.universes.length; j++) {
+        if (rectsOverlap(this.universes[i].getRect(), this.universes[j].getRect(), padding)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  },
+
+  moveDraggedUniverseToOpenPosition(anchor, target, padding) {
+    const start = { x: anchor.x, y: anchor.y };
+    const steps = Math.max(1, Math.ceil(Math.max(Math.abs(target.x - start.x), Math.abs(target.y - start.y)) / 4));
+    let position = start;
+
+    // Walk the requested drag path rather than jumping straight to the end...
+    // Leaves the window at the last clear point when a chain is pinned against an edge and can't be pushed any farther...
+    for (let step = 1; step <= steps; step++) {
+      const progress = step / steps;
+
+      const candidate = this.getClampedUniversePosition(anchor, start.x + (target.x - start.x) * progress, start.y + (target.y - start.y) * progress);
+      const candidateRect = { ...anchor.getRect(), x: candidate.x, y: candidate.y };
+
+      if (this.universes.some((other) => other !== anchor && rectsOverlap(candidateRect, other.getRect(), padding))) {
+        break;
+      }
+
+      position = candidate;
+    }
+
+    anchor.setPosition(position.x, position.y);
+  },
+
   resolveDraggedUniverseCollisions(anchor, dragDelta = null) {
     const padding = Math.max(6, 9 * this.scale);
     const maxIterations = 36;
@@ -312,9 +347,20 @@ Object.assign(Game.prototype, {
     this.dragLastMouseY = e.clientY;
     this.dragLastMoveTime = now;
 
+    const padding = Math.max(6, 9 * this.scale);
+    const positionsBeforeMove = this.universes.map((universe) => ({ universe, x: universe.x, y: universe.y }));
     const target = this.getClampedUniversePosition(u, e.clientX - this.dragOffsetX, e.clientY - this.dragOffsetY);
     this.moveDraggedUniverseAxis(u, 'x', target.x - u.x);
     this.moveDraggedUniverseAxis(u, 'y', target.y - u.y);
+
+    // A window at the viewport edge may be impossible to push out of the way... 
+    if (this.hasUniverseOverlaps(padding)) {
+      for (const position of positionsBeforeMove) {
+        position.universe.setPosition(position.x, position.y);
+      }
+
+      this.moveDraggedUniverseToOpenPosition(u, target, padding);
+    }
   },
 
   updateDragTilt(dt) {
@@ -343,7 +389,15 @@ Object.assign(Game.prototype, {
       return;
     }
 
+    const padding = Math.max(6, 9 * this.scale);
+    const positionsBeforeResolve = this.universes.map((universe) => ({ universe, x: universe.x, y: universe.y }));
     this.resolveDraggedUniverseCollisions(u);
+
+    if (this.hasUniverseOverlaps(padding)) {
+      for (const position of positionsBeforeResolve) {
+        position.universe.setPosition(position.x, position.y);
+      }
+    }
     u.element.classList.remove('dragging');
     u.element.style.zIndex = 1;
     void u.element.offsetWidth;

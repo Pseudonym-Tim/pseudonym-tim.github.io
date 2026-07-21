@@ -19,7 +19,7 @@ class ShotgunEnemy extends Enemy {
       avoidanceSkill: 0.55,
       avoidanceLookAhead: 1.15,
       sprite: pixelArt.enemyShotgun,
-      spriteScale: 1.22
+      spritePixelScale: 2
     });
   }
 

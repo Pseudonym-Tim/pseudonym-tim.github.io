@@ -10,7 +10,7 @@ class DestroyedShipDebris {
     // Snapshot the rendered ship orientation before its randomized spin begins...
     this.rotation = options.initialRotation ?? source.angle ?? 0;
     this.sprite = options.sprite ?? source.sprite;
-    this.spriteScale = options.spriteScale ?? source.spriteScale ?? 1;
+    this.spritePixelScale = options.spritePixelScale ?? source.spritePixelScale ?? 2;
     this.isBoss = options.isBoss ?? false;
 
     const direction = Math.random() * Math.PI * 2;
@@ -32,17 +32,15 @@ class DestroyedShipDebris {
 
   draw(ctx) {
     ctx.save();
-    ctx.translate(this.x, this.y);
+    ctx.translate(pixelSnap(this.x), pixelSnap(this.y));
     ctx.rotate(this.rotation);
     ctx.filter = 'brightness(0.25)'; // TODO: Use actual proper unique destroyed ship GFX instead!
 
     // HACK!!! Please don't do hardcoded draw width/height and radius stuff here...
     if (this.isBoss) {
-      const drawWidth = 384 * this.spriteScale;
-      const drawHeight = 264 * this.spriteScale;
-      drawPixelArtFrame(ctx, this.sprite, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight, { time: 0 });
+      drawPixelArtFrame(ctx, this.sprite, -192, -132, 384, 264, { time: 0, pixelScale: 4 });
     } else {
-      drawPixelArt(ctx, this.sprite, this.radius * 3.1, { time: 0, scale: this.spriteScale });
+      drawPixelArt(ctx, this.sprite, { time: 0, pixelScale: this.spritePixelScale });
     }
 
     ctx.restore();

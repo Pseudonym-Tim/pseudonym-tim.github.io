@@ -19,7 +19,7 @@ class SniperEnemy extends Enemy {
       avoidanceSkill: 0.9,
       avoidanceLookAhead: 2,
       sprite: pixelArt.enemyChargeSniper,
-      spriteScale: 1.18
+      spritePixelScale: 2
     });
 
     this.chargeDuration = 1;
@@ -96,7 +96,7 @@ class SniperEnemy extends Enemy {
     ctx.lineTo(end.x, end.y);
     ctx.stroke();
     ctx.setLineDash([]);
-    ctx.translate(end.x, end.y);
+    ctx.translate(pixelSnap(end.x), pixelSnap(end.y));
     ctx.scale(pulse, pulse);
     ctx.strokeStyle = '#fff1a8';
     ctx.lineWidth = 2;

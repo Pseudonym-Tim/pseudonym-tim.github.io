@@ -55,7 +55,7 @@ class WarpParticleFX {
     const ringRadius = this.radius * (0.45 + t * 1.35);
 
     ctx.save();
-    ctx.translate(this.x, this.y);
+    ctx.translate(pixelSnap(this.x), pixelSnap(this.y));
     ctx.globalCompositeOperation = 'lighter';
 
     ctx.globalAlpha = 0.5 * fade;

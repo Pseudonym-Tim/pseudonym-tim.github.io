@@ -7,6 +7,11 @@ function rand(min, max) {
   return min + Math.random() * (max - min);
 }
 
+// Rendering is intentionally quantized independently from simulation and collision coordinates... 
+function pixelSnap(value) {
+  return Math.round(value);
+}
+
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }

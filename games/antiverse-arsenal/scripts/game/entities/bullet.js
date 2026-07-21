@@ -17,7 +17,7 @@ class Bullet {
     this.scoreMultiplier = scoreMultiplier || 1;
     this.multiUniversalWrapCount = 0;
     this.sprite = options.sprite || null;
-    this.spriteScale = options.spriteScale ?? 1;
+    this.spritePixelScale = options.spritePixelScale ?? 3;
   }
 
   update(dt) {
@@ -183,11 +183,11 @@ class Bullet {
   draw() {
     const ctx = this.universe.ctx;
     ctx.save();
-    ctx.translate(this.x, this.y);
+    ctx.translate(pixelSnap(this.x), pixelSnap(this.y));
     ctx.rotate(Math.atan2(this.velY, this.velX) + Math.PI / 2);
     const defaultImage = this.owner === 'player' ? pixelArt.playerBullet : pixelArt.enemyBullet;
     const image = this.sprite?.ready ? this.sprite : defaultImage;
-    drawPixelArt(ctx, image, 16, { time: this.game.spriteClock, scale: this.spriteScale });
+    drawPixelArt(ctx, image, { time: this.game.spriteClock, pixelScale: this.spritePixelScale });
     ctx.restore();
   }
 }
