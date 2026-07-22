@@ -18,6 +18,7 @@ class Enemy extends Damageable {
     this.color = config.color || '#ff4d5a';
     this.sprite = config.sprite || pixelArt.enemyNormal;
     this.spritePixelScale = config.spritePixelScale ?? 2;
+    this.leavesDebris = config.leavesDebris ?? true;
     this.fireTimer = rand(this.fireDelayMin, this.fireDelayMax);
     this.angle = Math.random() * Math.PI * 2;
     this.roll = 0;
@@ -58,13 +59,16 @@ class Enemy extends Damageable {
     if (!this.expired) {
       this.universe.triggerDamageShake();
 
-      // Holy function parameters Batman!
-      this.game.spawnShipDebris(this.universe, this, this.enemyType === 'boss' ? {
-        initialRotation: this.tilt,
-        sprite: pixelArt.bossDreadnought?.[this.spriteState || this.getDamageSpriteState()] || pixelArt.bossDreadnought?.intact,
-        spritePixelScale: this.spritePixelScale,
-        isBoss: true
-      } : { initialRotation: this.angle + Math.PI / 2 });
+      if (this.leavesDebris) {
+        // Holy function parameters Batman!
+        // TODO: Don't hardcode dreadnought boss stuff here...
+        this.game.spawnShipDebris(this.universe, this, this.enemyType === 'boss' ? {
+          initialRotation: this.tilt,
+          sprite: pixelArt.bossDreadnought?.[this.spriteState || this.getDamageSpriteState()] || pixelArt.bossDreadnought?.intact,
+          spritePixelScale: this.spritePixelScale,
+          isBoss: true
+        } : { initialRotation: this.angle + Math.PI / 2 });
+      }
     }
 
     this.game.spawnExplosion(this.universe, this.x, this.y, { soundEffect: 'explosion', size: this.radius * 4.4, velX: this.velX * 0.08, velY: this.velY * 0.08 });

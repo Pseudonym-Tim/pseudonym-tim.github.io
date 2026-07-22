@@ -14,6 +14,7 @@ Object.assign(Game.prototype, {
     const difficulty = Math.max(0, this.round - 1);
     const weights = [
       { EnemyClass: NormalEnemy, weight: Math.max(35, 100 - difficulty * 9) },
+      { EnemyClass: KamikazeEnemy, weight: Math.max(0, (difficulty - 1) * 6) },
       { EnemyClass: ShotgunEnemy, weight: Math.max(0, difficulty * 5) },
       { EnemyClass: MachineGunEnemy, weight: Math.max(0, difficulty * 4) },
       { EnemyClass: DoubleShotEnemy, weight: Math.max(0, (difficulty - 1) * 5) },

@@ -126,6 +126,11 @@ Object.assign(Game.prototype, {
           return;
         }
 
+        if (enemy.enemyType === 'kamikaze') {
+          enemy.detonate();
+          continue;
+        }
+
         const dx = this.player.x - enemy.x;
         const dy = this.player.y - enemy.y;
         const len = Math.max(1, Math.hypot(dx, dy));

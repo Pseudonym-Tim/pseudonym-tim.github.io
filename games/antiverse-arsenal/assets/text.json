@@ -64,6 +64,7 @@
   "message.sectorStabilized": "Sector stabilized, all incursions repelled!",
   "message.traderDetected": "Intergalactic trader detected!",
   "float.dash": "DASH!",
+  "message.collateral": "COLLATERAL!",
   "float.fullRepair": "FULL REPAIR! +%amount%",
   "float.laser": "LASER!",
   "float.laserWraps": "LASER! x%wraps%",

@@ -358,6 +358,17 @@ const pixelArt = {
       idle: { row: 0, frames: 3, fps: 5 }
     }
   }),
+  enemyKamikaze: createAnimatedSprite({
+    image: 'assets/sprites/enemy_kamikaze_ship.png',
+    frameWidth: 18,
+    frameHeight: 22,
+    frameCount: 3,
+    fps: 5,
+    defaultAnimation: 'idle',
+    animations: {
+      idle: { row: 0, frames: 3, fps: 5 }
+    }
+  }),
   enemyMachineGun: createAnimatedSprite({
     image: 'assets/sprites/enemy_machine_gun_ship.png',
     frameWidth: 20,

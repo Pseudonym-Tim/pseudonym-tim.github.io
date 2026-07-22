@@ -25,15 +25,6 @@ class DoubleShotEnemy extends Enemy {
     this.shotSpacing = 16;
   }
   
-  steerTowardPlayer(dt) {
-    super.steerTowardPlayer(dt);
-
-    // The ship's nose, telegraph, and bullet all share this leading aim direction...
-    const leadAngle = this.getPlayerInterceptAngle(this.bulletSpeed);
-    const aimResponsiveness = 1 - Math.exp(-this.aimResponsiveness * dt);
-    this.angle = lerpAngle(this.angle, leadAngle, aimResponsiveness);
-  }
-
   firePrimaryWeapon() {
     const angle = this.angle;
     const forwardX = Math.cos(angle);

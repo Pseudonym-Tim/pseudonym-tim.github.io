@@ -11,13 +11,13 @@ class SniperEnemy extends Enemy {
       fireDelayMin: 3.6,
       fireDelayMax: 4.4,
       firePressure: 0.03,
-      bulletSpeed: 560,
+      bulletSpeed: 650,
       bulletMaxWraps: 1,
-      shotLeading: 1,
-      maxLeadTime: 2.8,
+      shotLeading: 2,
+      maxLeadTime: 3,
       aimError: 0.008,
       avoidanceSkill: 0.9,
-      avoidanceLookAhead: 2,
+      avoidanceLookAhead: 3,
       sprite: pixelArt.enemyChargeSniper,
       spritePixelScale: 2
     });
@@ -55,7 +55,8 @@ class SniperEnemy extends Enemy {
   }
 
   fireChargedShot() {
-    const angle = this.angle;
+    // Recalculate at release so a moving player is led from their latest velocity...
+    const angle = this.getPlayerInterceptAngle(this.bulletSpeed);
 
     // Passing the entire known universe as arguments...
     // BUT THAT'S TOTALLY OKAY BECAUSE THIS IS A NICE LITTLE WRAPPER FUNCTION, RIGHT?
