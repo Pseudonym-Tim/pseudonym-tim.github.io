@@ -72,6 +72,8 @@ Object.assign(Game.prototype, {
       u.update(worldDt);
     }
 
+    this.updateOrbitals(playerDt);
+
     for (let i = this.bullets.length - 1; i >= 0; i--) {
       const bullet = this.bullets[i];
       bullet.update(bullet.owner === 'player' ? playerDt : worldDt);
@@ -122,6 +124,10 @@ Object.assign(Game.prototype, {
     this.drawLaserPlan(this.laserAim);
     this.drawLaserFlashes();
     this.player.draw(this.player.universe.ctx);
+
+    for (const orbital of this.orbitals) {
+      orbital.draw();
+    }
 
     for (const explosion of this.explosions) {
       explosion.draw();

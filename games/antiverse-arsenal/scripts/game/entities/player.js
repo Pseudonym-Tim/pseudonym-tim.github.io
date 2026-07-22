@@ -251,7 +251,7 @@ class Player {
       offsets.forEach((offset) => {
         // Passing the entire known universe as arguments...
         // BUT THAT'S TOTALLY OKAY BECAUSE THIS IS A NICE LITTLE WRAPPER FUNCTION, RIGHT?
-        this.game.spawnBullet(this.universe, muzzleX + lateralX * offset, muzzleY + lateralY * offset, vx, vy, 'player', baseMult, { maxWraps: hasMultiShot ? 1 : MAX_WRAPS, playSound: false });
+        this.game.spawnBullet(this.universe, muzzleX + lateralX * offset, muzzleY + lateralY * offset, vx, vy, 'player', baseMult, { maxWraps: hasMultiShot ? 1 : MAX_WRAPS, playSound: false, orbitalIgnoreTime: ORBITAL_PLAYER_BULLET_IGNORE_TIME });
       });
     });
   }
@@ -263,7 +263,7 @@ class Player {
     const vx = Math.cos(angle) * SNIPER_SPEED + this.velX * 0.08;
     const vy = Math.sin(angle) * SNIPER_SPEED + this.velY * 0.08;
     this.game.sound.play('shoot');
-    this.game.spawnBullet(this.universe, x, y, vx, vy, 'player', 1, { damage: SNIPER_DAMAGE, maxWraps: 0, playSound: false, });
+    this.game.spawnBullet(this.universe, x, y, vx, vy, 'player', 1, { damage: SNIPER_DAMAGE, maxWraps: 0, playSound: false, orbitalIgnoreTime: ORBITAL_PLAYER_BULLET_IGNORE_TIME });
   }
 
   triggerDamageFlash(duration = this.damageFlashDuration) {

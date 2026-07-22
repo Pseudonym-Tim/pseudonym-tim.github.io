@@ -132,6 +132,7 @@ class SpriteAnimation {
       ctx.globalAlpha *= options.alpha;
     }
 
+    this.drawDropShadow(ctx, sx, sy, sourceWidth, sourceHeight, drawX, drawY, drawWidth, drawHeight, options);
     ctx.drawImage(this.image, sx, sy, sourceWidth, sourceHeight, drawX, drawY, drawWidth, drawHeight);
 
     const flashAlpha = clamp(options.flashAlpha ?? 0, 0, 1);
@@ -181,6 +182,57 @@ class SpriteAnimation {
     return SpriteAnimation.flashCanvas;
   }
 
+  drawDropShadow(ctx, sx, sy, sourceWidth, sourceHeight, drawX, drawY, drawWidth, drawHeight, options) {
+    if (!SpriteAnimation.dropShadowsEnabled || options.dropShadow === false) {
+      return;
+    }
+
+    const shadowCanvas = SpriteAnimation.getShadowCanvas(sourceWidth, sourceHeight);
+    const shadowCtx = shadowCanvas?.getContext('2d');
+
+    if (!shadowCtx) {
+      return;
+    }
+
+    shadowCtx.clearRect(0, 0, sourceWidth, sourceHeight);
+    shadowCtx.imageSmoothingEnabled = false;
+    shadowCtx.globalCompositeOperation = 'source-over';
+    shadowCtx.globalAlpha = 1;
+    shadowCtx.drawImage(this.image, sx, sy, sourceWidth, sourceHeight, 0, 0, sourceWidth, sourceHeight);
+    shadowCtx.globalCompositeOperation = 'source-in';
+    shadowCtx.fillStyle = '#000000';
+    shadowCtx.fillRect(0, 0, sourceWidth, sourceHeight);
+    shadowCtx.globalCompositeOperation = 'source-over';
+
+    const offsetX = pixelSnap(options.dropShadowOffsetX ?? 4);
+    const offsetY = pixelSnap(options.dropShadowOffsetY ?? 4);
+
+    ctx.save();
+    ctx.globalAlpha *= clamp(options.dropShadowAlpha ?? 0.35, 0, 1);
+    ctx.drawImage(shadowCanvas, 0, 0, sourceWidth, sourceHeight, drawX + offsetX, drawY + offsetY, drawWidth, drawHeight);
+    ctx.restore();
+  }
+
+  static getShadowCanvas(width, height) {
+    if (typeof document === 'undefined') {
+      return null;
+    }
+
+    if (!SpriteAnimation.shadowCanvas) {
+      SpriteAnimation.shadowCanvas = document.createElement('canvas');
+    }
+
+    if (SpriteAnimation.shadowCanvas.width !== width) {
+      SpriteAnimation.shadowCanvas.width = width;
+    }
+
+    if (SpriteAnimation.shadowCanvas.height !== height) {
+      SpriteAnimation.shadowCanvas.height = height;
+    }
+
+    return SpriteAnimation.shadowCanvas;
+  }
+
   drawFrame(ctx, x, y, width, height, options = {}) {
     if (!this.ready) {
       return false;
@@ -205,6 +257,7 @@ class SpriteAnimation {
       ctx.globalAlpha *= options.alpha;
     }
 
+    this.drawDropShadow(ctx, sx, sy, sourceWidth, sourceHeight, drawX, drawY, drawWidth, drawHeight, options);
     ctx.drawImage(this.image, sx, sy, sourceWidth, sourceHeight, drawX, drawY, drawWidth, drawHeight);
 
     const flashAlpha = clamp(options.flashAlpha ?? 0, 0, 1);
@@ -268,6 +321,8 @@ class SpriteAnimation {
     return true;
   }
 }
+
+SpriteAnimation.dropShadowsEnabled = true;
 
 const pixelArt = {
   player: createAnimatedSprite({
@@ -400,6 +455,7 @@ const pixelArt = {
   }),
   hullPickup: loadSprite('assets/sprites/hull_pickup.png'),
   playerBullet: loadSprite('assets/sprites/player_bullet.png'),
+  orbital: loadSprite('assets/sprites/ship_orbital.png'),
   enemyBullet: loadSprite('assets/sprites/enemy_bullet.png'),
   bossShotgunBullet: loadSprite('assets/sprites/boss_shotgun_bullet.png'),
   universeBackground: createAnimatedSprite({

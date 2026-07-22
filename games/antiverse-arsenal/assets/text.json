@@ -84,6 +84,8 @@
   "powerups.quantum_boost.desc": "Wrap multipliers grow faster!",
   "powerups.sniper.name": "Sniper Shot",
   "powerups.sniper.desc": "Fire a quick, powerful single-target shot!",
+  "powerups.orbital.name": "Orbital",
+  "powerups.orbital.desc": "Orbits the ship and defends against incoming bullets and ship collisions!",
   "pause.title": "PAUSED!",
   "pause.resume": "RESUME",
   "pause.restart": "RESTART",

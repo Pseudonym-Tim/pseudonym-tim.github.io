@@ -96,7 +96,7 @@ Object.assign(Game.prototype, {
       return;
     }
 
-    const powerupID = 'multi';
+    const powerupID = 'orbital';
     const alreadyGiven = this.hasPowerup(powerupID);
     const powerupName = formatText(`powerups.${powerupID}.name`);
 

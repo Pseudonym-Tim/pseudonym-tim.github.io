@@ -6,6 +6,9 @@ class Game {
     this.bullets = [];
     this.floatingTexts = [];
     this.explosions = [];
+    this.orbitals = [];
+    this.blockedShipCollisions = new Set();
+    this.orbitalCollisionCooldowns = new Map();
     this.sound = new SoundManager();
     this.player = null;
     this.mouseX = window.innerWidth / 2;

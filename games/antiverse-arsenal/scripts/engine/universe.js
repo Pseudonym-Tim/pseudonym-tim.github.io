@@ -228,26 +228,8 @@ class Universe {
     ctx.save();
     ctx.globalCompositeOperation = 'screen';
     ctx.fillStyle = `hsla(${hueShift}, 100%, 55%, ${UNIVERSE_TINT_BACKGROUND_ALPHA})`;
-
     ctx.fillRect(0, 0, this.width, this.height);
     ctx.restore();
-
-    ctx.strokeStyle = `hsla(${hueShift}, 100%, 62%, ${UNIVERSE_TINT_GRID_ALPHA})`;
-    ctx.lineWidth = 1;
-
-    for (let x = 0; x <= this.width; x += 40) {
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, this.height);
-      ctx.stroke();
-    }
-
-    for (let y = 0; y <= this.height; y += 40) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(this.width, y);
-      ctx.stroke();
-    }
 
     // Hull pickups render beneath asteroids so rocks can pass visibly over them...
     for (const pickup of this.hullPickups) {

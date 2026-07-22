@@ -8,6 +8,7 @@ const POWERUP_DEFINITIONS = [
   { id: 'speed', nameKey: 'powerups.speed.name', descKey: 'powerups.speed.desc', cost: 300, canAppearAgain: true, trackOwnership: true },
   { id: 'quantum_boost', nameKey: 'powerups.quantum_boost.name', descKey: 'powerups.quantum_boost.desc', cost: 450, canAppearAgain: true, trackOwnership: true },
   { id: 'reinforced_hull', nameKey: 'powerups.reinforced_hull.name', descKey: 'powerups.reinforced_hull.desc', cost: 400, canAppearAgain: true, trackOwnership: true },
+  { id: 'orbital', nameKey: 'powerups.orbital.name', descKey: 'powerups.orbital.desc', cost: 425, canAppearAgain: true, trackOwnership: false },
 ];
 
 Object.assign(Game.prototype, {
@@ -33,6 +34,7 @@ Object.assign(Game.prototype, {
     const pool = all.filter((p) => (
       (!p.isWeaponReplacement || !this.hasPowerup(p.id))
       && (p.id !== 'reinforced_hull' || !this.hasPowerup('reinforced_hull'))
+      && (p.id !== 'orbital' || this.orbitals.length < MAX_ORBITALS)
       && (p.canAppearAgain || !this.powerups.includes(p.id))
       && (p.id !== 'repair' || this.hp < this.maxHull)
     ));
@@ -169,6 +171,14 @@ Object.assign(Game.prototype, {
 
     if (id === 'speed') {
       this.player.extraThrust += 95;
+    }
+
+     if (id === 'orbital' && this.orbitals.length < MAX_ORBITALS) {
+      this.orbitals.push(new ShipOrbital(this, 0));
+
+      this.orbitals.forEach((orbital, index) => {
+        orbital.phase = -Math.PI / 2 + (Math.PI * 2 * index) / this.orbitals.length;
+      });
     }
   },
 

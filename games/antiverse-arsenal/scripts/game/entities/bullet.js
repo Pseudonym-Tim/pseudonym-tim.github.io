@@ -18,6 +18,7 @@ class Bullet {
     this.multiUniversalWrapCount = 0;
     this.sprite = options.sprite || null;
     this.spritePixelScale = options.spritePixelScale ?? 3;
+    this.orbitalIgnoreTime = options.orbitalIgnoreTime ?? 0;
   }
 
   update(dt) {
@@ -50,6 +51,11 @@ class Bullet {
   checkHits() {
     const player = this.game.player;
 
+    if (this.game.isBulletBlockedByOrbital(this)) {
+      this.dead = true;
+      return;
+    }
+
     if (this.universe === player.universe && !player.dashing) {
       const canHitOwner = this.owner === 'player' && this.age > 0.42;
 
@@ -65,7 +71,6 @@ class Bullet {
     for (const asteroid of this.universe.asteroids) {
       if (collisionShapesOverlap(this.getCollisionShape(), entityCollisionShape(asteroid))) {
         asteroid.takeDamage(this.damage, this.scoreMultiplier);
-        this.game.recordWrapShotHit(this);
         this.dead = true;
         return;
       }

@@ -9,6 +9,9 @@ Object.assign(Game.prototype, {
     this.bullets = [];
     this.floatingTexts = [];
     this.explosions = [];
+    this.orbitals = [];
+    this.blockedShipCollisions = new Set();
+    this.orbitalCollisionCooldowns = new Map();
     this.powerups = [];
     this.round = 1;
     this.multiverse = 1;

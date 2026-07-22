@@ -307,11 +307,11 @@ body.window-dragging {
 }
 
 #player-hud {
-  left: 10px;
-  bottom: 10px;
+  left: 20px;
+  bottom: 5px;
   display: grid;
   grid-template-columns: auto auto;
-  gap: 4px;
+  gap: 20px;
   align-items: center;
   width: max-content;
   max-width: calc(100% - 20px);
@@ -330,8 +330,8 @@ body.window-dragging {
 
 .player-hud-hull {
   display: grid;
-  grid-template-columns: 82px minmax(38px, auto);
-  gap: 6px;
+  grid-template-columns: 90px minmax(38px, auto);
+  gap: 10px;
   align-items: center;
   min-width: 0;
   opacity: 1;
@@ -348,13 +348,13 @@ body.window-dragging {
   --cooldown-ratio: 1;
   display: grid;
   justify-items: center;
-  gap: 2px;
+  gap: 5px;
   min-width: 46px;
 }
 
 .ability-cooldown-ring {
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   display: grid;
   place-items: center;
   position: relative;
@@ -494,7 +494,7 @@ body.window-dragging {
   display: flex;
   min-width: 0;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
 }
 
 .hull-readout-title {
