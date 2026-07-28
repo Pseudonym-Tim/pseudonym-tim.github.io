@@ -1,5 +1,52 @@
 // Universe window management...
 Object.assign(Game.prototype, {
+  canManipulateUniverses() {
+    return this.running && !this.paused && !this.transitioning && !this.isShopOpen() && !this.isMultiverseCompleteOpen();
+  },
+
+  isUniverseManipulationActive() {
+    return Boolean(this.draggingUniverse || this.selectedUniverse);
+  },
+
+  beginUniverseManipulation() {
+    this.clearAllInput();
+    this.laserCharging = false;
+    this.laserAim = null;
+    this.timeScale = 1;
+  },
+
+  clearUniverseReplacementSelection() {
+    if (this.selectedUniverse) {
+      this.selectedUniverse.element.classList.remove('replacement-selected');
+    }
+
+    this.selectedUniverse = null;
+  },
+
+  selectUniverseForReplacement(universe) {
+    if (!this.canManipulateUniverses() || !this.universes.includes(universe)) {
+      return;
+    }
+
+    if (!this.selectedUniverse) {
+      this.beginUniverseManipulation();
+      this.selectedUniverse = universe;
+      universe.element.classList.add('replacement-selected');
+      return;
+    }
+
+    if (this.selectedUniverse === universe) {
+      this.clearUniverseReplacementSelection();
+      return;
+    }
+
+    const selected = this.selectedUniverse;
+    const selectedPosition = { x: selected.x, y: selected.y };
+    selected.setPosition(universe.x, universe.y);
+    universe.setPosition(selectedPosition.x, selectedPosition.y);
+    this.clearUniverseReplacementSelection();
+  },
+
   computeScale() {
     return UNIVERSE_WINDOW_SCALE;
   },
@@ -139,10 +186,11 @@ Object.assign(Game.prototype, {
   },
 
   startDraggingUniverse(universe, e) {
-    if (this.transitioning || this.isShopOpen() || this.paused) {
+    if (!this.canManipulateUniverses()) {
       return;
     }
 
+    this.beginUniverseManipulation();
     this.draggingUniverse = universe;
     this.clearMovementInput();
     this.keys.Space = false;
@@ -157,7 +205,6 @@ Object.assign(Game.prototype, {
     universe.element.style.zIndex = 4;
     universe.element.classList.add('dragging');
     document.body.classList.add('window-dragging');
-    this.timeScale = 0;
   },
 
   getClampedUniversePosition(universe, x, y) {
@@ -409,7 +456,6 @@ Object.assign(Game.prototype, {
     this.dragLastMouseY = 0;
     this.dragLastMoveTime = 0;
     document.body.classList.remove('window-dragging');
-    this.timeScale = 1;
     this.clearMovementInput();
   }
 });

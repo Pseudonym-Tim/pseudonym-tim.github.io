@@ -10,6 +10,7 @@ Object.assign(Game.prototype, {
   },
 
   async playRoundTransition(survivor) {
+    this.clearUniverseReplacementSelection();
     this.transitioning = true;
     this.keys = {};
     this.draggingUniverse = null;
@@ -53,7 +54,7 @@ Object.assign(Game.prototype, {
     this.removeEnemiesInUniverse(universe);
     this.roundGraceActive = true;
     this.prepareRoundEncounter(enemyCount);
-    this.showMessage(formatText('message.roundBegins', { round, incursions: this.roundIncursionTotal }), 1800);
+    this.showMessage(formatText('message.roundBegins', { round }), 1800);
 
     const releaseEnemies = () => {
       if (!this.running || token !== this.startToken || this.round !== round) {
@@ -70,7 +71,7 @@ Object.assign(Game.prototype, {
       this.spawnEnemiesFromOffscreen(enemyCount, universe);
       this.roundIncursionDeployed = 1;
       this.updateStabilityFromThreats();
-      this.flashMessage(formatText('message.incursionEntering', { current: 1, total: this.roundIncursionTotal, universe: universe.id }), 1000);
+      universe.showIncursionWarning();
       this.scheduleNextIncursion();
     };
 

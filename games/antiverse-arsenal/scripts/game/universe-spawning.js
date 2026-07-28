@@ -12,16 +12,13 @@ Object.assign(Game.prototype, {
     // (Keep the materialization point stable, explicitly relocate any older window occupying before grow anim makes overlap visible)...
     this.makeRoomForSpawn(universe);
     
-    this.showMessage(formatText('message.universeMaterializing', { id: universe.id }), 900);
-
     // Stagger enemies in from off-screen...
+    universe.showIncursionWarning();
     this.scheduleEnemyWave(enemyCount, universe);
     this.roundIncursionDeployed += 1;
     this.spawnAsteroids(this.getRoundAsteroidSpawnCount(), [universe]);
     this.maybeSpawnHullPickup(universe);
     this.updateStabilityFromThreats();
-    this.flashMessage(formatText('message.incursionEntering', { current: this.roundIncursionDeployed, total: this.roundIncursionTotal, universe: universe.id }), 1000);
-
     this.growUniverse(universe).then(() => {
       if (!this.running || this.roundEnding || !this.universes.includes(universe)) {
         this.incursionDeploying = false;

@@ -141,7 +141,7 @@ Object.assign(Game.prototype, {
   },
 
   tryWarpTo(universe, x, y) {
-    if (this.paused || !this.player || this.player.warpCooldown > 0 || !this.universes.includes(universe)) {
+    if (this.paused || this.isUniverseManipulationActive() || !this.player || this.player.warpCooldown > 0 || !this.universes.includes(universe)) {
       return;
     }
 
@@ -163,7 +163,6 @@ Object.assign(Game.prototype, {
 
     this.spawnWarpParticles(universe, this.player.x, this.player.y, { count: 42, dirX: warpDir?.x || 0, dirY: warpDir?.y || 0, radius: this.player.radius * 2.8 });
 
-    this.flashMessage(formatText('message.warpedToUniverse', { id: universe.id }), 650);
   },
 
   safeWarpPosition(universe) {

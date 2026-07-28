@@ -55,6 +55,5 @@ Object.assign(Game.prototype, {
     }
 
     this.finalIncursionAnnounced = true;
-    this.flashMessage(formatText('message.finalIncursion'), 1500);
   }
 });

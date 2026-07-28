@@ -46,6 +46,7 @@ Object.assign(Game.prototype, {
     controlsPanel.classList.add('hidden');
     this.draggingUniverse = null;
     document.body.classList.remove('window-dragging');
+    this.clearUniverseReplacementSelection();
     this.clearAllInput();
     this.invulnerable = false;
     this.debugInvulnerable = false;
@@ -87,6 +88,7 @@ Object.assign(Game.prototype, {
   },
 
   quitGame() {
+    this.clearUniverseReplacementSelection();
     this.running = false;
     this.loopToken += 1;
     this.paused = false;
@@ -104,6 +106,7 @@ Object.assign(Game.prototype, {
   },
 
   gameOver() {
+    this.clearUniverseReplacementSelection();
     this.running = false;
     this.loopToken += 1;
     this.paused = false;

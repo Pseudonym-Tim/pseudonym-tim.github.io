@@ -24,7 +24,6 @@ class HullPickup {
     const restored = this.game.maxHull - this.game.hp;
     this.game.hp = this.game.maxHull;
     this.game.addFloatingText(this.universe, this.x, this.y - 20, formatText('float.fullRepair', { amount: restored }), '#72f7ff');
-    this.game.flashMessage(formatText('message.hullRestored'), 750);
     return true;
   }
 

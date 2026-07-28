@@ -21,9 +21,20 @@ Object.assign(Game.prototype, {
         return;
       }
 
-      messageOverlay.classList.add('hidden');
-      this.messageExpiresAt = 0;
-      this.messageRemainingMs = 0;
+      messageOverlay.classList.remove('message-enter');
+      messageOverlay.classList.add('message-exit');
+      
+      this.messageExitTimeout = setTimeout(() => {
+        if (token !== this.messageToken) {
+          return;
+        }
+
+        messageOverlay.classList.add('hidden');
+        messageOverlay.classList.remove('message-exit');
+        this.messageExitTimeout = null;
+        this.messageExpiresAt = 0;
+        this.messageRemainingMs = 0;
+      }, 320);
     }, this.messageRemainingMs);
   },
 
@@ -46,9 +57,11 @@ Object.assign(Game.prototype, {
 
   showMessage(text, duration = 1000) {
     const token = ++this.messageToken;
+    clearTimeout(this.messageExitTimeout);
+    this.messageExitTimeout = null;
     messageText.textContent = text;
     messageOverlay.classList.remove('hidden');
-    messageOverlay.classList.remove('message-enter');
+    messageOverlay.classList.remove('message-enter', 'message-exit');
     void messageOverlay.offsetWidth;
     messageOverlay.classList.add('message-enter');
 

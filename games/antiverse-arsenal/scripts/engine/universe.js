@@ -28,12 +28,26 @@ class Universe {
     this.ctx.imageSmoothingEnabled = false;
     this.element.appendChild(this.canvas);
 
+    this.messageOverlay = document.createElement('div');
+    this.messageOverlay.className = 'universe-message-overlay hidden';
+    this.messageOverlay.setAttribute('role', 'status');
+    this.messageText = document.createElement('div');
+    this.messageText.className = 'universe-message-text';
+    this.messageOverlay.appendChild(this.messageText);
+    this.element.appendChild(this.messageOverlay);
+
     this.element.addEventListener('contextmenu', (e) => {
       e.preventDefault();
     });
 
     this.element.addEventListener('mousedown', (e) => {
       if (e.button === 2) {
+        e.preventDefault();
+        this.game.selectUniverseForReplacement(this);
+        return;
+      }
+
+      if (e.button === 1) {
         e.preventDefault();
         this.warpToPointer(e);
         return;
@@ -87,10 +101,31 @@ class Universe {
     this.canvas.style.left = '0px';
     this.canvas.style.width = `${this.cssWidth}px`;
     this.canvas.style.height = `${this.cssHeight}px`;
+    this.messageOverlay.style.top = `${this.cssHeader}px`;
+    this.messageOverlay.style.height = `${this.cssHeight}px`;
   }
 
   setLabel() {
     this.header.textContent = formatText('universe.label', { id: this.id });
+  }
+
+  showIncursionWarning(duration = 1800) {
+    clearTimeout(this.messageTimeout);
+    this.messageText.textContent = formatText('message.incursionWarning');
+    this.messageOverlay.classList.remove('hidden', 'message-enter', 'message-exit');
+    void this.messageOverlay.offsetWidth;
+    this.messageOverlay.classList.add('message-enter');
+
+    this.messageTimeout = setTimeout(() => {
+      this.messageOverlay.classList.remove('message-enter');
+      this.messageOverlay.classList.add('message-exit');
+      
+      this.messageTimeout = setTimeout(() => {
+        this.messageOverlay.classList.add('hidden');
+        this.messageOverlay.classList.remove('message-exit');
+        this.messageTimeout = null;
+      }, 320);
+    }, duration);
   }
 
   warpToPointer(e) {

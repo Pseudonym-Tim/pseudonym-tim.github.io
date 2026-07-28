@@ -21,6 +21,7 @@ class Game {
     this.dragLastMouseX = 0;
     this.dragLastMouseY = 0;
     this.dragLastMoveTime = 0;
+    this.selectedUniverse = null;
     this.timeScale = 1;
     this.laserCharging = false;
     this.laserAim = null;
@@ -65,6 +66,7 @@ class Game {
     this.scale = this.computeScale();
     this.messageToken = 0;
     this.messageTimeout = null;
+    this.messageExitTimeout = null;
     this.messageExpiresAt = 0;
     this.messageRemainingMs = 0;
     this.startToken = 0;

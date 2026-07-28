@@ -30,6 +30,12 @@ Object.assign(Game.prototype, {
         return;
       }
 
+      if (this.isUniverseManipulationActive()) {
+        e.preventDefault();
+        this.clearAllInput();
+        return;
+      }
+
       this.keys[e.code] = true;
       const isLaserControl = e.code === 'ControlLeft' || e.code === 'ControlRight';
       const laserModifierActive = isLaserControl || e.ctrlKey || this.isLaserControlHeld();
@@ -72,6 +78,11 @@ Object.assign(Game.prototype, {
     });
 
     window.addEventListener('keyup', (e) => {
+      if (this.isUniverseManipulationActive()) {
+        e.preventDefault();
+        this.keys[e.code] = false;
+        return;
+      }
       if (this.paused) {
         this.keys[e.code] = false;
         return;
@@ -118,10 +129,12 @@ Object.assign(Game.prototype, {
 
     const cancelActiveInput = () => {
       this.clearAllInput();
-      
+
       if (this.draggingUniverse) {
         this.stopDraggingUniverse();
       }
+
+      this.clearUniverseReplacementSelection();
     };
 
     window.addEventListener('blur', cancelActiveInput);

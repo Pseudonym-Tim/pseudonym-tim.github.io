@@ -25,14 +25,8 @@ Object.assign(Game.prototype, {
       return;
     }
 
-    // Window manipulation is a true pause, so...
-    // Skip every gameplay update, including firing, cooldowns, collisions, spawning, projectiles, effects, etc...
     if (this.draggingUniverse) {
       this.updateDragTilt(rawDt);
-      this.updateHUD();
-      this.draw();
-      requestAnimationFrame((t) => this.loop(t, loopToken));
-      return;
     }
 
     const hitStopped = this.hitStopTimer > 0;
@@ -47,10 +41,16 @@ Object.assign(Game.prototype, {
       }
     }
 
-    this.updateLaser(rawDt);
-    const temporalScale = hitStopped ? 0 : this.timeScale * (this.hitSlowTimer > 0 ? this.hitSlowScale : 1);
-    const playerDt = rawDt * temporalScale;
-    this.update(playerDt, playerDt);
+    const manipulatingUniverses = this.isUniverseManipulationActive();
+
+    if (!manipulatingUniverses) {
+      this.updateLaser(rawDt);
+    }
+    const managementScale = manipulatingUniverses ? 0.25 : 1;
+    const temporalScale = hitStopped ? 0 : this.timeScale * managementScale * (this.hitSlowTimer > 0 ? this.hitSlowScale : 1);
+    const worldDt = rawDt * temporalScale;
+    const playerDt = manipulatingUniverses ? 0 : worldDt;
+    this.update(playerDt, worldDt);
     this.draw();
 
     requestAnimationFrame((t) => this.loop(t, loopToken));
@@ -76,7 +76,7 @@ Object.assign(Game.prototype, {
 
     for (let i = this.bullets.length - 1; i >= 0; i--) {
       const bullet = this.bullets[i];
-      bullet.update(bullet.owner === 'player' ? playerDt : worldDt);
+      bullet.update(worldDt);
 
       if (bullet.dead) {
         this.bullets.splice(i, 1);

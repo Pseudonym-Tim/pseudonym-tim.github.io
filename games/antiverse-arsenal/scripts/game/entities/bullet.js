@@ -70,7 +70,7 @@ class Bullet {
 
     for (const asteroid of this.universe.asteroids) {
       if (collisionShapesOverlap(this.getCollisionShape(), entityCollisionShape(asteroid))) {
-        asteroid.takeDamage(this.damage, this.scoreMultiplier);
+        asteroid.takeDamage(this.damage, 1);
         this.dead = true;
         return;
       }
