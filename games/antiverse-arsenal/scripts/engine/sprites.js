@@ -469,6 +469,17 @@ const pixelArt = {
   orbital: loadSprite('assets/sprites/ship_orbital.png'),
   enemyBullet: loadSprite('assets/sprites/enemy_bullet.png'),
   bossShotgunBullet: loadSprite('assets/sprites/boss_shotgun_bullet.png'),
+  bossRocket: createAnimatedSprite({
+    image: 'assets/sprites/boss/boss_rocket.png',
+    frameWidth: 16,
+    frameHeight: 16,
+    animations: Object.fromEntries(Array.from({ length: 2 }, (_, thrustFrame) =>
+      Array.from({ length: 8 }, (_, directionFrame) => [
+        `direction-${directionFrame}-thrust-${thrustFrame}`,
+        { row: thrustFrame, column: directionFrame, frames: 1 }
+      ])
+    ).flat())
+  }),
   universeBackground: createAnimatedSprite({
     image: 'assets/sprites/universe_background.png',
     frameWidth: 64,

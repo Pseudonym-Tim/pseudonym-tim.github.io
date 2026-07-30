@@ -47,6 +47,7 @@ Object.assign(Game.prototype, {
     universe.id = 1;
     universe.setLabel();
     this.bullets = this.bullets.filter((bullet) => bullet.universe === universe);
+    this.rockets = this.rockets.filter((rocket) => rocket.universe === universe);
     this.pendingEnemySpawns = [];
     this.incursionQueue = [];
     this.incursionDeploying = false;
@@ -154,6 +155,7 @@ Object.assign(Game.prototype, {
   },
 
   finishBossEncounter() {
+    this.rockets = [];
     this.bossActive = false;
     this.bossPending = false;
     this.bossDefeated = true;

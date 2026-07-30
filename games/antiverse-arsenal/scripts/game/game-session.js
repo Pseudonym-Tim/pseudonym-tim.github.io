@@ -7,6 +7,7 @@ Object.assign(Game.prototype, {
 
     this.universes = [];
     this.bullets = [];
+    this.rockets = [];
     this.floatingTexts = [];
     this.explosions = [];
     this.orbitals = [];

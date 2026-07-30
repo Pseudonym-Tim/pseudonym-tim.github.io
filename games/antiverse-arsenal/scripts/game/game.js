@@ -4,6 +4,7 @@ class Game {
     this.keys = {};
     this.universes = [];
     this.bullets = [];
+    this.rockets = [];
     this.floatingTexts = [];
     this.explosions = [];
     this.orbitals = [];

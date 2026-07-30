@@ -77,6 +77,15 @@ class Bullet {
     }
 
     if (this.owner === 'player') {
+      for (const rocket of this.game.rockets) {
+        if (!rocket.dead && rocket.universe === this.universe && collisionShapesOverlap(this.getCollisionShape(), rocket.getCollisionShape())) {
+          if (rocket.takeDamage(this.damage, this)) {
+            this.dead = true;
+            return;
+          }
+        }
+      }
+
       for (const enemy of this.universe.enemies) {
         if (collisionShapesOverlap(this.getCollisionShape(), entityCollisionShape(enemy))) {
           enemy.takeDamage(this.damage, this.scoreMultiplier, this.x, this.y, this.radius);

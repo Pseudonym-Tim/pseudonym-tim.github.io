@@ -83,6 +83,15 @@ Object.assign(Game.prototype, {
       }
     }
 
+    for (let i = this.rockets.length - 1; i >= 0; i--) {
+      const rocket = this.rockets[i];
+      rocket.update(worldDt);
+
+      if (rocket.dead) {
+        this.rockets.splice(i, 1);
+      }
+    }
+
     for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
       const text = this.floatingTexts[i];
       text.update(worldDt);
@@ -119,6 +128,10 @@ Object.assign(Game.prototype, {
 
     for (const bullet of this.bullets) {
       bullet.draw();
+    }
+
+    for (const rocket of this.rockets) {
+      rocket.draw();
     }
 
     this.drawLaserPlan(this.laserAim);

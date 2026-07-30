@@ -36,6 +36,7 @@ Object.assign(Game.prototype, {
     survivor.asteroids = survivor.asteroids.filter((a) => !a.dead);
     survivor.setPosition(survivor.x, survivor.y);
     this.bullets = [];
+    this.rockets = [];
 
     this.showMessage(formatText('message.entryUniverseReconstituting'), 900);
     await this.growUniverse(survivor);
@@ -226,6 +227,7 @@ Object.assign(Game.prototype, {
 
     this.universes = [];
     this.bullets = [];
+    this.rockets = [];
     this.floatingTexts = [];
     this.explosions = [];
 

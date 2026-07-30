@@ -31,6 +31,16 @@ Object.assign(Game.prototype, {
       }
     }
 
+    for (const rocket of this.rockets) {
+      if (rocket.dead || rocket.universe !== universe) {
+        continue;
+      }
+
+      if (entitiesOverlap(player, rocket)) {
+        return true;
+      }
+    }
+
     return false;
   },
 
@@ -65,6 +75,19 @@ Object.assign(Game.prototype, {
       if (collisionShapesOverlap(dashShape, entityCollisionShape(enemy))) {
         hitSet.add(enemy);
         enemy.takeDamage(DASH_DAMAGE, 1);
+      }
+    }
+
+    for (const rocket of this.rockets) {
+      if (rocket.dead || rocket.universe !== universe || hitSet.has(rocket)) {
+        continue;
+      }
+
+      const dashShape = circleCollisionShape(player.x, player.y, player.radius + 2);
+
+      if (collisionShapesOverlap(dashShape, rocket.getCollisionShape())) {
+        hitSet.add(rocket);
+        rocket.takeDamage(DASH_DAMAGE, player);
       }
     }
   },

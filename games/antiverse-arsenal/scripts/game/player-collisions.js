@@ -99,6 +99,17 @@ Object.assign(Game.prototype, {
       return;
     }
 
+    for (const rocket of this.rockets) {
+      if (rocket.dead || rocket.universe !== u) {
+        continue;
+      }
+
+      if (entitiesOverlap(this.player, rocket)) {
+        this.player.takeDamage(rocket.velX, rocket.velY);
+        rocket.explode();
+      }
+    }
+
     for (const asteroid of u.asteroids) {
       if (asteroid.dead || this.blockedShipCollisions.has(asteroid)) {
         continue;

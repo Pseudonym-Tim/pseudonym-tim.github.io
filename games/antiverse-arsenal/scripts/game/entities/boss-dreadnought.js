@@ -26,15 +26,46 @@ class DreadnoughtBoss extends Enemy {
     this.aiTimer = 5;
 
     this.parts = [
-      { id: 'leftLauncher', name: formatText('boss.part.leftLauncher'), offsetX: -145, offsetY: 0, radius: 50, width: 100, height: 160, maxHp: 60, hp: 60, destroyed: false, fireTimer: 0.45 },
-      { id: 'rightLauncher', name: formatText('boss.part.rightLauncher'), offsetX: 145, offsetY: 0, radius: 50, width: 100, height: 160, maxHp: 60, hp: 60, destroyed: false, fireTimer: 0.65 }
+      {
+        id: 'leftLauncher',
+        name: formatText('boss.part.leftLauncher'),
+        offsetX: -145,
+        offsetY: 0,
+        radius: 50,
+        width: 100,
+        height: 160,
+        maxHp: 30,
+        hp: 30,
+        destroyed: false
+      },
+      {
+        id: 'rightLauncher',
+        name: formatText('boss.part.rightLauncher'),
+        offsetX: 145,
+        offsetY: 0,
+        radius: 50,
+        width: 100,
+        height: 160,
+        maxHp: 30,
+        hp: 30,
+        destroyed: false
+      }
     ];
 
-    this.coreShotguns = [
-      { offsetX: -42, offsetY: 96, fireTimer: 1.1 },
-      { offsetX: 42, offsetY: 96, fireTimer: 1.65 }
-    ];
-
+    // Alternate the side launchers instead of firing both simultaneously...
+    this.nextSideLauncherIndex = 0;
+    this.sideVolleyCooldown = 0.55;
+    this.coreShotguns = [{ offsetX: -42, offsetY: 96 }, { offsetX: 42, offsetY: 96 }];
+    this.nextCoreShotgunIndex = 0;
+    this.coreVolleyCooldown = 0.8;
+    this.coreSpreadPhase = 0;
+    this.rocketLaunchers = [{ offsetX: -80, offsetY: 0, fireTimer: 0.65 }, { offsetX: 80, offsetY: 0, fireTimer: 1.2 }];
+    this.maxActiveRockets = 2;
+    this.activeRockets = [];
+    this.rocketCooldownMin = 0.85;
+    this.rocketCooldownMax = 1.2;
+    this.rocketCooldown = 0;
+    this.nextRocketLauncherIndex = 0;
     this.maxHp = 120;
     this.hp = this.maxHp;
     this.healthBarTimer = Infinity;
@@ -56,6 +87,7 @@ class DreadnoughtBoss extends Enemy {
     this.updateMovement(dt);
     this.updateLaunchers(dt);
     this.updateCoreShotguns(dt);
+    this.updateRocketLaunchers(dt);
   }
 
   updateMovement(dt) {
@@ -102,31 +134,96 @@ class DreadnoughtBoss extends Enemy {
   }
 
   updateLaunchers(dt) {
-    for (const part of this.parts) {
-      if (part.destroyed) {
-        continue;
-      }
+    this.sideVolleyCooldown -= dt;
+    if (this.sideVolleyCooldown > 0) { return; }
 
-      part.fireTimer -= dt;
-      if (part.fireTimer > 0) {
-        continue;
-      }
+    const activeLaunchers = this.parts.filter((part) => !part.destroyed);
+    if (activeLaunchers.length === 0) { return; }
 
-      part.fireTimer = rand(0.28, 0.56);
-      this.fireLauncher(part);
-    }
+    const part = activeLaunchers[this.nextSideLauncherIndex % activeLaunchers.length];
+    this.nextSideLauncherIndex += 1;
+    this.fireLauncher(part);
+
+    this.sideVolleyCooldown = rand(0.52, 0.76);
   }
 
   updateCoreShotguns(dt) {
-    for (const gun of this.coreShotguns) {
-      gun.fireTimer -= dt;
-      if (gun.fireTimer > 0) {
-        continue;
-      }
+    this.coreVolleyCooldown -= dt;
+    if (this.coreVolleyCooldown > 0) { return; }
 
-      gun.fireTimer = this.allLaunchersDestroyed() ? rand(0.65, 1.2) : rand(1.15, 2.15);
-      this.fireCoreShotgun(gun);
+    const gun = this.coreShotguns[this.nextCoreShotgunIndex % this.coreShotguns.length];
+    this.nextCoreShotgunIndex += 1;
+    this.fireCoreShotgun(gun);
+
+    // Enraged phase has an increased fire rate...
+    this.coreVolleyCooldown = this.allLaunchersDestroyed() ? rand(0.24, 0.38) : rand(0.7, 0.95);
+  }
+
+  updateRocketLaunchers(dt) {
+    this.updateTrackedRockets(dt);
+    this.rocketCooldown = Math.max(0, this.rocketCooldown - dt);
+    for (const launcher of this.rocketLaunchers) launcher.fireTimer -= dt;
+
+    // Never spawn too many active rockets...
+    if (this.rocketCooldown > 0 || this.activeRockets.length >= this.maxActiveRockets) { return; }
+
+    const readyLaunchers = this.rocketLaunchers.filter((launcher) => launcher.fireTimer <= 0);
+    if (readyLaunchers.length === 0) { return; }
+
+    const launcher = readyLaunchers[this.nextRocketLauncherIndex % readyLaunchers.length];
+    this.nextRocketLauncherIndex += 1;
+    launcher.fireTimer = rand(1.45, 1.9);
+    this.fireRocketLauncher(launcher);
+    this.rocketCooldown = rand(this.rocketCooldownMin, this.rocketCooldownMax);
+  }
+
+  updateTrackedRockets(dt) {
+    this.activeRockets = this.activeRockets.filter((entry) => {
+      entry.fallbackLife -= dt;
+
+      const rocket = entry.rocket;
+      if (!rocket) { return entry.fallbackLife > 0; }
+      if (rocket.dead || rocket.destroyed || rocket.removed || rocket.active === false) { return false; }
+
+      const isInCollection = this.isObjectInGameCollections(rocket);
+      entry.wasInCollection = entry.wasInCollection || isInCollection;
+      if (entry.wasInCollection && !isInCollection) { return false; }
+
+      return true;
+    });
+  }
+
+  getGameCollectionObjects() {
+    const objects = new Set();
+
+    for (const owner of [this.universe, this.game]) {
+      if (!owner) continue;
+
+      for (const value of Object.values(owner)) {
+        if (!Array.isArray(value)) continue;
+        for (const item of value) if (item && typeof item === 'object') objects.add(item);
+      }
     }
+
+    return objects;
+  }
+
+  isObjectInGameCollections(object) {
+    if (!object) { return false; }
+
+    for (const owner of [this.universe, this.game]) {
+      if (!owner) { continue; }
+
+      for (const value of Object.values(owner)) 
+      {
+        if (Array.isArray(value) && value.includes(object)) 
+        { 
+          return true; 
+        }
+      }
+    }
+
+    return false;
   }
 
   allLaunchersDestroyed() {
@@ -136,8 +233,10 @@ class DreadnoughtBoss extends Enemy {
   fireLauncher(part) {
     const baseX = this.x + part.offsetX;
     const baseY = this.y + part.offsetY + 30;
-    const aim = Math.PI / 2 + rand(-0.34, 0.34);
-    const spread = 0.13;
+    const player = this.game.player;
+    const playerAim = Math.atan2(player.y - baseY, player.x - baseX);
+    const aim = clamp(playerAim, Math.PI / 2 - 0.42, Math.PI / 2 + 0.42) + rand(-0.035, 0.035);
+    const spread = 0.12;
 
     for (const offset of [-spread, spread]) {
       const angle = aim + offset;
@@ -148,14 +247,49 @@ class DreadnoughtBoss extends Enemy {
     }
   }
 
+  fireRocketLauncher(launcher) {
+    const baseX = this.x + launcher.offsetX;
+    const baseY = this.y + launcher.offsetY;
+    const angle = Math.PI / 2 + rand(-0.1, 0.1);
+    const objectsBeforeSpawn = this.getGameCollectionObjects();
+
+    const spawnedRocket = this.game.spawnHomingRocket(this.universe, baseX + Math.cos(angle) * 24, baseY + Math.sin(angle) * 24, Math.cos(angle) * 128 + this.velX * 0.08, Math.sin(angle) * 128);
+
+    // Prefer returned rocket, if the spawn method returns nothing, find the newly inserted entity...
+    const rocket = spawnedRocket || [...this.getGameCollectionObjects()].find((object) => !objectsBeforeSpawn.has(object));
+    this.activeRockets.push({ rocket, wasInCollection: this.isObjectInGameCollections(rocket), fallbackLife: 12 });
+  }
+
   fireCoreShotgun(gun) {
     const baseX = this.x + gun.offsetX;
     const baseY = this.y + gun.offsetY;
-    const aim = Math.PI / 2 + rand(-0.18, 0.18);
+    const downwardAngle = Math.PI / 2;
+    const enraged = this.allLaunchersDestroyed();
+    const phaseOffset = this.coreSpreadPhase % 2 === 0 ? -0.035 : 0.035;
+    this.coreSpreadPhase += 1;
 
-    for (const spread of [-0.24, 0, 0.24]) {
-      const angle = aim + spread + rand(-0.055, 0.055);
-      const speed = rand(250, 310);
+    const spreads = [];
+
+    if (enraged) {
+      const pelletsPerSide = 4;
+      const innerSpread = 0.14;
+      const outerSpread = 0.66;
+
+      for (const side of [-1, 1]) {
+        for (let i = 0; i < pelletsPerSide; i++) {
+          const normalized = pelletsPerSide > 1 ? i / (pelletsPerSide - 1) : 0;
+          const spread = innerSpread + normalized * (outerSpread - innerSpread);
+          spreads.push(side * spread);
+        }
+      }
+    } else {
+      spreads.push(-0.5, -0.17, 0.17, 0.5);
+    }
+
+    const speed = enraged ? rand(245, 325) : rand(225, 300);
+
+    for (const spread of spreads) {
+      const angle = downwardAngle + spread + phaseOffset;
 
       // Passing the entire known universe as arguments...
       // BUT THAT'S TOTALLY OKAY BECAUSE THIS IS A NICE LITTLE WRAPPER FUNCTION, RIGHT?
@@ -181,16 +315,12 @@ class DreadnoughtBoss extends Enemy {
     const hitShape = radius > 0 ? circleCollisionShape(x, y, radius) : null;
 
     for (const part of this.parts) {
-      if (part.destroyed) {
-        continue;
-      }
+      if (part.destroyed) { continue; }
 
       const partShape = this.getPartCollisionShape(part);
       const hit = hitShape ? collisionShapesOverlap(hitShape, partShape) : pointInCollisionShape(x, y, partShape);
 
-      if (!hit) {
-        continue;
-      }
+      if (!hit) { continue; }
 
       const area = part.width * part.height;
 
@@ -204,9 +334,7 @@ class DreadnoughtBoss extends Enemy {
   }
 
   takeDamage(amount, multiplier = 1, hitX = this.x, hitY = this.y, hitRadius = 0) {
-    if (this.dead) {
-      return;
-    }
+    if (this.dead) { return; }
 
     const part = this.getPartAt(hitX, hitY, hitRadius);
 
@@ -215,10 +343,8 @@ class DreadnoughtBoss extends Enemy {
       this.healthBarTimer = Infinity;
       this.triggerDamageFlash();
       this.game.sound.play('hitHurt');
-      
-      if (part.hp <= 0 && !part.destroyed) {
-        this.destroyPart(part, multiplier);
-      }
+
+      if (part.hp <= 0 && !part.destroyed) { this.destroyPart(part, multiplier); }
 
       return;
     }
@@ -226,10 +352,8 @@ class DreadnoughtBoss extends Enemy {
     const hitShape = hitRadius > 0 ? circleCollisionShape(hitX, hitY, hitRadius) : null;
     const coreShape = this.getCoreCollisionShape();
     const hitCore = hitShape ? collisionShapesOverlap(hitShape, coreShape) : pointInCollisionShape(hitX, hitY, coreShape);
-
-    if (!hitCore) {
-      return;
-    }
+    
+    if (!hitCore) { return; }
 
     this.hp = Math.max(0, this.hp - amount);
     this.healthBarTimer = Infinity;
@@ -246,25 +370,33 @@ class DreadnoughtBoss extends Enemy {
     part.destroyed = true;
     this.spriteState = this.getDamageSpriteState();
 
+    // Passing the entire known universe as arguments...
+    // BUT THAT'S TOTALLY OKAY BECAUSE THIS IS A NICE LITTLE WRAPPER FUNCTION, RIGHT?
     for (let i = 0; i < 8; i++) {
-      // Passing the entire known universe as arguments...
-      // BUT THAT'S TOTALLY OKAY BECAUSE THIS IS A NICE LITTLE WRAPPER FUNCTION, RIGHT?
-      this.game.spawnExplosion(this.universe, this.x + part.offsetX + rand(-part.radius, part.radius), this.y + part.offsetY + rand(-part.radius, part.radius), {
-        size: rand(22, 48),
-        soundEffect: i === 0 ? 'explosion' : null,
-        velX: rand(-35, 35),
-        velY: rand(-20, 50)
-      });
+      this.game.spawnExplosion(this.universe, this.x + part.offsetX + rand(-part.radius, part.radius), this.y + part.offsetY + rand(-part.radius, part.radius), { size: rand(22, 48), soundEffect: i === 0 ? 'explosion' : null, velX: rand(-35, 35), velY: rand(-20, 50) });
     }
 
     this.hp = Math.max(0, this.hp - 25);
-    this.game.addFloatingText(this.universe, this.x + part.offsetX, this.y + part.offsetY - 34, `${part.name} DISABLED -25 CORE`, '#ffcf7a');
+    this.game.addFloatingText(this.universe, this.x + part.offsetX, this.y + part.offsetY - 34, `${part.name} DISABLED!`, '#ffcf7a');
     this.killMultiplier = Math.max(this.killMultiplier || 1, multiplier || 1);
 
     if (this.hp <= 0) {
       this.killMultiplier = Math.max(1, multiplier || 1);
       this.dead = true;
     }
+  }
+
+  onDestroyed() {
+    this.universe.triggerDamageShake();
+    this.game.clearEnemyThreat(this);
+
+    // Passing the entire known universe as arguments...
+    // BUT THAT'S TOTALLY OKAY BECAUSE THIS IS A NICE LITTLE WRAPPER FUNCTION, RIGHT?
+    for (let i = 0; i < 14; i++) {
+      this.game.spawnExplosion(this.universe, this.x + rand(-160, 160), this.y + rand(-105, 105), { size: 58, life: rand(0.42, 0.62), soundEffect: i === 0 ? 'explosion' : null, velX: rand(-28, 28), velY: rand(-16, 38) });
+    }
+
+    this.game.finishBossEncounter();
   }
 
   draw(ctx) {
@@ -280,19 +412,10 @@ class DreadnoughtBoss extends Enemy {
   getDamageSpriteState() {
     const leftBroken = this.parts.find((part) => part.id === 'leftLauncher')?.destroyed;
     const rightBroken = this.parts.find((part) => part.id === 'rightLauncher')?.destroyed;
-    
-    if (leftBroken && rightBroken) {
-      return 'bothLaunchersBroken';
-    }
 
-    if (leftBroken) {
-      return 'leftLauncherBroken';
-    }
-
-    if (rightBroken) {
-      return 'rightLauncherBroken';
-    }
-
+    if (leftBroken && rightBroken) { return 'bothLaunchersBroken'; }
+    if (leftBroken) { return 'leftLauncherBroken'; }
+    if (rightBroken)  { return 'rightLauncherBroken'; }
     return 'intact';
   }
 
@@ -306,14 +429,13 @@ class DreadnoughtBoss extends Enemy {
 
   drawPartHealthBars(ctx) {
     for (const part of this.parts) {
-      if (part.destroyed) {
-        continue;
-      }
+      if (part.destroyed) { continue; }
 
       const width = 48;
       const x = this.x + part.offsetX - width / 2;
       const y = this.y + part.offsetY + part.height / 2 + 8;
       const ratio = clamp(part.hp / part.maxHp, 0, 1);
+
       ctx.save();
       ctx.fillStyle = 'rgba(3, 7, 18, 0.88)';
       ctx.fillRect(x - 1, y - 1, width + 2, 6);
@@ -330,6 +452,7 @@ class DreadnoughtBoss extends Enemy {
     const x = (this.universe.width - width) / 2;
     const y = 18;
     const ratio = clamp(this.hp / this.maxHp, 0, 1);
+
     ctx.save();
     ctx.fillStyle = 'rgba(3, 7, 18, 0.86)';
     ctx.fillRect(x - 3, y - 3, width + 6, 24);
@@ -339,9 +462,11 @@ class DreadnoughtBoss extends Enemy {
     ctx.fillRect(x, y, width * ratio, 14);
     ctx.strokeStyle = '#ffd6e7';
     ctx.strokeRect(x - 0.5, y - 0.5, width + 1, 15);
+
     const hpText = formatText('boss.hp', { name: this.name, hp: Math.ceil(this.hp), maxHp: this.maxHp });
     const hpTextX = Math.round(this.universe.width / 2);
     const hpTextY = Math.round(y + 35);
+
     ctx.font = '16px "Press Start 2P", "Lucida Console", monospace';
     ctx.textAlign = 'center';
     ctx.fillStyle = '#000000';

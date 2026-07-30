@@ -65,7 +65,7 @@ class KamikazeEnemy extends Enemy {
   }
 
   applyBlastDamage() {
-    const blastRadius = KAMIKAZEE_BLAST_RADIUS;
+    const blastRadius = KAMIKAZE_BLAST_RADIUS;
     const player = this.game.player;
     let destroyedEnemy = false;
 
@@ -100,7 +100,7 @@ class KamikazeEnemy extends Enemy {
     }
 
     if (destroyedEnemy) {
-      this.game.awardPoints(KAMIKAZEE_BLAST_BONUS_SCORE, 1, this.universe, this.x, this.y - 18, '#ff8a5c', formatText('message.collateral'));
+      this.game.awardPoints(KAMIKAZE_BLAST_BONUS_SCORE, 1, this.universe, this.x, this.y - 18, '#ff8a5c', formatText('message.collateral'));
     }
   }
 

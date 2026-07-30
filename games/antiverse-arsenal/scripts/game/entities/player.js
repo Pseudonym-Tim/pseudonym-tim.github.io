@@ -2,13 +2,14 @@
 class Player {
   constructor(game, universe, x, y) {
     this.game = game;
+    this.owner = 'player';
     this.universe = universe;
     this.x = x;
     this.y = y;
     this.velX = 0;
     this.velY = 0;
     this.angle = 0;
-    this.radius = 11;
+    this.radius = 6;
     this.cooldown = 0;
     this.baseFireRate = 0.24;
     this.fireRate = this.baseFireRate;
