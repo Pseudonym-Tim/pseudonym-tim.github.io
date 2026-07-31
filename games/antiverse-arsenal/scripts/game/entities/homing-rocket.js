@@ -9,6 +9,8 @@ class HomingRocket extends Damageable {
     this.velY = vy;
     this.speed = 205;
     this.turnRate = 2.15;
+    this.separationRadius = 78;
+    this.separationStrength = 1.15;
     this.life = 0;
     this.smokeTimer = 0;
     this.smoke = [];
@@ -19,7 +21,33 @@ class HomingRocket extends Damageable {
     this.healthBarTimer = Math.max(0, this.healthBarTimer - dt);
     this.updateDamageFlash(dt);
     const player = this.game.player;
-    const targetAngle = Math.atan2(player.y - this.y, player.x - this.x);
+    let targetX = player.x - this.x;
+    let targetY = player.y - this.y;
+    const targetDistance = Math.hypot(targetX, targetY) || 1;
+    targetX /= targetDistance;
+    targetY /= targetDistance;
+
+    // Blend flock separation into homing so salvo approaches on distinct paths...
+    let separationX = 0;
+    let separationY = 0;
+
+    for (const rocket of this.game.rockets) {
+      if (rocket === this || rocket.dead || rocket.universe !== this.universe) { continue; }
+
+      const dx = this.x - rocket.x;
+      const dy = this.y - rocket.y;
+      const distance = Math.hypot(dx, dy);
+      
+      if (distance <= 0 || distance >= this.separationRadius) { continue; }
+
+      const proximity = 1 - distance / this.separationRadius;
+      separationX += dx / distance * proximity;
+      separationY += dy / distance * proximity;
+    }
+
+    const desiredX = targetX + separationX * this.separationStrength;
+    const desiredY = targetY + separationY * this.separationStrength;
+    const targetAngle = Math.atan2(desiredY, desiredX);
     const currentAngle = Math.atan2(this.velY, this.velX);
     const angle = currentAngle + clamp(angleDelta(targetAngle, currentAngle), -this.turnRate * dt, this.turnRate * dt);
     const launchSpeed = Math.hypot(this.velX, this.velY);
@@ -42,8 +70,8 @@ class HomingRocket extends Damageable {
 
     this.smoke = this.smoke.filter((puff) => puff.age < puff.life);
 
-    if (this.life > 9 || this.x < -40 || this.x > this.universe.width + 40 || this.y < -40 || this.y > this.universe.height + 40) {
-      this.dead = true;
+    if (this.life > 9 || this.x < -20 || this.x > this.universe.width + 20 || this.y < -20 || this.y > this.universe.height + 20) {
+      this.explode();
     }
   }
 

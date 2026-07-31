@@ -405,39 +405,39 @@ const pixelArt = {
   bossDreadnought: {
     intact: createAnimatedSprite({
       image: 'assets/sprites/boss/boss_dreadnought_intact.png',
-      frameWidth: 96,
+      frameWidth: 95,
       frameHeight: 66,
-      frameCount: 1,
-      fps: 1,
+      frameCount: 4,
+      fps: 6,
       defaultAnimation: 'idle',
-      animations: { idle: { row: 0, frames: 1, fps: 1 } }
+      animations: { idle: { row: 0, frames: 4, fps: 6 } }
     }),
     leftLauncherBroken: createAnimatedSprite({
       image: 'assets/sprites/boss/boss_dreadnought_left_launcher_broken.png',
-      frameWidth: 96,
+      frameWidth: 95,
       frameHeight: 66,
-      frameCount: 1,
-      fps: 1,
+      frameCount: 4,
+      fps: 6,
       defaultAnimation: 'idle',
-      animations: { idle: { row: 0, frames: 1, fps: 1 } }
+      animations: { idle: { row: 0, frames: 4, fps: 6 } }
     }),
     rightLauncherBroken: createAnimatedSprite({
       image: 'assets/sprites/boss/boss_dreadnought_right_launcher_broken.png',
-      frameWidth: 96,
+      frameWidth: 95,
       frameHeight: 66,
-      frameCount: 1,
-      fps: 1,
+      frameCount: 4,
+      fps: 6,
       defaultAnimation: 'idle',
-      animations: { idle: { row: 0, frames: 1, fps: 1 } }
+      animations: { idle: { row: 0, frames: 4, fps: 6 } }
     }),
     bothLaunchersBroken: createAnimatedSprite({
       image: 'assets/sprites/boss/boss_dreadnought_both_launchers_broken.png',
-      frameWidth: 96,
+      frameWidth: 95,
       frameHeight: 66,
-      frameCount: 1,
-      fps: 1,
+      frameCount: 4,
+      fps: 6,
       defaultAnimation: 'idle',
-      animations: { idle: { row: 0, frames: 1, fps: 1 } }
+      animations: { idle: { row: 0, frames: 4, fps: 6 } }
     })
   },
   asteroids: {

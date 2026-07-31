@@ -48,8 +48,21 @@ Object.assign(Game.prototype, {
         }
 
         const hit = rayCircleHit(startLocal, segDir, enemy, enemy.radius + LASER_LOCK_RADIUS, 0, segLen);
+        
         if (hit) {
           plan.locks.push({ enemy, universe, wraps, x: enemy.x, y: enemy.y, t: hit.t });
+        }
+      }
+
+      for (const rocket of this.rockets) {
+        if (rocket.dead || rocket.universe !== universe || plan.locks.some((lock) => lock.enemy === rocket)) {
+          continue;
+        }
+
+        const hit = rayCircleHit(startLocal, segDir, rocket, rocket.radius + LASER_LOCK_RADIUS, 0, segLen);
+        
+        if (hit) {
+          plan.locks.push({ enemy: rocket, universe, wraps, x: rocket.x, y: rocket.y, t: hit.t, isRocket: true });
         }
       }
 
@@ -125,8 +138,12 @@ Object.assign(Game.prototype, {
       }
 
       hitEnemies.add(lock.enemy);
-      lock.enemy.takeDamage(LASER_DAMAGE, 1 + lock.wraps);
-      lock.enemy.registerHit(1 + lock.wraps);
+      if (lock.isRocket) {
+        lock.enemy.takeDamage(LASER_DAMAGE, this.player);
+      } else {
+        lock.enemy.takeDamage(LASER_DAMAGE, 1 + lock.wraps);
+        lock.enemy.registerHit(1 + lock.wraps);
+      }
       const laserText = lock.wraps > 0 ? formatText('float.laserWraps', { wraps: lock.wraps }) : formatText('float.laser');
       this.addFloatingText(lock.universe, lock.enemy.x, lock.enemy.y - 18, laserText, '#ff4df0');
     }

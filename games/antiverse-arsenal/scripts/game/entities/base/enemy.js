@@ -59,15 +59,10 @@ class Enemy extends Damageable {
     if (!this.expired) {
       this.universe.triggerDamageShake();
 
-      if (this.leavesDebris) {
+      // Bosses end in their encounter explosion sequence and must never leave a ship husk...
+      if (this.leavesDebris && this.enemyType !== 'boss') {
         // Holy function parameters Batman!
-        // TODO: Don't hardcode dreadnought boss stuff here...
-        this.game.spawnShipDebris(this.universe, this, this.enemyType === 'boss' ? {
-          initialRotation: this.tilt,
-          sprite: pixelArt.bossDreadnought?.[this.spriteState || this.getDamageSpriteState()] || pixelArt.bossDreadnought?.intact,
-          spritePixelScale: this.spritePixelScale,
-          isBoss: true
-        } : { initialRotation: this.angle + Math.PI / 2 });
+        this.game.spawnShipDebris(this.universe, this, { initialRotation: this.angle + Math.PI / 2 });
       }
     }
 

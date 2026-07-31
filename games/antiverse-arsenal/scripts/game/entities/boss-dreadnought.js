@@ -10,7 +10,8 @@ class DreadnoughtBoss extends Enemy {
       fireDelayMin: 0.32,
       fireDelayMax: 0.58,
       bulletSpeed: 235,
-      bulletMaxWraps: 0
+      bulletMaxWraps: 0,
+      leavesDebris: false
     });
 
     this.name = formatText('boss.dreadnought.name');
@@ -36,6 +37,7 @@ class DreadnoughtBoss extends Enemy {
         height: 160,
         maxHp: 30,
         hp: 30,
+        healthBarTimer: 0,
         destroyed: false
       },
       {
@@ -48,6 +50,7 @@ class DreadnoughtBoss extends Enemy {
         height: 160,
         maxHp: 30,
         hp: 30,
+        healthBarTimer: 0,
         destroyed: false
       }
     ];
@@ -59,11 +62,18 @@ class DreadnoughtBoss extends Enemy {
     this.nextCoreShotgunIndex = 0;
     this.coreVolleyCooldown = 0.8;
     this.coreSpreadPhase = 0;
-    this.rocketLaunchers = [{ offsetX: -80, offsetY: 0, fireTimer: 0.65 }, { offsetX: 80, offsetY: 0, fireTimer: 1.2 }];
-    this.maxActiveRockets = 2;
+
+    this.rocketLaunchers = [
+      { offsetX: -102, offsetY: -28, fireTimer: 0.8 },
+      { offsetX: -76, offsetY: 0, fireTimer: 1.6 },
+      { offsetX: 76, offsetY: 0, fireTimer: 2.4 },
+      { offsetX: 102, offsetY: -28, fireTimer: 3.2 }
+    ];
+
+    this.maxActiveRockets = 4;
     this.activeRockets = [];
-    this.rocketCooldownMin = 0.85;
-    this.rocketCooldownMax = 1.2;
+    this.rocketCooldownMin = 1.5;
+    this.rocketCooldownMax = 2.0;
     this.rocketCooldown = 0;
     this.nextRocketLauncherIndex = 0;
     this.maxHp = 120;
@@ -76,6 +86,10 @@ class DreadnoughtBoss extends Enemy {
   update(dt) {
     this.healthBarTimer = Infinity;
     this.updateDamageFlash(dt);
+
+    for (const part of this.parts) {
+      part.healthBarTimer = Math.max(0, part.healthBarTimer - dt);
+    }
 
     if (this.y < this.targetY) {
       this.prevX = this.x;
@@ -172,7 +186,7 @@ class DreadnoughtBoss extends Enemy {
 
     const launcher = readyLaunchers[this.nextRocketLauncherIndex % readyLaunchers.length];
     this.nextRocketLauncherIndex += 1;
-    launcher.fireTimer = rand(1.45, 1.9);
+    launcher.fireTimer = rand(3.8, 4.8);
     this.fireRocketLauncher(launcher);
     this.rocketCooldown = rand(this.rocketCooldownMin, this.rocketCooldownMax);
   }
@@ -340,6 +354,7 @@ class DreadnoughtBoss extends Enemy {
 
     if (part) {
       part.hp = Math.max(0, part.hp - amount);
+      part.healthBarTimer = 3;
       this.healthBarTimer = Infinity;
       this.triggerDamageFlash();
       this.game.sound.play('hitHurt');
@@ -377,7 +392,7 @@ class DreadnoughtBoss extends Enemy {
     }
 
     this.hp = Math.max(0, this.hp - 25);
-    this.game.addFloatingText(this.universe, this.x + part.offsetX, this.y + part.offsetY - 34, `${part.name} DISABLED!`, '#ffcf7a');
+    this.game.addFloatingText(this.universe, this.x + part.offsetX, this.y + part.offsetY - 34, `DISABLED!`, '#ffcf7a'); // TODO: Pull this from text.json...
     this.killMultiplier = Math.max(this.killMultiplier || 1, multiplier || 1);
 
     if (this.hp <= 0) {
@@ -424,19 +439,21 @@ class DreadnoughtBoss extends Enemy {
     const sprites = pixelArt.bossDreadnought || {};
     const sprite = sprites[state] || sprites.intact;
 
-    drawPixelArtFrame(ctx, sprite, -192, -132, 384, 264, { time: this.game.spriteClock, pixelScale: 4, flashAlpha: this.getDamageFlashAlpha() });
+    drawPixelArtFrame(ctx, sprite, -190, -132, 380, 264, { time: this.game.spriteClock, pixelScale: 4, flashAlpha: this.getDamageFlashAlpha() });
   }
 
   drawPartHealthBars(ctx) {
     for (const part of this.parts) {
-      if (part.destroyed) { continue; }
+      if (part.destroyed || part.healthBarTimer <= 0 || part.hp >= part.maxHp) { continue; }
 
       const width = 48;
       const x = this.x + part.offsetX - width / 2;
       const y = this.y + part.offsetY + part.height / 2 + 8;
       const ratio = clamp(part.hp / part.maxHp, 0, 1);
+      const alpha = clamp(part.healthBarTimer / 0.55, 0, 1);
 
       ctx.save();
+      ctx.globalAlpha = alpha;
       ctx.fillStyle = 'rgba(3, 7, 18, 0.88)';
       ctx.fillRect(x - 1, y - 1, width + 2, 6);
       ctx.fillStyle = '#ffd166';
