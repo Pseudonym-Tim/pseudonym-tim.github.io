@@ -9,6 +9,7 @@ const POWERUP_DEFINITIONS = [
   { id: 'quantum_boost', nameKey: 'powerups.quantum_boost.name', descKey: 'powerups.quantum_boost.desc', cost: 450, canAppearAgain: true, trackOwnership: true },
   { id: 'reinforced_hull', nameKey: 'powerups.reinforced_hull.name', descKey: 'powerups.reinforced_hull.desc', cost: 400, canAppearAgain: true, trackOwnership: true },
   { id: 'orbital', nameKey: 'powerups.orbital.name', descKey: 'powerups.orbital.desc', cost: 425, canAppearAgain: true, trackOwnership: false },
+  { id: 'homing_rocket', nameKey: 'powerups.homing_rocket.name', descKey: 'powerups.homing_rocket.desc', cost: 500, canAppearAgain: true, trackOwnership: false },
 ];
 
 Object.assign(Game.prototype, {
@@ -35,6 +36,7 @@ Object.assign(Game.prototype, {
       (!p.isWeaponReplacement || !this.hasPowerup(p.id))
       && (p.id !== 'reinforced_hull' || !this.hasPowerup('reinforced_hull'))
       && (p.id !== 'orbital' || this.orbitals.length < MAX_ORBITALS)
+      && (p.id !== 'homing_rocket' || this.homingRocketLevel < MAX_HOMING_ROCKETS)
       && (p.canAppearAgain || !this.powerups.includes(p.id))
       && (p.id !== 'repair' || this.hp < this.maxHull)
     ));
@@ -123,11 +125,13 @@ Object.assign(Game.prototype, {
     }
 
     shopFeedback.textContent = '';
+
     if (!text) {
       return;
     }
 
     let index = 0;
+
     this.shopFeedbackTimer = setInterval(() => {
       shopFeedback.textContent += text[index] || '';
       index += 1;
@@ -171,6 +175,14 @@ Object.assign(Game.prototype, {
 
     if (id === 'speed') {
       this.player.extraThrust += 95;
+    }
+
+    if (id === 'homing_rocket' && this.homingRocketLevel < MAX_HOMING_ROCKETS) {
+      this.homingRocketLevel += 1;
+      
+      if (this.homingRocketLevel > 1) {
+        this.player.rocketCooldown *= 1 - HOMING_ROCKET_COOLDOWN_REDUCTION;
+      }
     }
 
      if (id === 'orbital' && this.orbitals.length < MAX_ORBITALS) {

@@ -62,6 +62,8 @@ Object.assign(Game.prototype, {
       return;
     }
 
+    this.tunnelBackground.updateUniverseTheme(this.player?.universe, worldDt);
+
     // Player and world share the same clock, so window dragging still freezes both...
     this.spriteClock += worldDt;
     this.updatePendingEnemySpawns(worldDt);

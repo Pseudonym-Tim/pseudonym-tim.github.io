@@ -1,13 +1,13 @@
-// Destructible dreadnought homing missile...
+// Destructible homing rockets...
 class HomingRocket extends Damageable {
-  constructor(game, universe, x, y, vx, vy) {
+  constructor(game, universe, x, y, vx, vy, owner = 'enemy') {
     super(game, universe, x, y, 10);
     this.hp = 3;
     this.maxHp = 3;
-    this.owner = 'enemy';
+    this.owner = owner;
     this.velX = vx;
     this.velY = vy;
-    this.speed = 205;
+    this.speed = owner === 'player' ? 285 : 205;
     this.turnRate = 2.15;
     this.separationRadius = 78;
     this.separationStrength = 1.15;
@@ -20,9 +20,9 @@ class HomingRocket extends Damageable {
     this.life += dt;
     this.healthBarTimer = Math.max(0, this.healthBarTimer - dt);
     this.updateDamageFlash(dt);
-    const player = this.game.player;
-    let targetX = player.x - this.x;
-    let targetY = player.y - this.y;
+    const target = this.owner === 'player' ? this.findPlayerTarget() : this.game.player;
+    let targetX = target ? target.x - this.x : this.velX;
+    let targetY = target ? target.y - this.y : this.velY;
     const targetDistance = Math.hypot(targetX, targetY) || 1;
     targetX /= targetDistance;
     targetY /= targetDistance;
@@ -32,7 +32,7 @@ class HomingRocket extends Damageable {
     let separationY = 0;
 
     for (const rocket of this.game.rockets) {
-      if (rocket === this || rocket.dead || rocket.universe !== this.universe) { continue; }
+      if (rocket === this || rocket.dead || rocket.owner !== this.owner || rocket.universe !== this.universe) { continue; }
 
       const dx = this.x - rocket.x;
       const dy = this.y - rocket.y;
@@ -57,6 +57,10 @@ class HomingRocket extends Damageable {
     this.x += this.velX * dt;
     this.y += this.velY * dt;
 
+    if (this.owner === 'player') {
+      this.checkEnemyHit();
+    }
+
     this.smokeTimer -= dt;
 
     if (this.smokeTimer <= 0) {
@@ -75,8 +79,36 @@ class HomingRocket extends Damageable {
     }
   }
 
+  findPlayerTarget() {
+    let closest = null;
+    let closestDistance = Infinity;
+
+    for (const enemy of this.universe.enemies) {
+      if (enemy.dead || enemy.expired) { continue; }
+      const distance = Math.hypot(enemy.x - this.x, enemy.y - this.y);
+      if (distance < closestDistance) {
+        closest = enemy;
+        closestDistance = distance;
+      }
+    }
+
+    return closest;
+  }
+
+  checkEnemyHit() {
+    for (const enemy of this.universe.enemies) {
+      if (enemy.dead || enemy.expired) { continue; }
+      if (entitiesOverlap(this, enemy)) {
+        enemy.registerHit(1);
+        enemy.takeDamage(HOMING_ROCKET_DAMAGE, 1);
+        this.explode();
+        return;
+      }
+    }
+  }
+
   takeDamage(amount, source) {
-    if (this.dead || source?.owner !== 'player') {
+    if (this.owner !== 'enemy' || this.dead || source?.owner !== 'player') {
       return false;
     }
 
@@ -106,7 +138,7 @@ class HomingRocket extends Damageable {
       ctx.fillRect(pixelSnap(puff.x - size / 2), pixelSnap(puff.y - size / 2), size, size);
     }
 
-    const sprite = pixelArt.bossRocket;
+    const sprite = this.owner === 'player' && pixelArt.playerRocket ? pixelArt.playerRocket : pixelArt.bossRocket;
 
     if (!sprite?.ready) { return; }
 

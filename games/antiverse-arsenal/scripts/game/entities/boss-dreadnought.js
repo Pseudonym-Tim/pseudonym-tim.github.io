@@ -402,6 +402,7 @@ class DreadnoughtBoss extends Enemy {
   }
 
   onDestroyed() {
+    this.game.triggerKillFeedback();
     this.universe.triggerDamageShake();
     this.game.clearEnemyThreat(this);
 

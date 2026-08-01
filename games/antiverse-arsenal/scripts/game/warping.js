@@ -102,6 +102,12 @@ Object.assign(Game.prototype, {
       entity.multiUniversalWrapCount = (entity.multiUniversalWrapCount || 0) + 1;
     }
 
+    // Crossing into another universe accelerates, same universe deliberately preserves speed...
+    if (target !== u && options.universeEntrySpeedMultiplier) {
+      entity.velX *= options.universeEntrySpeedMultiplier;
+      entity.velY *= options.universeEntrySpeedMultiplier;
+    }
+
     if (target === u) {
       if (outLeft) {
         entity.x = u.width - radius;

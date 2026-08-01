@@ -325,8 +325,52 @@ class SpriteAnimation {
 SpriteAnimation.dropShadowsEnabled = true;
 
 const pixelArt = {
-  player: createAnimatedSprite({
-    image: 'assets/sprites/player_ship.png',
+  playerNormal: createAnimatedSprite({
+    image: 'assets/sprites/player/player_ship_normal.png',
+    frameWidth: 18,
+    frameHeight: 22,
+    frameCount: 3,
+    fps: 5,
+    defaultAnimation: 'idle',
+    animations: {
+      idle: { row: 0, frames: 3, fps: 5 }
+    }
+  }),
+  playerDual: createAnimatedSprite({
+    image: 'assets/sprites/player/player_ship_dual.png',
+    frameWidth: 20,
+    frameHeight: 22,
+    frameCount: 3,
+    fps: 5,
+    defaultAnimation: 'idle',
+    animations: {
+      idle: { row: 0, frames: 3, fps: 5 }
+    }
+  }),
+  playerBurst: createAnimatedSprite({
+    image: 'assets/sprites/player/player_ship_burst.png',
+    frameWidth: 20,
+    frameHeight: 23,
+    frameCount: 3,
+    fps: 5,
+    defaultAnimation: 'idle',
+    animations: {
+      idle: { row: 0, frames: 3, fps: 5 }
+    }
+  }),
+  playerMulti: createAnimatedSprite({
+    image: 'assets/sprites/player/player_ship_multi.png',
+    frameWidth: 20,
+    frameHeight: 23,
+    frameCount: 3,
+    fps: 5,
+    defaultAnimation: 'idle',
+    animations: {
+      idle: { row: 0, frames: 3, fps: 5 }
+    }
+  }),
+  playerSniper: createAnimatedSprite({
+    image: 'assets/sprites/player/player_ship_sniper.png',
     frameWidth: 18,
     frameHeight: 22,
     frameCount: 3,
@@ -471,6 +515,17 @@ const pixelArt = {
   bossShotgunBullet: loadSprite('assets/sprites/boss_shotgun_bullet.png'),
   bossRocket: createAnimatedSprite({
     image: 'assets/sprites/boss/boss_rocket.png',
+    frameWidth: 16,
+    frameHeight: 16,
+    animations: Object.fromEntries(Array.from({ length: 2 }, (_, thrustFrame) =>
+      Array.from({ length: 8 }, (_, directionFrame) => [
+        `direction-${directionFrame}-thrust-${thrustFrame}`,
+        { row: thrustFrame, column: directionFrame, frames: 1 }
+      ])
+    ).flat())
+  }),
+  playerRocket: createAnimatedSprite({
+    image: 'assets/sprites/player_rocket.png',
     frameWidth: 16,
     frameHeight: 16,
     animations: Object.fromEntries(Array.from({ length: 2 }, (_, thrustFrame) =>

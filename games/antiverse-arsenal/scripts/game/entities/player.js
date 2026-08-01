@@ -11,6 +11,7 @@ class Player {
     this.angle = 0;
     this.radius = 6;
     this.cooldown = 0;
+    this.rocketCooldown = 0;
     this.baseFireRate = 0.24;
     this.fireRate = this.baseFireRate;
     this.burstShotsRemaining = 0;
@@ -87,6 +88,7 @@ class Player {
     }
 
     this.cooldown -= dt;
+    this.rocketCooldown = Math.max(0, this.rocketCooldown - dt);
     this.warpCooldown = Math.max(0, this.warpCooldown - dt);
     this.dashCooldown = Math.max(0, this.dashCooldown - dt);
     this.blink = Math.max(0, this.blink - dt);
@@ -126,6 +128,10 @@ class Player {
       }
     }
 
+    if (firing && !this.game.laserCharging) {
+      this.tryFireHomingRocket();
+    }
+
     this.prevX = this.x;
     this.prevY = this.y;
     this.x += this.velX * dt;
@@ -147,6 +153,26 @@ class Player {
     }
   }
 
+  tryFireHomingRocket() {
+    const rocketLevel = this.game.homingRocketLevel;
+
+    if (rocketLevel <= 0 || this.rocketCooldown > 0) {
+      return;
+    }
+
+    const activeRockets = this.game.rockets.filter((rocket) => rocket.owner === 'player' && !rocket.dead).length;
+
+    if (activeRockets >= rocketLevel) {
+      return;
+    }
+
+    const launchSpeed = 180;
+
+    this.game.spawnPlayerHomingRocket(this.universe, this.x, this.y, Math.cos(this.angle) * launchSpeed + this.velX * 0.15, Math.sin(this.angle) * launchSpeed + this.velY * 0.15);
+    this.game.sound.play('shoot');
+    this.rocketCooldown = HOMING_ROCKET_BASE_COOLDOWN * Math.pow(1 - HOMING_ROCKET_COOLDOWN_REDUCTION, rocketLevel - 1);
+  }
+
   startBurst() {
     this.fire(BURST_BULLET_SPEED);
     this.burstShotsRemaining = BURST_SHOT_COUNT - 1;
@@ -166,6 +192,7 @@ class Player {
     }
 
     const direction = this.getDashDirection();
+
     if (!direction) {
       return false;
     }
@@ -181,6 +208,7 @@ class Player {
     this.angle = Math.atan2(this.dashDirY, this.dashDirX);
     this.roll = 0;
     this.game.addFloatingText(this.universe, this.x, this.y - 16, formatText('float.dash'), '#72f7ff');
+    
     return true;
   }
 
@@ -275,6 +303,20 @@ class Player {
     return clamp(this.damageFlashTimer / this.damageFlashDuration, 0, 1);
   }
 
+  getPlayerSprite() {
+    const weaponSprites = {
+      dual: pixelArt.playerDual,
+      burst: pixelArt.playerBurst,
+      multi: pixelArt.playerMulti,
+      sniper: pixelArt.playerSniper
+    };
+
+    const weaponID = Object.keys(weaponSprites).find((id) => this.game.hasPowerup(id));
+    const weaponSprite = weaponSprites[weaponID];
+
+    return weaponSprite?.ready ? weaponSprite : pixelArt.playerNormal;
+  }
+
   draw(ctx) {
     ctx.save();
     ctx.translate(pixelSnap(this.x), pixelSnap(this.y));
@@ -302,7 +344,7 @@ class Player {
 
     ctx.rotate(Math.PI / 2);
 
-    drawPixelArt(ctx, pixelArt.player, { alpha: this.dashing ? 1 : 0.9, time: this.game.spriteClock, pixelScale: 2, flashAlpha: this.getDamageFlashAlpha() });
+    drawPixelArt(ctx, this.getPlayerSprite(), { alpha: this.dashing ? 1 : 0.9, time: this.game.spriteClock, pixelScale: 2, flashAlpha: this.getDamageFlashAlpha() });
 
     ctx.restore();
   }

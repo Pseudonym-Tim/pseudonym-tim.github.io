@@ -100,7 +100,7 @@ Object.assign(Game.prototype, {
     }
 
     for (const rocket of this.rockets) {
-      if (rocket.dead || rocket.universe !== u) {
+      if (rocket.owner !== 'enemy' || rocket.dead || rocket.universe !== u) {
         continue;
       }
 

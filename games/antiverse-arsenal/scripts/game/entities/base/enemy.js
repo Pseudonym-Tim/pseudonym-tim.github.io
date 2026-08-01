@@ -70,11 +70,13 @@ class Enemy extends Damageable {
     this.game.clearEnemyThreat(this);
 
     if (this === this.game.boss || this.enemyType === 'boss') {
+      this.game.triggerKillFeedback();
       this.game.finishBossEncounter();
       return;
     }
 
     if (!this.destroyedByAsteroid) {
+      this.game.triggerKillFeedback();
       this.game.awardPoints(ENEMY_SCORE, Math.max(1, this.killMultiplier || 1), this.universe, this.x, this.y + 8, '#ffd25c');
     }
 

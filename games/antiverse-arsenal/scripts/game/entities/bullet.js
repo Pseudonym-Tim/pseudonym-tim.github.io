@@ -39,7 +39,7 @@ class Bullet {
       this.checkHits();
 
       if (!this.dead) {
-        this.game.wrapEntity(this, { sameUniverse: true, countWrap: true, scoreMultiplier: true });
+        this.game.wrapEntity(this, {sameUniverse: true, countWrap: true, scoreMultiplier: true, universeEntrySpeedMultiplier: MULTIVERSE_BULLET_SPEED_MULTIPLIER});
       }
     }
   }

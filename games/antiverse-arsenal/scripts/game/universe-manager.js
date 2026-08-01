@@ -445,6 +445,7 @@ Object.assign(Game.prototype, {
         position.universe.setPosition(position.x, position.y);
       }
     }
+    
     u.element.classList.remove('dragging');
     u.element.style.zIndex = 1;
     void u.element.offsetWidth;

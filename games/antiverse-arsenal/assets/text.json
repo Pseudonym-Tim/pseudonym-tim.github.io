@@ -85,6 +85,8 @@
   "powerups.sniper.desc": "Fire a quick, powerful single-target shot!",
   "powerups.orbital.name": "Orbital",
   "powerups.orbital.desc": "Orbits the ship and defends against incoming bullets and ship collisions!",
+  "powerups.homing_rocket.name": "Homing Rocket",
+  "powerups.homing_rocket.desc": "Launch a homing rocket periodically. Reduce rocket cooldown by 10% (Max of 3)",
   "pause.title": "PAUSED!",
   "pause.resume": "RESUME",
   "pause.restart": "RESTART",

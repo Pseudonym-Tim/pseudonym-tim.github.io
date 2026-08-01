@@ -9,6 +9,10 @@ Object.assign(Game.prototype, {
     this.addFloatingText(universe, x, y, text, color);
   },
 
+  triggerKillFeedback() {
+    this.tunnelBackground?.pulseOnKill();
+  },
+
   addFloatingText(universe, x, y, text, color = '#ffd25c') {
     if (!universe) {
       return;

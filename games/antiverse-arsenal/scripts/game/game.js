@@ -8,6 +8,7 @@ class Game {
     this.floatingTexts = [];
     this.explosions = [];
     this.orbitals = [];
+    this.homingRocketLevel = 0;
     this.blockedShipCollisions = new Set();
     this.orbitalCollisionCooldowns = new Map();
     this.sound = new SoundManager();
@@ -64,6 +65,7 @@ class Game {
     this.debugShowCollisions = false;
     this.powerups = [];
     this.spriteClock = 0;
+    this.tunnelBackground = new TunnelBackground(tunnelBackgroundCanvas);
     this.scale = this.computeScale();
     this.messageToken = 0;
     this.messageTimeout = null;

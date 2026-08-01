@@ -11,6 +11,7 @@ Object.assign(Game.prototype, {
     this.floatingTexts = [];
     this.explosions = [];
     this.orbitals = [];
+    this.homingRocketLevel = 0;
     this.blockedShipCollisions = new Set();
     this.orbitalCollisionCooldowns = new Map();
     this.powerups = [];

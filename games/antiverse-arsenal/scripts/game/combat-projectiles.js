@@ -16,6 +16,12 @@ Object.assign(Game.prototype, {
     return rocket;
   },
 
+  spawnPlayerHomingRocket(universe, x, y, vx, vy) {
+    const rocket = new HomingRocket(this, universe, x, y, vx, vy, 'player');
+    this.rockets.push(rocket);
+    return rocket;
+  },
+
   recordWrapShotHit(bullet) {
     if (bullet?.owner !== 'player') {
       return;

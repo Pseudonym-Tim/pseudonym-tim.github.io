@@ -9,6 +9,7 @@ const roundValue = document.getElementById('round-label');
 const multiverseValue = document.getElementById('multiverse-label');
 const scoreValue = document.getElementById('score-label');
 const highscoreValue = document.getElementById('highscore-label');
+const tunnelBackgroundCanvas = document.getElementById('tunnel-background');
 const moneyValue = document.getElementById('money-label');
 const nextUniverseValue = document.getElementById('next-universe-label');
 const incursionValue = document.getElementById('incursion-label');
