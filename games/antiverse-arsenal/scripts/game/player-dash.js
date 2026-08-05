@@ -1,7 +1,7 @@
 // Player dash...
 Object.assign(Game.prototype, {
   canStartDash() {
-    return Boolean(this.running && this.player && !this.player.dashing && this.player.dashCooldown <= 0 && !this.draggingUniverse && !this.transitioning && !this.isShopOpen());
+    return Boolean(this.running && this.player && !this.player.isStunned?.() && !this.player.dashing && this.player.dashCooldown <= 0 && !this.draggingUniverse && !this.transitioning && !this.isShopOpen());
   },
 
   playerOverlapsDashObstacle(player = this.player) {

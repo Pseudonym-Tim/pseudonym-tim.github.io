@@ -13,6 +13,14 @@ class Universe {
     this.asteroids = [];
     this.hullPickups = [];
     this.theme = this.game.getUniverseTheme();
+    this.collapseCountdown = null;
+    this.collapseDuration = 0;
+    this.collapseClosing = false;
+    this.collapseWarningSecond = null;
+    this.collapseShakeTimer = 0;
+    this.shakeCharge = 0;
+    this.shakeLockTimer = 0;
+    this.shakeLockDuration = 0;
 
     this.element = document.createElement('div');
     this.element.className = collapsed ? 'universe universe-collapsed' : 'universe';
@@ -27,6 +35,11 @@ class Universe {
     this.ctx = this.canvas.getContext('2d');
     this.ctx.imageSmoothingEnabled = false;
     this.element.appendChild(this.canvas);
+
+    this.shakeLockBadge = document.createElement('div');
+    this.shakeLockBadge.className = 'universe-shake-lock-badge hidden';
+    this.shakeLockBadge.setAttribute('aria-hidden', 'true');
+    this.element.appendChild(this.shakeLockBadge);
 
     this.messageOverlay = document.createElement('div');
     this.messageOverlay.className = 'universe-message-overlay hidden';
@@ -93,6 +106,7 @@ class Universe {
     this.cssHeader = this.headerHeight * this.scale;
     this.element.style.width = `${this.cssWidth}px`;
     this.element.style.height = `${this.cssHeight + this.cssHeader}px`;
+    this.element.style.setProperty('--universe-header-height', `${this.cssHeader}px`);
     this.header.style.height = `${this.cssHeader}px`;
     this.header.style.lineHeight = `${this.cssHeader}px`;
     const headerFontSize = Math.max(16, Math.round((16 * this.scale) / 16) * 16);
@@ -109,7 +123,161 @@ class Universe {
     this.header.textContent = formatText('universe.label', { id: this.id });
   }
 
+  setShakeCharge(value) {
+    this.shakeCharge = clamp(Number(value) || 0, 0, 1);
+    this.element.dataset.shakeCharge = this.shakeCharge.toFixed(3);
+    this.element.style.setProperty('--shake-charge', this.shakeCharge.toFixed(3));
+    this.element.style.setProperty('--shake-border-alpha', (0.45 + this.shakeCharge * 0.55).toFixed(3));
+    this.element.style.setProperty('--shake-glow-alpha', (0.16 + this.shakeCharge * 0.58).toFixed(3));
+    this.element.style.setProperty('--shake-glow-size', `${(5 + this.shakeCharge * 22).toFixed(1)}px`);
+    this.element.classList.toggle('shake-charging', this.shakeCharge > 0.025 && !this.isShakeLocked());
+  }
+
+  isShakeLocked() {
+    return this.shakeLockTimer > 0;
+  }
+
+  beginShakeLock(duration) {
+    this.shakeLockDuration = Math.max(0.1, Number(duration) || 0.1);
+    this.shakeLockTimer = this.shakeLockDuration;
+    this.setShakeCharge(1);
+    this.element.classList.remove('shake-charging');
+    this.element.classList.add('shake-locked');
+    this.updateShakeLockBadge();
+  }
+
+  updateShakeLock(dt) {
+    if (!this.isShakeLocked()) {
+      return;
+    }
+
+    this.shakeLockTimer = Math.max(0, this.shakeLockTimer - Math.max(0, dt));
+    this.updateShakeLockBadge();
+
+    if (this.shakeLockTimer <= 0) {
+      this.endShakeLock();
+    }
+  }
+
+  updateShakeLockBadge() {
+    const ratio = this.shakeLockDuration > 0 ? clamp(this.shakeLockTimer / this.shakeLockDuration, 0, 1) : 0;
+    this.element.style.setProperty('--shake-lock-ratio', ratio.toFixed(3));
+    this.element.style.setProperty('--shake-lock-percent', `${(ratio * 100).toFixed(1)}%`);
+
+    if (!this.isShakeLocked()) {
+      this.shakeLockBadge.classList.add('hidden');
+      return;
+    }
+
+    this.shakeLockBadge.textContent = formatText('status.shakeLocked', { seconds: this.shakeLockTimer.toFixed(1) });
+    this.shakeLockBadge.classList.remove('hidden');
+  }
+
+  endShakeLock() {
+    this.shakeLockTimer = 0;
+    this.shakeLockDuration = 0;
+    this.element.classList.remove('shake-locked');
+    this.element.style.removeProperty('--shake-lock-ratio');
+    this.element.style.removeProperty('--shake-lock-percent');
+    this.shakeLockBadge.classList.add('hidden');
+    this.setShakeCharge(0);
+    this.game.refreshCustomCursorTarget?.();
+  }
+
+  startCollapseCountdown(duration) {
+    if (this.collapseCountdown !== null || this.collapseClosing) {
+      return false;
+    }
+
+    clearTimeout(this.messageTimeout);
+    this.messageTimeout = null;
+    this.collapseDuration = Math.max(0.1, duration);
+    this.collapseCountdown = this.collapseDuration;
+    this.collapseWarningSecond = null;
+    this.collapseShakeTimer = 0;
+    this.element.classList.add('universe-collapse-warning');
+    this.messageOverlay.classList.remove('hidden', 'message-enter', 'message-exit');
+    this.messageOverlay.classList.add('collapse-warning');
+    this.updateCollapseWarningText();
+    
+    return true;
+  }
+
+  updateCollapseWarningText() {
+    if (this.collapseCountdown === null) {
+      return;
+    }
+
+    const tenths = Math.max(0, Math.ceil(this.collapseCountdown * 10) / 10);
+    const displayValue = tenths.toFixed(1);
+
+    if (this.collapseWarningSecond === displayValue) {
+      return;
+    }
+
+    this.collapseWarningSecond = displayValue;
+    this.messageText.textContent = formatText('message.universeCollapseWarning', { seconds: displayValue });
+  }
+
+  updateCollapseCountdown(dt) {
+    if (this.collapseCountdown === null || this.collapseClosing) {
+      return;
+    }
+
+    if (!this.game.running || this.game.roundEnding || this.game.transitioning || this.game.bossActive || this.game.bossPending) {
+      this.cancelCollapseCountdown();
+      return;
+    }
+
+    this.collapseCountdown = Math.max(0, this.collapseCountdown - dt);
+    const progress = clamp(1 - this.collapseCountdown / this.collapseDuration, 0, 1);
+    this.collapseShakeTimer -= dt;
+
+    if (this.collapseShakeTimer <= 0) {
+      const intensityProgress = progress * progress * progress;
+      const intensity = UNIVERSE_COLLAPSE_MIN_SHAKE + (UNIVERSE_COLLAPSE_MAX_SHAKE - UNIVERSE_COLLAPSE_MIN_SHAKE) * intensityProgress;
+      const rotation = (Math.random() * 2 - 1) * intensity * 0.06;
+      const shakeX = (Math.random() * 2 - 1) * intensity;
+      const shakeY = (Math.random() * 2 - 1) * intensity;
+      const shakeInterval = UNIVERSE_COLLAPSE_SHAKE_INTERVAL_START + (UNIVERSE_COLLAPSE_SHAKE_INTERVAL_END - UNIVERSE_COLLAPSE_SHAKE_INTERVAL_START) * progress;
+      this.element.style.setProperty('--collapse-shake-x', `${shakeX.toFixed(2)}px`);
+      this.element.style.setProperty('--collapse-shake-y', `${shakeY.toFixed(2)}px`);
+      this.element.style.setProperty('--collapse-shake-rotation', `${rotation.toFixed(2)}deg`);
+      this.collapseShakeTimer = shakeInterval;
+    }
+
+    this.element.style.setProperty('--collapse-warning-progress', progress.toFixed(3));
+    this.updateCollapseWarningText();
+
+    if (this.collapseCountdown <= 0) {
+      this.collapseCountdown = null;
+      this.collapseClosing = true;
+      this.game.closeCollapsingUniverse(this);
+    }
+  }
+
+  cancelCollapseCountdown() {
+    this.collapseCountdown = null;
+    this.collapseDuration = 0;
+    this.collapseWarningSecond = null;
+    this.collapseShakeTimer = 0;
+    this.element.classList.remove('universe-collapse-warning');
+    this.element.style.removeProperty('--collapse-shake-x');
+    this.element.style.removeProperty('--collapse-shake-y');
+    this.element.style.removeProperty('--collapse-shake-rotation');
+    this.element.style.removeProperty('--collapse-warning-progress');
+    this.messageOverlay.classList.remove('collapse-warning');
+
+    if (!this.collapseClosing) {
+      this.messageOverlay.classList.add('hidden');
+    }
+  }
+
   showIncursionWarning(duration = 1800) {
+    if (this.collapseCountdown !== null || this.collapseClosing) {
+      return;
+    }
+
     clearTimeout(this.messageTimeout);
     this.messageText.textContent = formatText('message.incursionWarning');
     this.messageOverlay.classList.remove('hidden', 'message-enter', 'message-exit');
@@ -188,6 +356,8 @@ class Universe {
   }
 
   update(dt) {
+    let destroyedEnemyRemoved = false;
+
     for (let i = this.shipDebris.length - 1; i >= 0; i--) {
       const debris = this.shipDebris[i];
       debris.update(dt);
@@ -206,6 +376,7 @@ class Universe {
 
       if (enemy.dead) {
         this.enemies.splice(i, 1);
+        destroyedEnemyRemoved = true;
         enemy.onDestroyed();
         continue;
       }
@@ -215,6 +386,12 @@ class Universe {
         enemy.universe.enemies.push(enemy);
       }
     }
+
+    if (destroyedEnemyRemoved && this.enemies.every((enemy) => enemy.dead || enemy.expired)) {
+      this.game.maybeStartUniverseCollapse(this);
+    }
+
+    this.updateCollapseCountdown(dt);
 
     for (let i = this.asteroids.length - 1; i >= 0; i--) {
       const asteroid = this.asteroids[i];

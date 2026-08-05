@@ -240,6 +240,8 @@ Object.assign(Game.prototype, {
     this.player.dashCooldown = 0;
     this.player.dashing = false;
     this.player.dashHitEntities.clear();
+    this.player.stunTimer = 0;
+    this.player.stunDuration = 0;
 
     while (this.totalPrimaryAsteroids() < this.getRoundAsteroidTarget()) {
       this.spawnAsteroids(1, [freshUniverse]);

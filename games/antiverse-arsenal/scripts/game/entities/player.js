@@ -29,6 +29,8 @@ class Player {
     this.blink = 0;
     this.damageFlashTimer = 0;
     this.damageFlashDuration = 0.16;
+    this.stunTimer = 0;
+    this.stunDuration = 0;
     this.roll = 0;
     this.maxRoll = 0.52;
     this.rollResponsiveness = 12;
@@ -67,7 +69,91 @@ class Player {
     }
   }
 
+  isStunned() {
+    return this.stunTimer > 0;
+  }
+
+  applyStun(duration) {
+    const nextDuration = Math.max(0, Number(duration) || 0);
+
+    if (nextDuration <= 0) {
+      return;
+    }
+
+    this.stunDuration = this.stunTimer > 0 ? Math.max(this.stunDuration, nextDuration) : nextDuration;
+    this.stunTimer = Math.max(this.stunTimer, nextDuration);
+    this.burstShotsRemaining = 0;
+    this.burstShotTimer = 0;
+
+    if (this.dashing) {
+      this.dashing = false;
+      this.dashElapsed = 0;
+      this.dashCooldown = Math.max(this.dashCooldown, DASH_COOLDOWN);
+      this.dashHitEntities.clear();
+    }
+
+    this.velX = 0;
+    this.velY = 0;
+    this.roll = 0;
+
+    this.game.laserCharging = false;
+    this.game.laserAim = null;
+    this.game.timeScale = 1;
+  }
+
+  updateStun(dt) {
+    if (!this.isStunned()) {
+      return false;
+    }
+
+    this.stunTimer = Math.max(0, this.stunTimer - Math.max(0, dt));
+    this.velX = 0;
+    this.velY = 0;
+    this.roll += (0 - this.roll) * (1 - Math.exp(-this.rollResponsiveness * Math.max(0, dt)));
+    return true;
+  }
+
+  drawStunEffect(ctx) {
+    if (this.stunTimer <= 0) {
+      return;
+    }
+
+    const ratio = this.stunDuration > 0 ? clamp(this.stunTimer / this.stunDuration, 0, 1) : 0;
+    const pulse = 1 + Math.sin(this.game.spriteClock * 22) * 0.16;
+    const visualRadius = Math.min(this.radius, 70);
+    const orbitRadius = visualRadius + 14 + (1 - ratio) * 5;
+    ctx.save();
+    ctx.translate(pixelSnap(this.x), pixelSnap(this.y));
+    ctx.globalAlpha = 0.55 + ratio * 0.35;
+    ctx.strokeStyle = '#fff3a6';
+    ctx.fillStyle = '#ffd84d';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(0, 0, orbitRadius * pulse, 0, Math.PI * 2);
+    ctx.stroke();
+
+    for (let i = 0; i < 3; i++) {
+      const angle = this.game.spriteClock * 7 + i * Math.PI * 2 / 3;
+      const x = Math.cos(angle) * orbitRadius;
+      const y = Math.sin(angle) * orbitRadius * 0.45 - visualRadius * 0.55;
+      ctx.fillRect(pixelSnap(x - 2), pixelSnap(y - 2), 4, 4);
+    }
+
+    ctx.restore();
+  }
+
   update(dt) {
+    this.cooldown -= dt;
+    this.rocketCooldown = Math.max(0, this.rocketCooldown - dt);
+    this.warpCooldown = Math.max(0, this.warpCooldown - dt);
+    this.dashCooldown = Math.max(0, this.dashCooldown - dt);
+    this.blink = Math.max(0, this.blink - dt);
+    this.damageFlashTimer = Math.max(0, this.damageFlashTimer - dt);
+
+    if (this.updateStun(dt)) {
+      return;
+    }
+
     const keys = this.game.keys;
     const firing = Boolean(keys.Space);
     const moveX = (keys.KeyD || keys.ArrowRight ? 1 : 0) - (keys.KeyA || keys.ArrowLeft ? 1 : 0);
@@ -86,13 +172,6 @@ class Player {
       const rollReset = 1 - Math.exp(-this.rollResponsiveness * dt);
       this.roll += (0 - this.roll) * rollReset;
     }
-
-    this.cooldown -= dt;
-    this.rocketCooldown = Math.max(0, this.rocketCooldown - dt);
-    this.warpCooldown = Math.max(0, this.warpCooldown - dt);
-    this.dashCooldown = Math.max(0, this.dashCooldown - dt);
-    this.blink = Math.max(0, this.blink - dt);
-    this.damageFlashTimer = Math.max(0, this.damageFlashTimer - dt);
 
     if (this.dashing) {
       this.updateDash(dt);
@@ -347,5 +426,6 @@ class Player {
     drawPixelArt(ctx, this.getPlayerSprite(), { alpha: this.dashing ? 1 : 0.9, time: this.game.spriteClock, pixelScale: 2, flashAlpha: this.getDamageFlashAlpha() });
 
     ctx.restore();
+    this.drawStunEffect(ctx);
   }
 }

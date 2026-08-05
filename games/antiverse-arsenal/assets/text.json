@@ -45,6 +45,7 @@
   "message.universesCollapsing": "Universes collapsing!",
   "message.entryUniverseReconstituting": "Entry universe reconstituting!",
   "message.incursionWarning": "WARNING!\nIncursion detected!",
+  "message.universeCollapseWarning": "WARNING!\nUNIVERSE COLLAPSE IN %seconds%",
   "message.universeMaterializing": "Universe %id% materializing!",
   "message.incursionEntering": "Incursion %current%/%total% entering universe %universe%",
   "message.incursionSignaturesForming": "Incursion signatures forming!",
@@ -100,5 +101,7 @@
   "boss.part.leftLauncher": "Left launcher",
   "boss.part.rightLauncher": "Right launcher",
   "boss.hp": "%name% - HP: %hp%/%maxHp%",
-  "status.locking": "Locking"
+  "status.locking": "Locking",
+  "status.shakeLocked": "OVERLOAD %seconds%S",
+  "float.stunned": "STUNNED!"
 }

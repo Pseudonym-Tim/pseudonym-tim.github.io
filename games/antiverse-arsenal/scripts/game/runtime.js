@@ -25,6 +25,8 @@ Object.assign(Game.prototype, {
       return;
     }
 
+    this.updateUniverseShakeState(rawDt);
+
     if (this.draggingUniverse) {
       this.updateDragTilt(rawDt);
     }

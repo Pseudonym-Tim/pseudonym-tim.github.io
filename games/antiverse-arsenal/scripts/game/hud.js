@@ -58,5 +58,17 @@ Object.assign(Game.prototype, {
 
     const laserTime = this.laserCooldown || 0;
     setAbilityCooldown(laserCooldown, laserValue, laserTime, LASER_COOLDOWN, this.laserCharging ? formatText('status.locking') : null);
+
+    const shakeUnavailable = this.bossPending || this.bossActive;
+
+    if (shakeCooldown) {
+      shakeCooldown.classList.toggle('hidden', shakeUnavailable);
+      shakeCooldown.setAttribute('aria-hidden', String(shakeUnavailable));
+    }
+
+    if (!shakeUnavailable) {
+      const shakeTime = this.shakeAbilityCooldown || 0;
+      setAbilityCooldown(shakeCooldown, shakeValue, shakeTime, UNIVERSE_SHAKE_ABILITY_COOLDOWN);
+    }
   }
 });

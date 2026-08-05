@@ -23,6 +23,9 @@ class TunnelBackground {
     this.hasUniverseTheme = false;
     this.lastFrameTime = performance.now();
     this.startTime = this.lastFrameTime;
+    this.paused = false;
+    this.pauseStartedAt = 0;
+    this.totalPausedTime = 0;
 
     if (!this.gl || !this.createProgram()) {
       return;
@@ -188,6 +191,26 @@ class TunnelBackground {
     this.pulse = Math.min(1.5, this.pulse + 1);
   }
 
+  pause(now = performance.now()) {
+    if (this.paused) {
+      return;
+    }
+
+    this.paused = true;
+    this.pauseStartedAt = now;
+  }
+
+  resume(now = performance.now()) {
+    if (!this.paused) {
+      return;
+    }
+
+    this.totalPausedTime += Math.max(0, now - this.pauseStartedAt);
+    this.pauseStartedAt = 0;
+    this.lastFrameTime = now;
+    this.paused = false;
+  }
+
   updateUniverseTheme(universe, dt) {
     if (!TUNNEL_FOLLOWS_UNIVERSE_THEME) {
       this.currentUniverse = null;
@@ -279,13 +302,19 @@ class TunnelBackground {
   }
 
   render(now) {
+    if (this.paused) {
+      this.lastFrameTime = now;
+      requestAnimationFrame(this.render);
+      return;
+    }
+
     const dt = Math.min(0.05, (now - this.lastFrameTime) / 1000);
     this.lastFrameTime = now;
 
     this.pulse += (0 - this.pulse) * (1 - Math.exp(-7 * dt));
 
     this.gl.uniform2f(this.resolutionLocation, this.canvas.width, this.canvas.height);
-    this.gl.uniform1f(this.timeLocation, (now - this.startTime) / 1000);
+    this.gl.uniform1f(this.timeLocation, (now - this.startTime - this.totalPausedTime) / 1000);
     this.gl.uniform1f(this.pulseLocation, this.pulse);
     this.gl.uniform3fv(this.themeDarkLocation, this.themeDark);
     this.gl.uniform3fv(this.themeBrightLocation, this.themeBright);

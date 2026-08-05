@@ -147,7 +147,7 @@ Object.assign(Game.prototype, {
   },
 
   tryWarpTo(universe, x, y) {
-    if (this.paused || this.isUniverseManipulationActive() || !this.player || this.player.warpCooldown > 0 || !this.universes.includes(universe)) {
+    if (this.paused || this.isUniverseManipulationActive() || !this.player || this.player.isStunned?.() || this.player.warpCooldown > 0 || !this.universes.includes(universe)) {
       return;
     }
 

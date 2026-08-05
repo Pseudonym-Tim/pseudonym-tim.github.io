@@ -11,6 +11,8 @@ Object.assign(Game.prototype, {
   },
 
   initInput() {
+    this.initCustomCursor();
+
     window.addEventListener('keydown', (e) => {
       if (e.code === 'Escape' && !e.repeat) {
         e.preventDefault();
@@ -110,6 +112,9 @@ Object.assign(Game.prototype, {
     document.addEventListener('mousemove', (e) => {
       this.mouseX = e.clientX;
       this.mouseY = e.clientY;
+      this.updateCustomCursorPosition(e.clientX, e.clientY);
+      this.updateCustomCursorTarget(e.target);
+      this.customCursor?.classList.add('visible');
 
       if (this.draggingUniverse) {
         this.onDrag(e);
@@ -119,13 +124,22 @@ Object.assign(Game.prototype, {
     document.addEventListener('mousedown', (e) => {
       this.mouseX = e.clientX;
       this.mouseY = e.clientY;
+      this.updateCustomCursorPosition(e.clientX, e.clientY);
+      this.updateCustomCursorTarget(e.target);
+      this.setCustomCursorPressed(true);
     });
 
-    document.addEventListener('mouseup', () => {
+    document.addEventListener('mouseup', (e) => {
+      this.setCustomCursorPressed(false);
+      this.updateCustomCursorTarget(e.target);
+
       if (this.draggingUniverse) {
         this.stopDraggingUniverse();
       }
     });
+
+    document.addEventListener('mouseenter', () => this.customCursor?.classList.add('visible'));
+    document.addEventListener('mouseleave', () => this.customCursor?.classList.remove('visible'));
 
     const cancelActiveInput = () => {
       this.clearAllInput();
@@ -135,6 +149,8 @@ Object.assign(Game.prototype, {
       }
 
       this.clearUniverseReplacementSelection();
+      this.setCustomCursorPressed(false);
+      this.setCursorShakeRatio(0);
     };
 
     window.addEventListener('blur', cancelActiveInput);

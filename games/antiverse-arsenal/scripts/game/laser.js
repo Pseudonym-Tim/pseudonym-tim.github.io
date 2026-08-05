@@ -97,7 +97,7 @@ Object.assign(Game.prototype, {
 
   updateLaser(dt) {
     this.laserCooldown = Math.max(0, this.laserCooldown - dt);
-    const active = this.running && !this.isShopOpen() && !this.transitioning && !this.draggingUniverse && this.laserCooldown <= 0 && this.isLaserControlHeld();
+    const active = this.running && !this.isShopOpen() && !this.transitioning && !this.draggingUniverse && !this.player?.isStunned?.() && this.laserCooldown <= 0 && this.isLaserControlHeld();
     this.laserCharging = active;
     this.laserAim = active ? this.getLaserPlan() : null;
 

@@ -35,6 +35,7 @@ Object.assign(Game.prototype, {
     this.laserCharging = false;
     this.laserAim = null;
     this.timeScale = 1;
+    this.tunnelBackground?.pause();
     this.pauseMessageTimer();
     pauseOverlay.classList.remove('hidden');
   },
@@ -45,6 +46,7 @@ Object.assign(Game.prototype, {
     }
 
     this.paused = false;
+    this.tunnelBackground?.resume();
     this.clearAllInput();
     pauseOverlay.classList.add('hidden');
     controlsPanel.classList.add('hidden');

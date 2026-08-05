@@ -36,11 +36,70 @@ class Enemy extends Damageable {
     this.avoidanceX = 0;
     this.avoidanceY = 0;
     this.maxWraps = Infinity;
+    this.stunTimer = 0;
+    this.stunDuration = 0;
+  }
+
+  applyStun(duration) {
+    if (this.dead || this.expired) {
+      return;
+    }
+
+    const nextDuration = Math.max(0, Number(duration) || 0);
+    this.stunDuration = this.stunTimer > 0 ? Math.max(this.stunDuration, nextDuration) : nextDuration;
+    this.stunTimer = Math.max(this.stunTimer, nextDuration);
+    this.velX *= 0.35;
+    this.velY *= 0.35;
+  }
+
+  updateStun(dt) {
+    if (this.stunTimer <= 0) {
+      return false;
+    }
+
+    this.stunTimer = Math.max(0, this.stunTimer - Math.max(0, dt));
+    this.velX *= Math.exp(-Math.max(0, dt) * 8);
+    this.velY *= Math.exp(-Math.max(0, dt) * 8);
+    return true;
+  }
+
+  drawStunEffect(ctx) {
+    if (this.stunTimer <= 0) {
+      return;
+    }
+
+    const ratio = this.stunDuration > 0 ? clamp(this.stunTimer / this.stunDuration, 0, 1) : 0;
+    const pulse = 1 + Math.sin(this.game.spriteClock * 22) * 0.16;
+    const visualRadius = Math.min(this.radius, 70);
+    const orbitRadius = visualRadius + 14 + (1 - ratio) * 5;
+    ctx.save();
+    ctx.translate(pixelSnap(this.x), pixelSnap(this.y));
+    ctx.globalAlpha = 0.55 + ratio * 0.35;
+    ctx.strokeStyle = '#fff3a6';
+    ctx.fillStyle = '#ffd84d';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(0, 0, orbitRadius * pulse, 0, Math.PI * 2);
+    ctx.stroke();
+
+    for (let i = 0; i < 3; i++) {
+      const angle = this.game.spriteClock * 7 + i * Math.PI * 2 / 3;
+      const x = Math.cos(angle) * orbitRadius;
+      const y = Math.sin(angle) * orbitRadius * 0.45 - visualRadius * 0.55;
+      ctx.fillRect(pixelSnap(x - 2), pixelSnap(y - 2), 4, 4);
+    }
+
+    ctx.restore();
   }
 
   update(dt) {
     this.healthBarTimer = Math.max(0, this.healthBarTimer - dt);
     this.updateDamageFlash(dt);
+
+    if (this.updateStun(dt)) {
+      return;
+    }
+
     this.steerTowardPlayer(dt);
     this.updateWeapon(dt);
     this.move(dt);
@@ -287,6 +346,7 @@ class Enemy extends Damageable {
     this.drawShip(ctx);
     ctx.restore();
     this.drawHealthBar(ctx);
+    this.drawStunEffect(ctx);
   }
 
   drawShip(ctx) {

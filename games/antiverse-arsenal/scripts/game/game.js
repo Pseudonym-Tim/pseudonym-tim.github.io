@@ -23,6 +23,17 @@ class Game {
     this.dragLastMouseX = 0;
     this.dragLastMouseY = 0;
     this.dragLastMoveTime = 0;
+    this.dragShakeAxis = null;
+    this.dragShakeCandidateX = 0;
+    this.dragShakeCandidateY = 0;
+    this.dragShakeAxisPosition = 0;
+    this.dragShakeExtremePosition = 0;
+    this.dragShakeDirection = 0;
+    this.dragShakeLastDirectionTime = 0;
+    this.dragShakeActivityTimer = 0;
+    this.shakeAbilityCooldown = 0;
+    this.customCursor = null;
+    this.cursorShakeRatio = 0;
     this.selectedUniverse = null;
     this.timeScale = 1;
     this.laserCharging = false;

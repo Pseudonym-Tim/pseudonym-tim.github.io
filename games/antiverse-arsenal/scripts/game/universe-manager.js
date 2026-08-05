@@ -4,6 +4,10 @@ Object.assign(Game.prototype, {
     return this.running && !this.paused && !this.transitioning && !this.isShopOpen() && !this.isMultiverseCompleteOpen();
   },
 
+  canManipulateUniverse(universe) {
+    return this.canManipulateUniverses() && universe?.collapseCountdown === null && !universe?.collapseClosing && !universe?.isShakeLocked?.();
+  },
+
   isUniverseManipulationActive() {
     return Boolean(this.draggingUniverse || this.selectedUniverse);
   },
@@ -24,7 +28,7 @@ Object.assign(Game.prototype, {
   },
 
   selectUniverseForReplacement(universe) {
-    if (!this.canManipulateUniverses() || !this.universes.includes(universe)) {
+    if (!this.canManipulateUniverse(universe) || !this.universes.includes(universe)) {
       return;
     }
 
@@ -80,6 +84,8 @@ Object.assign(Game.prototype, {
   },
 
   async growUniverse(universe, duration = 720) {
+    universe.collapseClosing = false;
+    universe.cancelCollapseCountdown();
     universe.element.classList.remove('universe-shrink-out');
     universe.element.classList.remove('universe-grow-in');
     void universe.element.offsetWidth;
@@ -90,6 +96,10 @@ Object.assign(Game.prototype, {
   },
 
   async shrinkUniverse(universe, duration = 550) {
+    universe.element.classList.remove('universe-collapse-warning');
+    universe.element.style.removeProperty('--collapse-shake-x');
+    universe.element.style.removeProperty('--collapse-shake-y');
+    universe.element.style.removeProperty('--collapse-shake-rotation');
     universe.element.classList.remove('universe-grow-in');
     universe.element.classList.remove('universe-shrink-out');
     void universe.element.offsetWidth;
@@ -186,7 +196,7 @@ Object.assign(Game.prototype, {
   },
 
   startDraggingUniverse(universe, e) {
-    if (!this.canManipulateUniverses()) {
+    if (!this.canManipulateUniverse(universe)) {
       return;
     }
 
@@ -201,6 +211,8 @@ Object.assign(Game.prototype, {
     this.dragLastMouseX = e.clientX;
     this.dragLastMouseY = e.clientY;
     this.dragLastMoveTime = performance.now();
+    this.resetDragShakeTracking();
+    this.setCursorShakeRatio(this.isUniverseShakeAbilityReady() ? universe.shakeCharge : 0);
     universe.element.style.setProperty('--drag-tilt', '0deg');
     universe.element.style.zIndex = 4;
     universe.element.classList.add('dragging');
@@ -212,6 +224,10 @@ Object.assign(Game.prototype, {
   },
 
   pushUniverseAway(movable, obstacle, padding = 8, anchor = null, pushDirection = null) {
+    if (movable?.isShakeLocked?.()) {
+      return false;
+    }
+
     const moved = pushWindowAway(movable, obstacle, this.universes, padding, anchor, pushDirection);
 
     if (!moved) {
@@ -303,8 +319,17 @@ Object.assign(Game.prototype, {
           const bCenter = { x: b.x + b.cssWidth / 2, y: b.y + (b.cssHeight + b.cssHeader) / 2 };
           const aDistance = distSq(aCenter.x, aCenter.y, anchorCenter.x, anchorCenter.y);
           const bDistance = distSq(bCenter.x, bCenter.y, anchorCenter.x, anchorCenter.y);
-          const movable = aDistance >= bDistance ? a : b;
-          const obstacle = movable === a ? b : a;
+          let movable = aDistance >= bDistance ? a : b;
+          let obstacle = movable === a ? b : a;
+
+          if (movable.isShakeLocked?.() && !obstacle.isShakeLocked?.()) {
+            [movable, obstacle] = [obstacle, movable];
+          }
+
+          if (movable.isShakeLocked?.()) {
+            continue;
+          }
+
           const dx = movable.x - obstacle.x;
           const dy = movable.y - obstacle.y;
           moved = this.pushUniverseAway(movable, obstacle, padding, anchor, { x: dx, y: dy }) || moved;
@@ -394,6 +419,10 @@ Object.assign(Game.prototype, {
     this.dragLastMouseY = e.clientY;
     this.dragLastMoveTime = now;
 
+    if (this.trackUniverseShake(u, dragDelta, elapsedMs, now)) {
+      return;
+    }
+
     const padding = Math.max(6, 9 * this.scale);
     const positionsBeforeMove = this.universes.map((universe) => ({ universe, x: universe.x, y: universe.y }));
     const target = this.getClampedUniversePosition(u, e.clientX - this.dragOffsetX, e.clientY - this.dragOffsetY);
@@ -456,7 +485,15 @@ Object.assign(Game.prototype, {
     this.dragLastMouseX = 0;
     this.dragLastMouseY = 0;
     this.dragLastMoveTime = 0;
+
+    if (!u.isShakeLocked()) {
+      u.setShakeCharge(0);
+    }
+
+    this.resetDragShakeTracking();
+    this.setCursorShakeRatio(0);
     document.body.classList.remove('window-dragging');
     this.clearMovementInput();
+    this.refreshCustomCursorTarget();
   }
 });

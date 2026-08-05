@@ -44,9 +44,13 @@ Object.assign(Game.prototype, {
     this.spawnTimer = UNIVERSE_INTERVAL;
     this.roundEnding = false;
     this.paused = false;
+    this.tunnelBackground?.resume();
     pauseOverlay.classList.add('hidden');
     controlsPanel.classList.add('hidden');
     this.draggingUniverse = null;
+    this.resetDragShakeTracking();
+    this.shakeAbilityCooldown = 0;
+    this.setCursorShakeRatio(0);
     document.body.classList.remove('window-dragging');
     this.clearUniverseReplacementSelection();
     this.clearAllInput();
@@ -90,6 +94,10 @@ Object.assign(Game.prototype, {
   },
 
   quitGame() {
+    if (this.draggingUniverse) {
+      this.stopDraggingUniverse();
+    }
+
     this.clearUniverseReplacementSelection();
     this.running = false;
     this.loopToken += 1;
@@ -108,6 +116,10 @@ Object.assign(Game.prototype, {
   },
 
   gameOver() {
+    if (this.draggingUniverse) {
+      this.stopDraggingUniverse();
+    }
+
     this.clearUniverseReplacementSelection();
     this.running = false;
     this.loopToken += 1;

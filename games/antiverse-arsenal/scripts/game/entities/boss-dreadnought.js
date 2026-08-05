@@ -91,6 +91,10 @@ class DreadnoughtBoss extends Enemy {
       part.healthBarTimer = Math.max(0, part.healthBarTimer - dt);
     }
 
+    if (this.updateStun(dt)) {
+      return;
+    }
+
     if (this.y < this.targetY) {
       this.prevX = this.x;
       this.prevY = this.y;
@@ -423,6 +427,7 @@ class DreadnoughtBoss extends Enemy {
     ctx.restore();
     this.drawPartHealthBars(ctx);
     this.drawBossHealthBar(ctx);
+    this.drawStunEffect(ctx);
   }
 
   getDamageSpriteState() {
