@@ -28,26 +28,43 @@ class FloatingText {
       return;
     }
 
-    const ctx = this.universe.ctx;
+    const ctx = this.game.floatingTextCtx;
+    if (!ctx) {
+      return;
+    }
+
     const t = clamp(this.age / this.life, 0, 1);
+    const screenPosition = this.getScreenPosition();
+    const scale = this.universe.scale || 1;
     ctx.save();
     ctx.globalAlpha = 1 - t;
-    const textX = Math.round(this.x);
-    const textY = Math.round(this.y);
-    ctx.font = `${FloatingText.FONT_SIZE}px "Press Start 2P", "Lucida Console", monospace`;
+    const textX = Math.round(screenPosition.x);
+    const textY = Math.round(screenPosition.y);
+    ctx.font = `${FloatingText.FONT_SIZE * scale}px "Press Start 2P", "Lucida Console", monospace`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = '#000000';
-    ctx.fillText(this.text, textX - 2, textY + 2);
+    ctx.fillText(this.text, textX - 2 * scale, textY + 2 * scale);
     ctx.fillStyle = this.color;
     ctx.fillText(this.text, textX, textY);
     ctx.restore();
   }
 
   getBounds(x = this.x, y = this.y) {
-    const width = this.measureWidth();
-    const height = FloatingText.FONT_SIZE;
-    return { left: x - width / 2, right: x + width / 2, top: y - height / 2, bottom: y + height / 2 };
+    const scale = this.universe?.scale || 1;
+    const screenPosition = this.getScreenPosition(x, y);
+    const width = this.measureWidth() * scale;
+    const height = FloatingText.FONT_SIZE * scale;
+    return {
+      left: screenPosition.x - width / 2,
+      right: screenPosition.x + width / 2,
+      top: screenPosition.y - height / 2,
+      bottom: screenPosition.y + height / 2
+    };
+  }
+
+  getScreenPosition(x = this.x, y = this.y) {
+    return this.universe.localToWorld(x, y);
   }
 
   measureWidth() {
@@ -71,7 +88,7 @@ class FloatingText {
   }
 
   avoidOverlaps(existingTexts) {
-    const nearbyTexts = existingTexts.filter((text) => text.universe === this.universe && !text.dead);
+    const nearbyTexts = existingTexts.filter((text) => !text.dead && text.universe && text.universesIncludes());
     if (!nearbyTexts.length) {
       return;
     }

@@ -9,17 +9,22 @@
 <body class="focus-pending">
   <canvas id="tunnel-background" aria-hidden="true"></canvas>
   <div id="game-container"></div>
+  <canvas id="floating-text-overlay" aria-hidden="true"></canvas>
   <div id="custom-cursor" aria-hidden="true">
     <span class="custom-cursor custom-cursor-left"></span>
     <span class="custom-cursor custom-cursor-right"></span>
     <span class="custom-cursor custom-cursor-top"></span>
     <span class="custom-cursor custom-cursor-bottom"></span>
   </div>
-  <div id="focus-overlay" role="button" tabindex="0">
-    <div class="menu-card focus-card">
+  <div id="focus-overlay" aria-labelledby="focus-title">
+    <main class="menu-card main-menu-card">
       <h1 id="focus-title"></h1>
-      <p id="focus-body"></p>
-    </div>
+      <p id="main-menu-highscore" class="main-menu-highscore"></p>
+      <div class="main-menu-actions">
+        <button id="start-game-button" class="menu-primary-button" type="button"></button>
+        <button id="main-menu-controls-button" type="button"></button>
+      </div>
+    </main>
   </div>
 
   <div id="spawn-banner"><span id="spawn-timer">10</span></div>
@@ -114,12 +119,29 @@
       <button id="pause-restart-button"></button>
       <button id="quit-button"></button>
     </div>
-    <div id="controls-panel" class="hidden" role="dialog" aria-modal="true" aria-labelledby="controls-title">
-      <div class="menu-card controls-panel-card">
-        <button id="controls-close-button" aria-label="Close controls">x</button>
-        <h2 id="controls-title"></h2>
-        <p id="controls-body"></p>
-      </div>
+  </div>
+
+  <div id="controls-panel" class="hidden" role="dialog" aria-modal="true" aria-labelledby="controls-title">
+    <div class="menu-card guide-panel-card controls-panel-card">
+      <button id="controls-close-button" class="panel-close-button" type="button" aria-label="Close controls">x</button>
+      <p id="controls-eyebrow" class="controls-eyebrow"></p>
+      <h2 id="controls-title"></h2>
+      <p id="controls-body" class="guide-intro"></p>
+
+      <section class="controls-list">
+        <div class="control-grid">
+          <div class="control-row"><kbd>WASD</kbd><span id="control-move"></span></div>
+          <div class="control-row"><kbd>MOUSE</kbd><span id="control-aim"></span></div>
+          <div class="control-row"><kbd>SPACE</kbd><span id="control-fire"></span></div>
+          <div class="control-row"><kbd>SHIFT</kbd><span id="control-dash"></span></div>
+          <div class="control-row"><kbd>MIDDLE MOUSE CLICK</kbd><span id="control-warp"></span></div>
+          <div class="control-row"><kbd>CTRL</kbd><span id="control-laser"></span></div>
+          <div class="control-row"><kbd>LEFT CLICK</kbd><span id="control-drag"></span></div>
+          <div class="control-row"><kbd>RIGHT CLICK</kbd><span id="control-swap"></span></div>
+        </div>
+      </section>
+
+      <button id="controls-back-button" class="menu-primary-button" type="button"></button>
     </div>
   </div>
 

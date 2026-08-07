@@ -120,6 +120,8 @@ Object.assign(Game.prototype, {
 
   // Main game runtime draw update...
   draw() {
+    this.clearFloatingTextOverlay();
+
     for (const u of this.universes) {
       u.draw();
     }

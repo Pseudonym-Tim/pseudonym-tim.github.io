@@ -6,6 +6,9 @@ class Game {
     this.bullets = [];
     this.rockets = [];
     this.floatingTexts = [];
+    this.floatingTextCanvas = floatingTextCanvas;
+    this.floatingTextCtx = floatingTextCanvas?.getContext('2d') || null;
+    this.floatingTextPixelRatio = 0;
     this.explosions = [];
     this.orbitals = [];
     this.homingRocketLevel = 0;
@@ -78,6 +81,7 @@ class Game {
     this.spriteClock = 0;
     this.tunnelBackground = new TunnelBackground(tunnelBackgroundCanvas);
     this.scale = this.computeScale();
+    this.resizeFloatingTextOverlay();
     this.messageToken = 0;
     this.messageTimeout = null;
     this.messageExitTimeout = null;
@@ -101,8 +105,9 @@ class Game {
     shopRerollButton.addEventListener('click', () => this.rerollPowerupShop());
     shopContinueButton.addEventListener('click', () => this.continueFromPowerupShop());
     resumeButton.addEventListener('click', () => this.resumeGame());
-    controlsButton.addEventListener('click', () => this.showControlsPanel());
+    controlsButton.addEventListener('click', () => this.showControlsPanel(controlsButton));
     controlsCloseButton.addEventListener('click', () => this.hideControlsPanel());
+    controlsBackButton.addEventListener('click', () => this.hideControlsPanel());
     pauseRestartButton.addEventListener('click', () => this.start());
     quitButton.addEventListener('click', () => this.quitGame());
   }

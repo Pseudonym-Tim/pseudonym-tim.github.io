@@ -23,10 +23,21 @@ async function loadGameText() {
 
 function applyStaticText() {
   document.title = formatText('page.title');
-  focusTitle.textContent = formatText('focus.title');
-  focusBody.textContent = formatText('focus.body');
+  focusTitle.textContent = formatText('menu.title');
+  startGameButton.textContent = formatText('menu.start');
+  mainMenuControlsButton.textContent = formatText('menu.controls');
+
   document.getElementById('controls-title').textContent = formatText('controls.title');
-  document.getElementById('controls-body').textContent = formatText('controls.body');
+  document.getElementById('control-move').textContent = formatText('controls.move');
+  document.getElementById('control-aim').textContent = formatText('controls.aim');
+  document.getElementById('control-fire').textContent = formatText('controls.fire');
+  document.getElementById('control-dash').textContent = formatText('controls.dash');
+  document.getElementById('control-warp').textContent = formatText('controls.warp');
+  document.getElementById('control-laser').textContent = formatText('controls.laser');
+  document.getElementById('control-drag').textContent = formatText('controls.drag');
+  document.getElementById('control-swap').textContent = formatText('controls.swap');
+  controlsBackButton.textContent = formatText('controls.back');
+
   document.getElementById('shop-title').textContent = formatText('shop.title');
   document.getElementById('shop-subtitle').textContent = formatText('shop.subtitle');
   shopContinueButton.textContent = formatText('shop.continue');

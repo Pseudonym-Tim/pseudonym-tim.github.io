@@ -5,31 +5,30 @@ window.addEventListener('load', async () => {
   spawnBanner.innerHTML = formatText('spawn.nextUniverseIn', { seconds: '<span id="spawn-timer">10</span>' });
   const game = new Game();
 
-  focusOverlay.classList.remove('hidden');
-  focusOverlay.focus();
-
-  let focusStarted = false;
-
-  const beginFocusedGame = async () => {
-    if (focusStarted) {
-      return;
-    }
-
-    focusStarted = true;
-    document.body.classList.remove('focus-pending');
-    focusOverlay.classList.add('hidden');
-    await game.enterFullscreenMode();
-    game.start();
+  const refreshMenuHighscore = () => {
+    mainMenuHighscore.textContent = formatText('menu.highscore', { value: Math.floor(game.highscore) });
   };
 
-  focusOverlay.addEventListener('click', beginFocusedGame);
+  game.refreshMenuHighscore = refreshMenuHighscore;
+  refreshMenuHighscore();
+  focusOverlay.classList.remove('hidden');
+  startGameButton.focus();
 
-  focusOverlay.addEventListener('keydown', (e) => {
-    if (e.code !== 'Enter' && e.code !== 'Space') {
+  let starting = false;
+
+  const beginGame = async () => {
+    if (starting || game.running) {
       return;
     }
 
-    e.preventDefault();
-    beginFocusedGame();
-  });
+    starting = true;
+    startGameButton.disabled = true;
+    await game.enterFullscreenMode();
+    game.start();
+    startGameButton.disabled = false;
+    starting = false;
+  };
+
+  startGameButton.addEventListener('click', beginGame);
+  mainMenuControlsButton.addEventListener('click', () => game.showControlsPanel(mainMenuControlsButton));
 });

@@ -9,6 +9,21 @@ Object.assign(Game.prototype, {
     this.messageExpiresAt = 0;
   },
 
+  clearMessage() {
+    this.messageToken += 1;
+    this.clearMessageTimer();
+
+    if (this.messageExitTimeout) {
+      clearTimeout(this.messageExitTimeout);
+    }
+
+    this.messageExitTimeout = null;
+    this.messageRemainingMs = 0;
+    messageText.textContent = '';
+    messageOverlay.classList.add('hidden');
+    messageOverlay.classList.remove('message-enter', 'message-exit');
+  },
+
   scheduleMessageHide(token, duration) {
     this.clearMessageTimer();
     this.messageRemainingMs = Math.max(0, duration);

@@ -1,4 +1,4 @@
-// Pause menu...
+// Pause menu and controls panel...
 Object.assign(Game.prototype, {
   isPauseMenuOpen() {
     return !pauseOverlay.classList.contains('hidden');
@@ -8,16 +8,29 @@ Object.assign(Game.prototype, {
     return !controlsPanel.classList.contains('hidden');
   },
 
-  showControlsPanel() {
-    if (!this.isPauseMenuOpen()) {
+  showControlsPanel(returnTarget = document.activeElement) {
+    const mainMenuOpen = !focusOverlay.classList.contains('hidden');
+    if (!this.isPauseMenuOpen() && !mainMenuOpen) {
       return;
     }
 
+    this.controlsReturnTarget = returnTarget instanceof HTMLElement ? returnTarget : null;
     controlsPanel.classList.remove('hidden');
+    controlsCloseButton.focus();
   },
 
   hideControlsPanel() {
+    if (!this.isControlsPanelOpen()) {
+      return;
+    }
+
     controlsPanel.classList.add('hidden');
+    const returnTarget = this.controlsReturnTarget;
+    this.controlsReturnTarget = null;
+
+    if (returnTarget?.isConnected) {
+      returnTarget.focus();
+    }
   },
 
   pauseGame() {
@@ -38,6 +51,7 @@ Object.assign(Game.prototype, {
     this.tunnelBackground?.pause();
     this.pauseMessageTimer();
     pauseOverlay.classList.remove('hidden');
+    resumeButton.focus();
   },
 
   resumeGame() {
@@ -49,7 +63,6 @@ Object.assign(Game.prototype, {
     this.tunnelBackground?.resume();
     this.clearAllInput();
     pauseOverlay.classList.add('hidden');
-    controlsPanel.classList.add('hidden');
     this.lastTime = performance.now();
     this.resumeMessageTimer();
   },

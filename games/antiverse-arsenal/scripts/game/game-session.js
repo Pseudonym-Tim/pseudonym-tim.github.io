@@ -1,6 +1,12 @@
 // Game session...
 Object.assign(Game.prototype, {
   start() {
+    document.body.classList.remove('focus-pending');
+    focusOverlay.classList.add('hidden');
+    controlsPanel.classList.add('hidden');
+    this.clearMessage();
+    this.clearFloatingTextOverlay();
+
     for (const u of this.universes) {
       u.element.remove();
     }
@@ -100,19 +106,41 @@ Object.assign(Game.prototype, {
 
     this.clearUniverseReplacementSelection();
     this.running = false;
+    this.clearMessage();
+    this.clearFloatingTextOverlay();
     this.loopToken += 1;
     this.paused = false;
     this.clearAllInput();
     this.unlockFullscreenEscape();
+    this.tunnelBackground?.resetUniverseTheme();
+    this.tunnelBackground?.resume();
+
+    for (const universe of this.universes) {
+      universe.element.remove();
+    }
+
+    this.universes = [];
+    this.bullets = [];
+    this.rockets = [];
+    this.floatingTexts = [];
+    this.explosions = [];
+    this.orbitals = [];
+    this.player = null;
+
+    gameoverOverlay.classList.add('hidden');
+    powerupOverlay.classList.add('hidden');
+    multiverseCompleteOverlay.classList.add('hidden');
+    pauseOverlay.classList.add('hidden');
+    controlsPanel.classList.add('hidden');
+    document.body.classList.add('focus-pending');
+    focusOverlay.classList.remove('hidden');
+    this.refreshMenuHighscore?.();
 
     if (document.exitFullscreen && this.isFullscreenActive()) {
       document.exitFullscreen().catch(() => {});
     }
 
-    window.open('', '_self');
-    window.close();
-
-    setTimeout(() => { if (!window.closed) { window.location.replace('about:blank'); } }, 80);
+    setTimeout(() => startGameButton.focus(), 0);
   },
 
   gameOver() {
@@ -122,6 +150,8 @@ Object.assign(Game.prototype, {
 
     this.clearUniverseReplacementSelection();
     this.running = false;
+    this.clearMessage();
+    this.clearFloatingTextOverlay();
     this.loopToken += 1;
     this.paused = false;
     pauseOverlay.classList.add('hidden');

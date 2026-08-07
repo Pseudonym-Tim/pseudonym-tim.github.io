@@ -1,5 +1,6 @@
 // DOM handles...
 const container = document.getElementById('game-container');
+const floatingTextCanvas = document.getElementById('floating-text-overlay');
 const playerHud = document.getElementById('player-hud');
 const hullValue = document.getElementById('hull-label');
 const hullGauge = document.getElementById('hull-gauge');
@@ -26,6 +27,10 @@ const spawnBanner = document.getElementById('spawn-banner');
 const focusOverlay = document.getElementById('focus-overlay');
 const focusTitle = document.getElementById('focus-title');
 const focusBody = document.getElementById('focus-body');
+const mainMenuHighscore = document.getElementById('main-menu-highscore');
+const mainMenuHint = document.getElementById('main-menu-hint');
+const startGameButton = document.getElementById('start-game-button');
+const mainMenuControlsButton = document.getElementById('main-menu-controls-button');
 const messageOverlay = document.getElementById('message-overlay');
 const messageText = document.getElementById('message-text');
 const powerupOverlay = document.getElementById('powerup-overlay');
@@ -45,6 +50,7 @@ const resumeButton = document.getElementById('resume-button');
 const controlsButton = document.getElementById('controls-button');
 const controlsPanel = document.getElementById('controls-panel');
 const controlsCloseButton = document.getElementById('controls-close-button');
+const controlsBackButton = document.getElementById('controls-back-button');
 const pauseRestartButton = document.getElementById('pause-restart-button');
 const quitButton = document.getElementById('quit-button');
 const gameoverOverlay = document.getElementById('gameover-overlay');

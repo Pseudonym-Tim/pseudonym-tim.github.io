@@ -164,6 +164,8 @@ Object.assign(Game.prototype, {
     });
 
     window.addEventListener('resize', () => {
+      this.resizeFloatingTextOverlay(true);
+
       if (!this.running) {
         return;
       }
