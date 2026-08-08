@@ -12,8 +12,7 @@ class TunnelBackground {
     this.currentUniverse = null;
     this.universeDwellTime = 0;
 
-    this.defaultThemeDark = [0.015, 0.028, 0.095];
-    this.defaultThemeBright = [0.11, 0.20, 0.52];
+    [this.defaultThemeDark, this.defaultThemeBright] = this.getThemeColors(UNIVERSE_TINT_HUES[0]);
 
     this.themeDark = [...this.defaultThemeDark];
     this.themeBright = [...this.defaultThemeBright];
@@ -259,8 +258,11 @@ class TunnelBackground {
   }
 
   getUniverseColors(universe) {
-    // Universe colors remain brighter and more saturated than the starting palette...
-    const themedColor = this.hslToRgb(universe.theme.hue, 0.95, 0.28);
+    return this.getThemeColors(universe.theme.hue);
+  }
+
+  getThemeColors(hue) {
+    const themedColor = this.hslToRgb(hue, 0.95, 0.28);
     const windowBackground = [2 / 255, 6 / 255, 23 / 255];
 
     const darkColor = windowBackground.map(

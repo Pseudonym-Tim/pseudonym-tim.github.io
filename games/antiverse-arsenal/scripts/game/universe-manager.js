@@ -65,6 +65,10 @@ Object.assign(Game.prototype, {
   },
 
   getUniverseTheme() {
+    if (this.universes.length === 0) {
+      return this.universeThemes[0];
+    }
+
     const usedThemes = new Set(this.universes.map((universe) => universe.theme));
     const availableThemes = this.universeThemes.filter((theme) => !usedThemes.has(theme));
     const choices = availableThemes.length > 0 ? availableThemes : this.universeThemes;

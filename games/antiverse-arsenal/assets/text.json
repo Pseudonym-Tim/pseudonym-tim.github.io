@@ -29,7 +29,7 @@
   "gameover.multiverse": "Multiverse reached: %count%",
   "gameover.wrapHits": "Multi-universal wrap hits: %hits%",
   "gameover.highestWrapShot": "Highest wrap shot count: %count%",
-  "gameover.restart": "Restart",
+  "gameover.restart": "RESTART",
   "status.ready": "Ready",
   "status.dashing": "Dashing",
   "status.forming": "FORMING",
