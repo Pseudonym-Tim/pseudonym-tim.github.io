@@ -115,6 +115,7 @@ body.window-dragging {
   user-select: none;
   transform: none;
   transform-origin: center center;
+  scale: var(--music-window-scale, 1);
   transition: transform 140ms ease-out, left 95ms ease-out, top 95ms ease-out;
 }
 
@@ -206,6 +207,10 @@ body.window-dragging {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .universe {
+    scale: 1;
+  }
+
   .universe.player-universe::after,
   .universe-message-overlay.collapse-warning,
   .universe-message-overlay.collapse-warning .universe-message-text {

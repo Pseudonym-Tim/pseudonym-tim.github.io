@@ -1,5 +1,27 @@
 // Frame loop, update, and draw orchestration...
 Object.assign(Game.prototype, {
+  updateMusicReactiveVisuals(dt = 1 / 60) {
+    const pulse = this.music?.getReactivePulse(dt) || 0;
+    const windowScale = 1 + pulse * MUSIC_REACTIVE_WINDOW_SCALE_AMOUNT;
+    const tunnelZoom = 1 + pulse * MUSIC_REACTIVE_TUNNEL_ZOOM_AMOUNT;
+
+    for (const universe of this.universes) {
+      universe.element.style.setProperty('--music-window-scale', windowScale.toFixed(5));
+    }
+
+    this.tunnelBackground?.setMusicZoom(tunnelZoom);
+  },
+
+  resetMusicReactiveVisuals() {
+    this.music?.resetReactiveState?.();
+
+    for (const universe of this.universes) {
+      universe.element.style.setProperty('--music-window-scale', '1');
+    }
+
+    this.tunnelBackground?.setMusicZoom(1);
+  },
+
   triggerHitStop(stopSeconds = 0.035, slowSeconds = 0.16, slowScale = 0.35) {
     if (!this.running) {
       return;
@@ -25,6 +47,7 @@ Object.assign(Game.prototype, {
       return;
     }
 
+    this.updateMusicReactiveVisuals(rawDt);
     this.updateUniverseShakeState(rawDt);
 
     if (this.draggingUniverse) {

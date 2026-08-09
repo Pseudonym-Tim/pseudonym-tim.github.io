@@ -16,6 +16,7 @@ Object.assign(Game.prototype, {
   showPowerupSelection(afterSelection = null) {
     this.keys = {};
     powerupOverlay.classList.remove('hidden');
+    void this.music.play('shop', true);
     this.shopRerolls = 0;
     this.shopAfterSelection = afterSelection;
     this.showShopFeedback('');

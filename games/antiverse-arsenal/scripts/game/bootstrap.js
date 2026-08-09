@@ -23,7 +23,10 @@ window.addEventListener('load', async () => {
 
     starting = true;
     startGameButton.disabled = true;
-    await game.enterFullscreenMode();
+
+    const musicUnlock = game.music.unlock();
+    const fullscreenRequest = game.enterFullscreenMode();
+    await Promise.all([musicUnlock, fullscreenRequest]);
     game.start();
     startGameButton.disabled = false;
     starting = false;

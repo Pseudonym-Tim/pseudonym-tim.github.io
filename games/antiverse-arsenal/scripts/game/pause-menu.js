@@ -48,7 +48,9 @@ Object.assign(Game.prototype, {
     this.laserCharging = false;
     this.laserAim = null;
     this.timeScale = 1;
+    this.resetMusicReactiveVisuals?.();
     this.tunnelBackground?.pause();
+    this.music.pause();
     this.pauseMessageTimer();
     pauseOverlay.classList.remove('hidden');
     resumeButton.focus();
@@ -61,6 +63,7 @@ Object.assign(Game.prototype, {
 
     this.paused = false;
     this.tunnelBackground?.resume();
+    this.music.resume();
     this.clearAllInput();
     pauseOverlay.classList.add('hidden');
     this.lastTime = performance.now();

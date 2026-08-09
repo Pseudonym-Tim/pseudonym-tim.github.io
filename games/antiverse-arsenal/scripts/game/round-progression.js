@@ -133,6 +133,10 @@ Object.assign(Game.prototype, {
           return;
         }
 
+        if (this.music.currentTrack !== 'normal') {
+          void this.music.play('normal', true);
+        }
+
         const freshUniverse = await this.createFreshRoundUniverse();
         if (!this.running) {
           return;

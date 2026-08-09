@@ -12,6 +12,7 @@ Object.assign(Game.prototype, {
     const universe = this.player.universe;
     this.prepareBossSummonUniverse(universe);
     this.bossPending = true;
+    void this.music.play('boss', true);
     this.encounterClearTimer = 0;
     this.spawnTimer = Infinity;
     this.showMessage(formatText('message.bossDetected'), 2200);
@@ -160,6 +161,7 @@ Object.assign(Game.prototype, {
     this.bossPending = false;
     this.bossDefeated = true;
     this.boss = null;
+    void this.music.fadeOut();
     this.timeScale = Math.min(this.timeScale, 0.18);
     this.showMessage(formatText('message.bossDefeated'), 3200);
     spawnBanner.textContent = formatText('message.bossDefeated');

@@ -9,6 +9,8 @@ class TunnelBackground {
     });
 
     this.pulse = 0;
+    this.musicZoom = 1;
+    this.prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches || false;
     this.currentUniverse = null;
     this.universeDwellTime = 0;
 
@@ -34,6 +36,7 @@ class TunnelBackground {
     this.resolutionLocation = this.gl.getUniformLocation(this.program, 'iResolution');
     this.timeLocation = this.gl.getUniformLocation(this.program, 'iTime');
     this.pulseLocation = this.gl.getUniformLocation(this.program, 'uKillPulse');
+    this.musicZoomLocation = this.gl.getUniformLocation(this.program, 'uMusicZoom');
     this.themeDarkLocation = this.gl.getUniformLocation(this.program, 'uThemeDark');
     this.themeBrightLocation = this.gl.getUniformLocation(this.program, 'uThemeBright');
 
@@ -71,6 +74,7 @@ class TunnelBackground {
       uniform vec2 iResolution;
       uniform float iTime;
       uniform float uKillPulse;
+      uniform float uMusicZoom;
       uniform vec3 uThemeDark;
       uniform vec3 uThemeBright;
 
@@ -105,6 +109,7 @@ class TunnelBackground {
 
         vec2 uv = (2.0 * gl_FragCoord.xy - iResolution.xy) / iResolution.y;
         uv.y *= -1.0;
+        uv /= max(0.001, uMusicZoom);
         uv += shake;
 
         float pixel = 70.0;
@@ -188,6 +193,15 @@ class TunnelBackground {
 
   pulseOnKill() {
     this.pulse = Math.min(1.5, this.pulse + 1);
+  }
+
+  setMusicZoom(zoom = 1) {
+    if (this.prefersReducedMotion) {
+      this.musicZoom = 1;
+      return;
+    }
+
+    this.musicZoom = Math.max(0.96, Math.min(1.04, Number(zoom) || 1));
   }
 
   pause(now = performance.now()) {
@@ -318,6 +332,7 @@ class TunnelBackground {
     this.gl.uniform2f(this.resolutionLocation, this.canvas.width, this.canvas.height);
     this.gl.uniform1f(this.timeLocation, (now - this.startTime - this.totalPausedTime) / 1000);
     this.gl.uniform1f(this.pulseLocation, this.pulse);
+    this.gl.uniform1f(this.musicZoomLocation, this.musicZoom);
     this.gl.uniform3fv(this.themeDarkLocation, this.themeDark);
     this.gl.uniform3fv(this.themeBrightLocation, this.themeBright);
     this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);

@@ -15,6 +15,7 @@ class Game {
     this.blockedShipCollisions = new Set();
     this.orbitalCollisionCooldowns = new Map();
     this.sound = new SoundManager();
+    this.music = new BytebeatMusicManager();
     this.player = null;
     this.mouseX = window.innerWidth / 2;
     this.mouseY = window.innerHeight / 2;

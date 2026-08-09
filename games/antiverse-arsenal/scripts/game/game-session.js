@@ -50,6 +50,7 @@ Object.assign(Game.prototype, {
     this.spawnTimer = UNIVERSE_INTERVAL;
     this.roundEnding = false;
     this.paused = false;
+    this.resetMusicReactiveVisuals?.();
     this.tunnelBackground?.resume();
     pauseOverlay.classList.add('hidden');
     controlsPanel.classList.add('hidden');
@@ -64,6 +65,7 @@ Object.assign(Game.prototype, {
     this.debugInvulnerable = false;
     this.debugShowCollisions = false;
     this.running = true;
+    void this.music.play('normal', true);
     this.timeScale = 1;
     this.laserCharging = false;
     this.laserAim = null;
@@ -106,6 +108,8 @@ Object.assign(Game.prototype, {
 
     this.clearUniverseReplacementSelection();
     this.running = false;
+    this.resetMusicReactiveVisuals?.();
+    void this.music.fadeOut();
     this.clearMessage();
     this.clearFloatingTextOverlay();
     this.loopToken += 1;
@@ -150,6 +154,8 @@ Object.assign(Game.prototype, {
 
     this.clearUniverseReplacementSelection();
     this.running = false;
+    this.resetMusicReactiveVisuals?.();
+    void this.music.play('gameover', true);
     this.clearMessage();
     this.clearFloatingTextOverlay();
     this.loopToken += 1;

@@ -1,0 +1,1 @@
+rev=x=>(t?0:a=Array(r=2E4).fill(0),b=x+a[t%r],a[t%r]=b/2,b),rev(sin(sin(t*PI/128*'1123'[(t>>17)%4])*9)+sin(80*cbrt(t&524255.5))*8+sin(t))/16
