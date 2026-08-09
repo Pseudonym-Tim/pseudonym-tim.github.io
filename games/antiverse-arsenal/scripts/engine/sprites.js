@@ -300,6 +300,12 @@ class SpriteAnimation {
     const scale = Math.max(0.0001, options.scale ?? 1);
     const tileWidth = Math.max(1, pixelSnap((options.tileWidth || sourceWidth) * scale));
     const tileHeight = Math.max(1, pixelSnap((options.tileHeight || sourceHeight) * scale));
+    const rawOffsetX = pixelSnap(Number(options.offsetX) || 0);
+    const rawOffsetY = pixelSnap(Number(options.offsetY) || 0);
+    const offsetX = ((rawOffsetX % tileWidth) + tileWidth) % tileWidth;
+    const offsetY = ((rawOffsetY % tileHeight) + tileHeight) % tileHeight;
+    const startX = offsetX === 0 ? x : x + offsetX - tileWidth;
+    const startY = offsetY === 0 ? y : y + offsetY - tileHeight;
 
     ctx.save();
     ctx.imageSmoothingEnabled = false;
@@ -308,8 +314,9 @@ class SpriteAnimation {
       ctx.globalAlpha *= options.alpha;
     }
 
-    for (let tileY = y; tileY < y + height; tileY += tileHeight) {
-      for (let tileX = x; tileX < x + width; tileX += tileWidth) {
+    // Offset first row/column outside draw bounds, so scrolling wraps through repeated tile instead of jumping back to origin...
+    for (let tileY = startY; tileY < y + height; tileY += tileHeight) {
+      for (let tileX = startX; tileX < x + width; tileX += tileWidth) {
         const drawWidth = Math.min(tileWidth, x + width - tileX);
         const drawHeight = Math.min(tileHeight, y + height - tileY);
 

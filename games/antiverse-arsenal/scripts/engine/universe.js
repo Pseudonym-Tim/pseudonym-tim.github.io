@@ -432,7 +432,9 @@ class Universe {
 
     const hueShift = this.theme.hue;
 
-    if (!drawPixelArtTiled(ctx, pixelArt.universeBackground, 0, 0, this.width, this.height, { time: this.game.spriteClock + this.id * 0.19, scale: UNIVERSE_BACKGROUND_TILE_SCALE })) {
+    const backgroundTime = this.game.spriteClock + this.id * 0.19;
+
+    if (!drawPixelArtTiled(ctx, pixelArt.universeBackground, 0, 0, this.width, this.height, { time: backgroundTime, scale: UNIVERSE_BACKGROUND_TILE_SCALE, offsetY: backgroundTime * UNIVERSE_BACKGROUND_SCROLL_SPEED })) {
       ctx.fillStyle = '#020617';
       ctx.fillRect(0, 0, this.width, this.height);
     }
