@@ -71,8 +71,9 @@ Object.assign(Game.prototype, {
     if (!manipulatingUniverses) {
       this.updateLaser(rawDt);
     }
-    const managementScale = manipulatingUniverses ? 0.25 : 1;
-    const temporalScale = hitStopped ? 0 : this.timeScale * managementScale * (this.hitSlowTimer > 0 ? this.hitSlowScale : 1);
+    const managementScale = manipulatingUniverses ? UNIVERSE_MANIPULATION_TIME_SCALE : 1;
+    const baseTimeScale = this.transitionTimeScale < 1 ? this.transitionTimeScale : this.timeScale * managementScale;
+    const temporalScale = hitStopped ? 0 : baseTimeScale * (this.hitSlowTimer > 0 ? this.hitSlowScale : 1);
     const worldDt = rawDt * temporalScale;
     const playerDt = manipulatingUniverses ? 0 : worldDt;
     this.update(playerDt, worldDt);
@@ -173,6 +174,10 @@ Object.assign(Game.prototype, {
 
     for (const explosion of this.explosions) {
       explosion.draw();
+    }
+
+    for (const universe of this.universes) {
+      this.drawPendingEnemySpawnWarnings(universe);
     }
 
     this.drawCollisionDebug();

@@ -162,7 +162,7 @@ Object.assign(Game.prototype, {
     this.bossDefeated = true;
     this.boss = null;
     void this.music.fadeOut();
-    this.timeScale = Math.min(this.timeScale, 0.18);
+    this.transitionTimeScale = ROUND_TRANSITION_TIME_SCALE;
     this.showMessage(formatText('message.bossDefeated'), 3200);
     spawnBanner.textContent = formatText('message.bossDefeated');
     nextUniverseValue.textContent = formatText('hud.nextIncursion', { value: formatText('status.clear') });

@@ -67,6 +67,7 @@ Object.assign(Game.prototype, {
     this.running = true;
     void this.music.play('normal', true);
     this.timeScale = 1;
+    this.transitionTimeScale = 1;
     this.laserCharging = false;
     this.laserAim = null;
     this.laserFlash = [];

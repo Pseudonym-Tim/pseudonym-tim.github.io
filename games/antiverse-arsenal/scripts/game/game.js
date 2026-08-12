@@ -40,6 +40,7 @@ class Game {
     this.cursorShakeRatio = 0;
     this.selectedUniverse = null;
     this.timeScale = 1;
+    this.transitionTimeScale = 1;
     this.laserCharging = false;
     this.laserAim = null;
     this.laserFlash = [];

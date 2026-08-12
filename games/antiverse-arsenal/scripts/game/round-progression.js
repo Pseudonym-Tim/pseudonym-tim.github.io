@@ -15,6 +15,7 @@ Object.assign(Game.prototype, {
     this.keys = {};
     this.draggingUniverse = null;
     this.timeScale = 1;
+    this.transitionTimeScale = ROUND_TRANSITION_TIME_SCALE;
     this.showMessage(formatText('message.universesCollapsing'), 900);
     await Promise.all(this.universes.map((u) => this.shrinkUniverse(u)));
 
@@ -46,6 +47,7 @@ Object.assign(Game.prototype, {
     }
 
     this.transitioning = false;
+    this.transitionTimeScale = 1;
     this.keys = {};
   },
 
@@ -85,7 +87,7 @@ Object.assign(Game.prototype, {
     }
 
     this.roundEnding = true;
-    this.timeScale = Math.min(this.timeScale, 0.18);
+    this.transitionTimeScale = ROUND_TRANSITION_TIME_SCALE;
 
     if (options.showStabilizedMessage !== false) {
       this.showMessage(formatText('message.sectorStabilized'), 1300);
@@ -144,6 +146,7 @@ Object.assign(Game.prototype, {
 
         this.wrappingDisabled = false;
         this.timeScale = 1;
+        this.transitionTimeScale = 1;
         this.transitioning = false;
         this.beginRoundGrace(freshUniverse, clamp(2 + this.round, 3, 7));
       };

@@ -1,7 +1,7 @@
 // Universe window management...
 Object.assign(Game.prototype, {
   canManipulateUniverses() {
-    return this.running && !this.paused && !this.transitioning && !this.isShopOpen() && !this.isMultiverseCompleteOpen();
+    return this.running && !this.paused && !this.roundEnding && !this.transitioning && !this.isShopOpen() && !this.isMultiverseCompleteOpen();
   },
 
   canManipulateUniverse(universe) {
