@@ -44,6 +44,7 @@ Object.assign(Game.prototype, {
     this.money = 0;
     this.multiverseWrapShotMultiplier = 0;
     this.shopRerolls = 0;
+    this.lastCompletedRound = 0;
     this.showShopFeedback('');
     this.wrapShotHits = 0;
     this.highestWrapShotCount = 0;

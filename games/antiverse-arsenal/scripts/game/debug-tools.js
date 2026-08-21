@@ -28,6 +28,34 @@ Object.assign(Game.prototype, {
     this.endRound();
   },
 
+  async debugOpenShop() {
+    if (!this.running || this.roundEnding || this.transitioning || this.isShopOpen() || this.isMultiverseCompleteOpen()) {
+      return;
+    }
+
+    this.clearAllInput();
+    this.clearUniverseReplacementSelection();
+
+    if (this.draggingUniverse) {
+      this.stopDraggingUniverse();
+    }
+
+    this.laserCharging = false;
+    this.laserAim = null;
+
+    this.preparePostRoundState(SHOP_ROUND);
+    const income = this.collectShopIncome();
+    await Promise.all(this.universes.map((universe) => this.shrinkUniverse(universe, 0)));
+
+    if (!this.running) {
+      return;
+    }
+
+    this.showMessage(formatText('message.traderDetected'), 1200);
+    this.showPowerupSelection(() => this.startPreparedRound(), income);
+    this.updateHUD();
+  },
+
   debugKillAllEnemies() {
     if (!this.running) {
       return;
@@ -51,34 +79,32 @@ Object.assign(Game.prototype, {
     this.flashMessage(formatText('message.debugKilledEnemies', { count: killed }), 650);
   },
 
-  debugStartBossEncounter() {
-    if (!this.running || this.bossActive || this.bossPending) {
+  async debugStartBossEncounter() {
+    if (!this.running || this.roundEnding || this.transitioning || this.isShopOpen() || this.isMultiverseCompleteOpen() || this.bossActive || this.bossPending) {
       return;
     }
 
-    const universe = this.player?.universe || this.universes[0];
+    this.clearAllInput();
+    this.clearUniverseReplacementSelection();
 
-    if (!universe) {
+    if (this.draggingUniverse) {
+      this.stopDraggingUniverse();
+    }
+
+    this.laserCharging = false;
+    this.laserAim = null;
+
+    this.preparePostRoundState(SHOP_ROUND);
+    this.collectShopIncome();
+    this.shopRerolls = 0;
+    this.showShopFeedback('');
+    powerupOverlay.classList.add('hidden');
+    await this.startPreparedRound({ instant: true, instantBoss: true });
+
+    if (!this.running) {
       return;
     }
 
-    this.round = BOSS_ROUND;
-    this.bossDefeated = false;
-    this.roundEnding = false;
-    this.roundGraceActive = false;
-    this.encounterActive = true;
-    this.encounterClearTimer = 0;
-    this.incursionQueue = [];
-    this.incursionDeploying = false;
-    this.pendingEnemySpawns = [];
-    this.roundPendingThreat = 0;
-    this.roundIncursionTotal = 1;
-    this.roundIncursionDeployed = 1;
-
-    this.roundThreatTotal = 0;
-    this.roundThreatCleared = 0;
-    this.flashMessage('DEBUG: Boss test encounter', 700);
-    this.startBossEncounter();
     this.updateHUD();
   },
 

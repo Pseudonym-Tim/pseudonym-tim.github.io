@@ -27,7 +27,16 @@
     </main>
   </div>
 
-  <div id="spawn-banner"><span id="spawn-timer">10</span></div>
+  <div class="encounter-status">
+    <div id="spawn-banner"><span id="spawn-timer">10</span></div>
+    <ol id="encounter-timeline" class="encounter-timeline" aria-label="Upcoming encounters">
+      <li data-sector="1" data-kind="combat"><span aria-hidden="true"></span>Combat</li>
+      <li data-sector="2" data-kind="combat"><span aria-hidden="true"></span>Combat</li>
+      <li data-sector="3" data-kind="combat"><span aria-hidden="true"></span>Combat</li>
+      <li data-after-sector="3" data-kind="shop"><span aria-hidden="true"></span>Shop</li>
+      <li data-sector="4" data-kind="boss"><span aria-hidden="true"></span>Boss</li>
+    </ol>
+  </div>
 
   <div id="hud">
     <section class="hud-panel hud-score-panel" aria-label="Score">
@@ -97,8 +106,8 @@
       <div id="powerup-options"></div>
       <div class="shop-actions">
         <button id="shop-reroll-button" type="button"></button>
-        <button id="shop-continue-button" type="button"></button>
       </div>
+      <button id="shop-continue-button" class="shop-skip-button" type="button"></button>
     </div>
   </div>
 

@@ -13,13 +13,13 @@ const POWERUP_DEFINITIONS = [
 ];
 
 Object.assign(Game.prototype, {
-  showPowerupSelection(afterSelection = null) {
+  showPowerupSelection(afterSelection = null, income = null) {
     this.keys = {};
     powerupOverlay.classList.remove('hidden');
     void this.music.play('shop', true);
     this.shopRerolls = 0;
     this.shopAfterSelection = afterSelection;
-    this.showShopFeedback('');
+    this.showShopFeedback(income ? formatText('shop.income', income) : '', income ? 'income' : 'error');
     this.updateShopCash();
     this.rollPowerupChoices();
   },
@@ -65,7 +65,7 @@ Object.assign(Game.prototype, {
 
       card.addEventListener('click', () => {
         if (this.money < option.cost) {
-          this.showShopFeedback(formatText('shop.noCash'));
+          this.showShopFeedback(formatText('shop.noCash'), 'error');
           return;
         }
 
@@ -102,12 +102,12 @@ Object.assign(Game.prototype, {
 
   rerollPowerupShop() {
     if (this.shopRerolls >= MAX_SHOP_REROLLS) {
-      this.showShopFeedback(formatText('shop.noRerolls'));
+      this.showShopFeedback(formatText('shop.noRerolls'), 'error');
       return;
     }
 
     if (this.money < SHOP_REROLL_COST) {
-      this.showShopFeedback(formatText('shop.noCash'));
+      this.showShopFeedback(formatText('shop.noCash'), 'error');
       return;
     }
 
@@ -119,13 +119,14 @@ Object.assign(Game.prototype, {
     this.rollPowerupChoices();
   },
 
-  showShopFeedback(text) {
+  showShopFeedback(text, tone = 'error') {
     if (this.shopFeedbackTimer) {
       clearInterval(this.shopFeedbackTimer);
       this.shopFeedbackTimer = null;
     }
 
     shopFeedback.textContent = '';
+    shopFeedback.dataset.tone = tone;
 
     if (!text) {
       return;

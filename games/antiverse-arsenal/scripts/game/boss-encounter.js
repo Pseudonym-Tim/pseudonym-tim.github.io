@@ -4,7 +4,7 @@ Object.assign(Game.prototype, {
     return this.round === BOSS_ROUND && !this.bossActive && !this.bossPending && !this.bossDefeated;
   },
 
-  startBossEncounter() {
+  startBossEncounter(options = {}) {
     if (!this.running || this.bossActive || this.bossPending) {
       return;
     }
@@ -18,6 +18,13 @@ Object.assign(Game.prototype, {
     this.showMessage(formatText('message.bossDetected'), 2200);
     spawnBanner.textContent = formatText('message.bossStatus');
     spawnBanner.classList.add('warning');
+
+    if (options.instant) {
+      universe.setLogicalSize(BOSS_LOGICAL_W, BOSS_LOGICAL_H);
+      universe.setPosition((window.innerWidth - universe.cssWidth) / 2, (window.innerHeight - universe.cssHeight - universe.cssHeader) / 2);
+      this.activateBossEncounter(universe);
+      return;
+    }
 
     setTimeout(async () => {
       if (!this.running || this.round !== BOSS_ROUND || !this.bossPending) {

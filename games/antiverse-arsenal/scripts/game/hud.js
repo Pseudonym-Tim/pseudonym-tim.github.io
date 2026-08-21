@@ -19,6 +19,23 @@ Object.assign(Game.prototype, {
     highscoreValue.textContent = formatText('hud.highscore', { value: Math.floor(this.highscore) });
     moneyValue.textContent = formatText('hud.money', { value: Math.floor(this.money) });
 
+    if (encounterTimeline) {
+      // Keep the timeline on shop throughout the
+      // checkpoint (including the transition into/out of the overlay), and do
+      // not mark boss as current until its summon sequence has really begun...
+      const atShopCheckpoint = this.round === BOSS_ROUND && this.lastCompletedRound === SHOP_ROUND && !this.bossPending && !this.bossActive && !this.bossDefeated;
+      const bossEncounterStarted = this.round === BOSS_ROUND && (this.bossPending || this.bossActive || this.bossDefeated);
+
+      for (const event of encounterTimeline.children) {
+        const eventSector = Number(event.dataset.sector || event.dataset.afterSector);
+        const isShopEvent = Boolean(event.dataset.afterSector);
+        const isBossEvent = event.dataset.kind === 'boss';
+        const isCurrent = isShopEvent ? atShopCheckpoint && eventSector === SHOP_ROUND : isBossEvent ? bossEncounterStarted && eventSector === this.round : eventSector === this.round;
+        event.classList.toggle('current', isCurrent);
+        event.classList.toggle('past', eventSector < this.round && !isCurrent);
+      }
+    }
+
     if (incursionValue) {
       const deployed = Math.min(this.roundIncursionDeployed, this.roundIncursionTotal);
       incursionValue.textContent = formatText('hud.incursions', { value: this.roundIncursionTotal > 0 ? `${deployed}/${this.roundIncursionTotal}` : formatText('status.none') });

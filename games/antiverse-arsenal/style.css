@@ -61,6 +61,7 @@ body.fullscreen-active {
 
 body.focus-pending #hud,
 body.focus-pending #spawn-banner,
+body.focus-pending #encounter-timeline,
 body.focus-pending #player-hud {
   display: none;
 }
@@ -324,7 +325,7 @@ body.window-dragging {
 }
 
 #hud,
-#spawn-banner,
+.encounter-status,
 #player-hud {
   position: absolute;
   z-index: 6;
@@ -616,6 +617,10 @@ body.window-dragging {
   letter-spacing: 1px;
 }
 
+.shop-feedback[data-tone='income'] {
+  color: #74e8ff;
+}
+
 .hull-readout {
   display: flex;
   min-width: 0;
@@ -641,10 +646,17 @@ body.window-dragging {
   text-shadow: var(--text-underlay);
 }
 
-#spawn-banner {
-  left: 0;
-  right: 0;
+.encounter-status {
   top: 12px;
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  transform: translateX(-50%);
+}
+
+#spawn-banner {
   min-width: 96px;
   padding: 8px 16px;
   border: 1px solid rgba(255, 210, 92, 0.44);
@@ -655,9 +667,64 @@ body.window-dragging {
   letter-spacing: 1px;
   text-align: center;
   width: max-content;
-  margin: 0 auto;
+  margin: 0;
   transform: none;
   box-shadow: 0 0 12px rgba(255, 210, 92, 0.1);
+}
+
+.encounter-timeline {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 32px;
+  margin: 0;
+  padding: 8px 0 0;
+  color: rgba(218, 252, 255, 0.52);
+  font-size: 16px;
+  line-height: 16px;
+  letter-spacing: 0;
+  list-style: none;
+  text-transform: uppercase;
+  text-shadow: var(--text-underlay);
+}
+
+.encounter-timeline::before {
+  position: absolute;
+  top: 15px;
+  right: 56px;
+  left: 56px;
+  height: 2px;
+  background: rgba(218, 252, 255, 0.2);
+  content: '';
+}
+
+.encounter-timeline li {
+  position: relative;
+  display: flex;
+  width: 112px;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.encounter-timeline span {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(218, 252, 255, 0.5);
+  border-radius: 50%;
+  background: #050712;
+  box-sizing: border-box;
+}
+
+.encounter-timeline [data-kind='shop'] span { border-color: rgba(125, 255, 173, 0.72); }
+.encounter-timeline [data-kind='boss'] span { border-color: rgba(255, 105, 119, 0.76); }
+.encounter-timeline .past { filter: brightness(0.4); }
+.encounter-timeline .current { color: var(--gold); opacity: 1; }
+.encounter-timeline .current span {
+  border-color: var(--gold);
+  background: var(--gold);
+  box-shadow: 0 0 16px rgba(255, 210, 92, 0.6);
 }
 
 #spawn-banner.warning {
@@ -883,6 +950,11 @@ body.window-dragging {
   flex-wrap: wrap;
   gap: 12px;
   margin-top: 22px;
+}
+
+.shop-skip-button {
+  display: block;
+  margin: 24px auto 0;
 }
 
 #shop-reroll-button,

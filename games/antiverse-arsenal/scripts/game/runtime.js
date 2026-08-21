@@ -74,6 +74,7 @@ Object.assign(Game.prototype, {
     const managementScale = manipulatingUniverses ? UNIVERSE_MANIPULATION_TIME_SCALE : 1;
     const baseTimeScale = this.transitionTimeScale < 1 ? this.transitionTimeScale : this.timeScale * managementScale;
     const temporalScale = hitStopped ? 0 : baseTimeScale * (this.hitSlowTimer > 0 ? this.hitSlowScale : 1);
+    this.sound?.setTimeScale(temporalScale);
     const worldDt = rawDt * temporalScale;
     const playerDt = manipulatingUniverses ? 0 : worldDt;
     this.update(playerDt, worldDt);

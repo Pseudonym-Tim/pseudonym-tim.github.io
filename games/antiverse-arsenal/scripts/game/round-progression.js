@@ -81,6 +81,84 @@ Object.assign(Game.prototype, {
     setTimeout(releaseEnemies, 4000);
   },
 
+  preparePostRoundState(completedRound) {
+    const shopReady = completedRound === SHOP_ROUND;
+    const multiverseComplete = completedRound >= BOSS_ROUND;
+
+    this.lastCompletedRound = completedRound;
+    this.round = multiverseComplete ? ROUND_RESET_AFTER_BOSS : completedRound + 1;
+    this.startToken += 1;
+    this.stability = 0;
+    this.roundThreatTotal = 0;
+    this.roundThreatCleared = 0;
+    this.roundPendingThreat = 0;
+    this.incursionQueue = [];
+    this.roundIncursionTotal = 0;
+    this.roundIncursionDeployed = 0;
+    this.incursionDeploying = false;
+    this.pendingEnemySpawns = [];
+    this.encounterActive = false;
+    this.finalIncursionAnnounced = false;
+    this.encounterClearTimer = 0;
+    this.spawnTimer = Infinity;
+    this.roundGraceActive = false;
+    this.roundEnding = false;
+    this.timeScale = 1;
+    this.transitionTimeScale = ROUND_TRANSITION_TIME_SCALE;
+    this.transitioning = true;
+    this.bossActive = false;
+    this.bossPending = false;
+    this.bossDefeated = false;
+    this.bossUniverse = null;
+    this.boss = null;
+
+    if (multiverseComplete) {
+      this.multiverse += 1;
+    }
+
+    return { shopReady, multiverseComplete };
+  },
+
+  collectShopIncome() {
+    const wrapBonus = Math.round(this.multiverseWrapShotMultiplier * CASH_PER_WRAP_MULTIPLIER);
+    const totalIncome = BASE_SHOP_INCOME + wrapBonus;
+    this.money += totalIncome;
+    this.multiverseWrapShotMultiplier = 0;
+
+    return {
+      base: BASE_SHOP_INCOME,
+      bonus: wrapBonus,
+      total: totalIncome
+    };
+  },
+
+  async startPreparedRound(options = {}) {
+    if (!this.running) {
+      return;
+    }
+
+    if (this.music.currentTrack !== 'normal') {
+      void this.music.play('normal', true);
+    }
+
+    const freshUniverse = await this.createFreshRoundUniverse(options.instant ? 0 : 720);
+    if (!this.running) {
+      return;
+    }
+
+    this.wrappingDisabled = false;
+    this.timeScale = 1;
+    this.transitionTimeScale = 1;
+    this.transitioning = false;
+
+    if (this.round === BOSS_ROUND) {
+      this.startBossEncounter({ instant: options.instantBoss === true });
+      return;
+    }
+
+    this.beginRoundGrace(freshUniverse, clamp(2 + this.round, 3, 7));
+  },
+
   endRound(options = {}) {
     if (this.roundEnding) {
       return;
@@ -99,7 +177,7 @@ Object.assign(Game.prototype, {
       }
 
       const completedRound = this.round;
-      const shopReady = completedRound >= SHOP_ROUND_INTERVAL;
+      this.lastCompletedRound = completedRound;
 
       await Promise.all(this.universes.map((universe) => this.shrinkUniverse(universe)));
 
@@ -107,59 +185,10 @@ Object.assign(Game.prototype, {
         return;
       }
 
-      this.round = shopReady ? ROUND_RESET_AFTER_SHOP : completedRound + 1;
-
-      this.stability = 0;
-      this.roundThreatTotal = 0;
-      this.roundThreatCleared = 0;
-      this.roundPendingThreat = 0;
-      this.incursionQueue = [];
-      this.roundIncursionTotal = 0;
-      this.roundIncursionDeployed = 0;
-      this.incursionDeploying = false;
-      this.pendingEnemySpawns = [];
-      this.encounterActive = false;
-      this.finalIncursionAnnounced = false;
-      this.encounterClearTimer = 0;
-      this.spawnTimer = Infinity;
-      this.roundEnding = false;
-      this.transitioning = true;
-      this.bossActive = false;
-      this.bossPending = false;
-      this.bossDefeated = false;
-      this.bossUniverse = null;
-      this.boss = null;
-
-      const startFreshRound = async () => {
-        if (!this.running) {
-          return;
-        }
-
-        if (this.music.currentTrack !== 'normal') {
-          void this.music.play('normal', true);
-        }
-
-        const freshUniverse = await this.createFreshRoundUniverse();
-        if (!this.running) {
-          return;
-        }
-
-        this.wrappingDisabled = false;
-        this.timeScale = 1;
-        this.transitionTimeScale = 1;
-        this.transitioning = false;
-        this.beginRoundGrace(freshUniverse, clamp(2 + this.round, 3, 7));
-      };
+      const { shopReady } = this.preparePostRoundState(completedRound);
 
       if (shopReady) {
-        await this.showMultiverseComplete();
-
-        if (!this.running) {
-          return;
-        }
-
-        this.multiverse += 1;
-
+        const income = this.collectShopIncome();
         this.showMessage(formatText('message.traderDetected'), 1200);
 
         setTimeout(() => {
@@ -167,10 +196,10 @@ Object.assign(Game.prototype, {
             return;
           }
 
-          this.showPowerupSelection(startFreshRound);
+          this.showPowerupSelection(() => this.startPreparedRound(), income);
         }, 1250);
       } else {
-        await startFreshRound();
+        await this.startPreparedRound();
       }
     }, 1250);
   },
@@ -227,7 +256,7 @@ Object.assign(Game.prototype, {
     });
   },
 
-  async createFreshRoundUniverse() {
+  async createFreshRoundUniverse(growDuration = 720) {
     for (const universe of [...this.universes]) {
       universe.element.remove();
     }
@@ -259,7 +288,7 @@ Object.assign(Game.prototype, {
     this.player.x = safe.x;
     this.player.y = safe.y;
 
-    await this.growUniverse(freshUniverse);
+    await this.growUniverse(freshUniverse, growDuration);
     return freshUniverse;
   }
 });

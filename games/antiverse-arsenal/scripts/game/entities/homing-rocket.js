@@ -86,7 +86,6 @@ class HomingRocket extends Damageable {
     for (const enemy of this.universe.enemies) {
       if (enemy.dead || enemy.expired) { continue; }
       const distance = Math.hypot(enemy.x - this.x, enemy.y - this.y);
-
       if (distance < closestDistance) {
         closest = enemy;
         closestDistance = distance;
@@ -99,7 +98,6 @@ class HomingRocket extends Damageable {
   checkEnemyHit() {
     for (const enemy of this.universe.enemies) {
       if (enemy.dead || enemy.expired) { continue; }
-
       if (entitiesOverlap(this, enemy)) {
         enemy.registerHit(1);
         enemy.takeDamage(HOMING_ROCKET_DAMAGE, 1);
@@ -118,7 +116,6 @@ class HomingRocket extends Damageable {
     this.healthBarTimer = 0.55;
     this.triggerDamageFlash();
     this.game.sound.play('hitHurt');
-    
     if (this.hp <= 0) { this.explode(); }
 
     return true;

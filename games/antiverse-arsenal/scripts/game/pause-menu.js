@@ -48,6 +48,7 @@ Object.assign(Game.prototype, {
     this.laserCharging = false;
     this.laserAim = null;
     this.timeScale = 1;
+    this.sound?.setTimeScale(1);
     this.resetMusicReactiveVisuals?.();
     this.tunnelBackground?.pause();
     this.music.pause();

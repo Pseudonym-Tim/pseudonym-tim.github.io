@@ -77,6 +77,10 @@ Object.assign(Game.prototype, {
       if (e.code === 'KeyP' && !e.repeat) {
         this.debugGivePowerup();
       }
+
+      if (e.code === 'KeyT' && !e.repeat) {
+        this.debugOpenShop();
+      }
     });
 
     window.addEventListener('keyup', (e) => {

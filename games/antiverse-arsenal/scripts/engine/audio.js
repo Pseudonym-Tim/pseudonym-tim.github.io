@@ -10,6 +10,8 @@ const SOUND_EFFECTS = {
   warp: 'assets/audio/sfx/warp.wav'
 };
 
+const SFX_MIN_TIME_SCALE = 0.6;
+
 const SOUND_DEFAULTS = {
   explosion: { volume: 0.1, poolSize: 5, pitchRange: [0.8, 1.2] },
   hitHurt: { volume: 0.1, poolSize: 6, pitchRange: [0.7, 1.2] },
@@ -27,6 +29,8 @@ class SoundManager {
     this.effects = effects;
     this.defaults = defaults;
     this.pools = new Map();
+    this.timeScale = 1;
+    this.minTimeScale = SFX_MIN_TIME_SCALE;
 
     if (!this.enabled) {
       return;
@@ -110,7 +114,29 @@ class SoundManager {
 
   applyPitch(audio, pitchRange) {
     this.disablePitchPreservation(audio);
-    audio.playbackRate = this.randomPitch(pitchRange);
+    audio.gameBasePlaybackRate = this.randomPitch(pitchRange);
+    this.applyTimeScaleToAudio(audio);
+  }
+
+  setTimeScale(timeScale = 1) {
+    const parsedScale = Number(timeScale);
+    this.timeScale = Number.isFinite(parsedScale) ? Math.max(0, parsedScale) : 1;
+
+    for (const pool of this.pools.values()) {
+      for (const audio of pool.items) {
+        if (!audio.paused && !audio.ended) {
+          this.applyTimeScaleToAudio(audio);
+        }
+      }
+    }
+  }
+
+  applyTimeScaleToAudio(audio) {
+    const timePitchScale = Math.max(this.minTimeScale, Math.min(1, this.timeScale));
+    const basePlaybackRate = Number.isFinite(audio.gameBasePlaybackRate) ? audio.gameBasePlaybackRate : 1;
+
+    // Slow SFX with gameplay, but nothing too crazy, music is untouched...
+    audio.playbackRate = Math.max(0.1, basePlaybackRate * timePitchScale);
   }
 
   // It is so fucking stupid that I have to do this, but whatever...

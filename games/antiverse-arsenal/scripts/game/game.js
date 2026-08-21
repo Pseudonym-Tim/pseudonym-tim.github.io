@@ -69,6 +69,7 @@ class Game {
     this.multiverseWrapShotMultiplier = 0;
     this.shopRerolls = 0;
     this.shopFeedbackTimer = null;
+    this.lastCompletedRound = 0;
     this.wrapShotHits = 0;
     this.highestWrapShotCount = 0;
     this.highscore = Number(localStorage.getItem('antiverseHighscore') || 0);

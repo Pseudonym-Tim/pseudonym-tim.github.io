@@ -24,6 +24,7 @@ const laserCooldown = document.getElementById('laser');
 const shakeCooldown = document.getElementById('shake');
 const spawnTimerValue = document.getElementById('spawn-timer');
 const spawnBanner = document.getElementById('spawn-banner');
+const encounterTimeline = document.getElementById('encounter-timeline');
 const focusOverlay = document.getElementById('focus-overlay');
 const focusTitle = document.getElementById('focus-title');
 const focusBody = document.getElementById('focus-body');
