@@ -1,4 +1,4 @@
-// Window-shake attack: sustained reversals charge a global, long-cooldown player ability...
+// Window-shake attack: sustained reversals overload individual universe windows...
 Object.assign(Game.prototype, {
   resetDragShakeTracking() {
     this.dragShakeAxis = null;
@@ -40,7 +40,7 @@ Object.assign(Game.prototype, {
   },
 
   isUniverseShakeAbilityReady() {
-    return this.isUniverseShakeAbilityAvailable() && (this.shakeAbilityCooldown || 0) <= 0;
+    return this.isUniverseShakeAbilityAvailable();
   },
 
   trackUniverseShake(universe, dragDelta, elapsedMs, now = performance.now()) {
@@ -134,7 +134,7 @@ Object.assign(Game.prototype, {
       return;
     }
 
-    this.shakeAbilityCooldown = UNIVERSE_SHAKE_ABILITY_COOLDOWN;
+    this.abilityUses.shake += 1;
     universe.beginShakeLock(UNIVERSE_SHAKE_LOCK_DURATION);
 
     for (const other of this.universes) {
@@ -192,11 +192,6 @@ Object.assign(Game.prototype, {
 
   updateUniverseShakeState(dt) {
     const safeDt = Math.max(0, dt);
-    const abilityClockActive = !this.isShopOpen() && !this.isMultiverseCompleteOpen() && !this.transitioning;
-
-    if (abilityClockActive && this.shakeAbilityCooldown > 0) {
-      this.shakeAbilityCooldown = Math.max(0, this.shakeAbilityCooldown - safeDt);
-    }
 
     this.dragShakeActivityTimer = Math.max(0, (this.dragShakeActivityTimer || 0) - safeDt);
 

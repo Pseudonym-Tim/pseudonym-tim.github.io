@@ -60,7 +60,7 @@ class SniperEnemy extends Enemy {
 
     // Passing the entire known universe as arguments...
     // BUT THAT'S TOTALLY OKAY BECAUSE THIS IS A NICE LITTLE WRAPPER FUNCTION, RIGHT?
-    this.game.spawnBullet(this.universe, this.x + Math.cos(angle) * this.radius, this.y + Math.sin(angle) * this.radius, Math.cos(angle) * this.bulletSpeed + this.velX * 0.2, Math.sin(angle) * this.bulletSpeed + this.velY * 0.2, 'enemy', 1, { damage: 3, maxWraps: this.bulletMaxWraps });
+    this.game.spawnBullet(this.universe, this.x + Math.cos(angle) * this.radius, this.y + Math.sin(angle) * this.radius, Math.cos(angle) * this.bulletSpeed + this.velX * 0.2, Math.sin(angle) * this.bulletSpeed + this.velY * 0.2, 'enemy', 1, { damage: 3, maxWraps: this.bulletMaxWraps, sourceName: this.name });
   }
 
   draw(ctx) {

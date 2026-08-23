@@ -166,6 +166,7 @@ Object.assign(Game.prototype, {
     this.player.velX *= 0.35;
     this.player.velY *= 0.35;
     this.player.warpCooldown = 3.5;
+    this.abilityUses.warp += 1;
 
     this.spawnWarpParticles(universe, this.player.x, this.player.y, { count: 42, dirX: warpDir?.x || 0, dirY: warpDir?.y || 0, radius: this.player.radius * 2.8 });
 

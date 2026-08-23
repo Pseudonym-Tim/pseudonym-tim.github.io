@@ -19,6 +19,7 @@ class Bullet {
     this.sprite = options.sprite || null;
     this.spritePixelScale = options.spritePixelScale ?? 3;
     this.orbitalIgnoreTime = options.orbitalIgnoreTime ?? 0;
+    this.sourceName = options.sourceName || '';
   }
 
   update(dt) {
@@ -61,7 +62,8 @@ class Bullet {
 
       if (this.owner === 'enemy' || canHitOwner) {
         if (collisionShapesOverlap(this.getCollisionShape(), entityCollisionShape(player))) {
-          player.takeDamage(this.velX, this.velY, this.damage);
+          const cause = canHitOwner ? (this.wrapCount > 0 ? 'ownWrappedProjectile' : 'ownProjectile') : 'enemyProjectile';
+          player.takeDamage(this.velX, this.velY, this.damage, cause, this.sourceName);
           this.dead = true;
           return;
         }

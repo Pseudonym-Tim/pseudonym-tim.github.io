@@ -3,6 +3,7 @@ class Enemy extends Damageable {
   constructor(game, universe, x, y, config = {}) {
     super(game, universe, x, y, config.radius ?? 12);
     this.enemyType = config.enemyType || 'normal';
+    this.name = config.name || formatText(`enemy.${this.enemyType}.name`);
     this.maxHp = config.maxHp ?? 5;
     this.hp = this.maxHp;
     this.healthBarTimer = 0;
@@ -207,7 +208,7 @@ class Enemy extends Damageable {
 
     // Passing the entire known universe as arguments...
     // BUT THAT'S TOTALLY OKAY BECAUSE THIS IS A NICE LITTLE WRAPPER FUNCTION, RIGHT?
-    this.game.spawnBullet(this.universe, this.x + Math.cos(angle) * this.radius, this.y + Math.sin(angle) * this.radius, Math.cos(angle) * speed + this.velX * 0.2, Math.sin(angle) * speed + this.velY * 0.2, 'enemy', 1, { maxWraps });
+    this.game.spawnBullet(this.universe, this.x + Math.cos(angle) * this.radius, this.y + Math.sin(angle) * this.radius, Math.cos(angle) * speed + this.velX * 0.2, Math.sin(angle) * speed + this.velY * 0.2, 'enemy', 1, { maxWraps, sourceName: this.name });
   }
 
   getPlayerInterceptAngle(projectileSpeed) {

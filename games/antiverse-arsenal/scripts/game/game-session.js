@@ -48,6 +48,9 @@ Object.assign(Game.prototype, {
     this.showShopFeedback('');
     this.wrapShotHits = 0;
     this.highestWrapShotCount = 0;
+    this.lastDamageCause = 'unknown';
+    this.lastDamageSourceName = '';
+    this.abilityUses = { dash: 0, warp: 0, laser: 0, shake: 0 };
     this.spawnTimer = UNIVERSE_INTERVAL;
     this.roundEnding = false;
     this.paused = false;
@@ -57,7 +60,6 @@ Object.assign(Game.prototype, {
     controlsPanel.classList.add('hidden');
     this.draggingUniverse = null;
     this.resetDragShakeTracking();
-    this.shakeAbilityCooldown = 0;
     this.setCursorShakeRatio(0);
     document.body.classList.remove('window-dragging');
     this.clearUniverseReplacementSelection();
@@ -167,6 +169,18 @@ Object.assign(Game.prototype, {
     this.clearAllInput();
     this.highscore = Math.max(this.highscore, Math.floor(this.score));
     localStorage.setItem('antiverseHighscore', String(this.highscore));
+    const abilityEntries = Object.entries(this.abilityUses);
+    const mostUsed = abilityEntries.reduce((best, entry) => entry[1] > best[1] ? entry : best);
+    const leastUsed = abilityEntries.reduce((best, entry) => entry[1] <= best[1] ? entry : best);
+    const namedDamageCauses = new Set(['enemyProjectile', 'homingRocket', 'enemyCollision']);
+    const cause = namedDamageCauses.has(this.lastDamageCause) && this.lastDamageSourceName ? this.lastDamageSourceName : formatText(`gameover.cause.${this.lastDamageCause}`);
+    gameoverCauseEl.textContent = formatText('gameover.destroyedBy', { cause });
+    gameoverAbilityEl.textContent = formatText('gameover.mostUsed', {
+      ability: formatText(`ability.${mostUsed[0]}`)
+    });
+    gameoverLeastAbilityEl.textContent = formatText('gameover.leastUsed', {
+      ability: formatText(`ability.${leastUsed[0]}`)
+    });
     finalScoreEl.textContent = formatText('gameover.score', { score: Math.floor(this.score) });
     finalHighscoreEl.textContent = formatText('gameover.highscore', { highscore: Math.floor(this.highscore) });
     finalMultiverseEl.textContent = formatText('gameover.multiverse', { count: this.multiverse });

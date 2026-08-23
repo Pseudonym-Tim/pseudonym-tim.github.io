@@ -35,7 +35,6 @@ class Game {
     this.dragShakeDirection = 0;
     this.dragShakeLastDirectionTime = 0;
     this.dragShakeActivityTimer = 0;
-    this.shakeAbilityCooldown = 0;
     this.customCursor = null;
     this.cursorShakeRatio = 0;
     this.selectedUniverse = null;
@@ -72,6 +71,9 @@ class Game {
     this.lastCompletedRound = 0;
     this.wrapShotHits = 0;
     this.highestWrapShotCount = 0;
+    this.lastDamageCause = 'unknown';
+    this.lastDamageSourceName = '';
+    this.abilityUses = { dash: 0, warp: 0, laser: 0, shake: 0 };
     this.highscore = Number(localStorage.getItem('antiverseHighscore') || 0);
     this.spawnTimer = UNIVERSE_INTERVAL;
     this.running = false;

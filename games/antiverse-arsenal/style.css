@@ -465,7 +465,7 @@ body.window-dragging {
 
 .player-hud-cooldowns {
   display: flex;
-  gap: 15px;
+  gap: 24px;
   align-items: center;
   opacity: 1;
 }
@@ -475,37 +475,19 @@ body.window-dragging {
   display: grid;
   justify-items: center;
   gap: 5px;
-  min-width: 46px;
+  min-width: 58px;
 }
 
 .ability-cooldown-ring {
-  width: 40px;
-  height: 40px;
+  width: 46px;
+  height: 46px;
   display: grid;
   place-items: center;
   position: relative;
   border-radius: 50%;
   background: transparent;
-  box-shadow: 0 0 7px var(--universe-color-soft, rgba(114, 247, 255, 0.14));
+  box-shadow: 0 0 8px var(--universe-color-soft, rgba(114, 247, 255, 0.14));
   opacity: 1;
-}
-
-.ability-cooldown-ring span {
-  display: grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  color: rgba(255, 255, 255, 0.82);
-  position: relative;
-  z-index: 1;
-  background: transparent;
-  font-size: 16px;
-  line-height: 16px;
-
-  text-align: center;
-  text-shadow: 0 2px 0 #000;
-  transform: translateX(1px);
 }
 
 .ability-cooldown-ring::before {
@@ -514,27 +496,17 @@ body.window-dragging {
   inset: 0;
   border-radius: 50%;
   background: conic-gradient(var(--universe-color-glow, #72f7ff) calc(var(--cooldown-ratio) * 1turn), rgba(255,255,255,0.08) 0);
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 0);
-  mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 0);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 6px), #000 0);
+  mask: radial-gradient(farthest-side, transparent calc(100% - 6px), #000 0);
 }
 
-.ability-cooldown-ring span {
-  display: grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  color: rgba(255, 255, 255, 0.82);
+.ability-cooldown-icon {
   position: relative;
   z-index: 1;
-  background: transparent;
+  color: rgba(255, 255, 255, 0.86);
   font-size: 16px;
   line-height: 16px;
   text-shadow: var(--text-underlay);
-}
-
-.ability-cooldown[data-ready="false"] .ability-cooldown-ring {
-  filter: saturate(0.55);
 }
 
 
@@ -543,14 +515,13 @@ body.window-dragging {
   letter-spacing: 1px;
   font-size: 16px;
   line-height: 16px;
+  text-align: center;
 }
 
-.ability-cooldown-value {
-  min-height: 10px;
-  color: rgba(255, 255, 255, 0.68);
-  font-size: 8px;
-  line-height: 16px;
+.ability-cooldown[data-ready="false"] .ability-cooldown-ring {
+  filter: saturate(0.55);
 }
+
 
 .hull-gauge {
   --hull-ratio: 1;
@@ -1125,7 +1096,55 @@ body.window-dragging {
 }
 
 .gameover-card {
+  width: max-content;
+  min-width: min(640px, calc(100vw - 32px));
+  max-width: none;
+  padding: 48px 56px;
   border: 1px solid var(--red);
+  box-shadow: 0 0 32px rgba(255, 77, 90, 0.2);
+  font-size: 24px;
+  line-height: 32px;
+}
+
+.gameover-card h1 {
+  margin-bottom: 24px;
+  font-size: 48px;
+  line-height: 56px;
+}
+
+.gameover-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 32px;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.gameover-details p {
+  margin: 0;
+}
+
+.gameover-cause {
+  display: block;
+  width: max-content;
+  max-width: none;
+  align-self: center;
+  color: #ff9aa3;
+  font-size: 24px;
+  line-height: 32px;
+  white-space: nowrap;
+}
+
+.gameover-ability {
+  display: block;
+  width: max-content;
+  max-width: none;
+  align-self: center;
+  color: var(--gold);
+  font-size: 16px;
+  line-height: 24px;
+  white-space: nowrap;
 }
 
 .multiverse-complete-card {
@@ -1166,6 +1185,20 @@ body.window-dragging {
   border: 0;
   border-radius: 4px;
   cursor: pointer;
+}
+
+#gameover-overlay button {
+  min-width: 256px;
+  min-height: 64px;
+  padding: 16px 32px;
+  font-size: 24px;
+  line-height: 32px;
+}
+
+@media (max-width: 680px) {
+  .gameover-card {
+    padding: 32px 24px;
+  }
 }
 
 #focus-overlay button:hover:not(:disabled),

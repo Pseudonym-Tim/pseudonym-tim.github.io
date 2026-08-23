@@ -1,10 +1,11 @@
 // Destructible homing rockets...
 class HomingRocket extends Damageable {
-  constructor(game, universe, x, y, vx, vy, owner = 'enemy') {
+  constructor(game, universe, x, y, vx, vy, owner = 'enemy', sourceName = '') {
     super(game, universe, x, y, 10);
     this.hp = 3;
     this.maxHp = 3;
     this.owner = owner;
+    this.sourceName = sourceName;
     this.velX = vx;
     this.velY = vy;
     this.speed = owner === 'player' ? 285 : 205;

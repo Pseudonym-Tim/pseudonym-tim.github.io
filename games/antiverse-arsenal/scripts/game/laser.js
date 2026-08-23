@@ -129,6 +129,7 @@ Object.assign(Game.prototype, {
     }
 
     const plan = this.laserAim;
+    this.abilityUses.laser += 1;
     this.sound.play('laserBeam');
     const hitEnemies = new Set();
 
@@ -161,7 +162,7 @@ Object.assign(Game.prototype, {
       const hit = rayCircleHit(segment.from, segDir, this.player, this.player.radius + 3, startsAtMuzzle ? 20 : 0, segLen);
 
       if (hit) {
-        this.player.takeDamage(-segDir.x * 260, -segDir.y * 260);
+        this.player.takeDamage(-segDir.x * 260, -segDir.y * 260, 1, 'ownLaser');
         break;
       }
     }

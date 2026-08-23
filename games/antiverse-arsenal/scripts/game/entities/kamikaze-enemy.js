@@ -76,7 +76,7 @@ class KamikazeEnemy extends Enemy {
 
       if (distance <= blastRadius + player.radius) {
         const force = Math.max(1, distance);
-        player.takeDamage((dx / force) * 360, (dy / force) * 360, this.maxHp);
+        player.takeDamage((dx / force) * 360, (dy / force) * 360, this.maxHp, 'kamikazeBlast');
       }
     }
 

@@ -261,7 +261,7 @@ class DreadnoughtBoss extends Enemy {
 
       // Passing the entire known universe as arguments...
       // BUT THAT'S TOTALLY OKAY BECAUSE THIS IS A NICE LITTLE WRAPPER FUNCTION, RIGHT?
-      this.game.spawnBullet(this.universe, baseX + Math.cos(angle) * 18, baseY + Math.sin(angle) * 18, Math.cos(angle) * this.bulletSpeed + this.velX * 0.08, Math.sin(angle) * this.bulletSpeed, 'enemy', 1, { maxWraps: 0 });
+      this.game.spawnBullet(this.universe, baseX + Math.cos(angle) * 18, baseY + Math.sin(angle) * 18, Math.cos(angle) * this.bulletSpeed + this.velX * 0.08, Math.sin(angle) * this.bulletSpeed, 'enemy', 1, { maxWraps: 0, sourceName: this.name });
     }
   }
 
@@ -271,7 +271,7 @@ class DreadnoughtBoss extends Enemy {
     const angle = Math.PI / 2 + rand(-0.1, 0.1);
     const objectsBeforeSpawn = this.getGameCollectionObjects();
 
-    const spawnedRocket = this.game.spawnHomingRocket(this.universe, baseX + Math.cos(angle) * 24, baseY + Math.sin(angle) * 24, Math.cos(angle) * 128 + this.velX * 0.08, Math.sin(angle) * 128);
+    const spawnedRocket = this.game.spawnHomingRocket(this.universe, baseX + Math.cos(angle) * 24, baseY + Math.sin(angle) * 24, Math.cos(angle) * 128 + this.velX * 0.08, Math.sin(angle) * 128, this.name);
 
     // Prefer returned rocket, if the spawn method returns nothing, find the newly inserted entity...
     const rocket = spawnedRocket || [...this.getGameCollectionObjects()].find((object) => !objectsBeforeSpawn.has(object));
@@ -311,7 +311,7 @@ class DreadnoughtBoss extends Enemy {
 
       // Passing the entire known universe as arguments...
       // BUT THAT'S TOTALLY OKAY BECAUSE THIS IS A NICE LITTLE WRAPPER FUNCTION, RIGHT?
-      this.game.spawnBullet(this.universe, baseX + Math.cos(angle) * 16, baseY + Math.sin(angle) * 16, Math.cos(angle) * speed + this.velX * 0.05, Math.sin(angle) * speed, 'enemy', 1, { maxWraps: 0, sprite: pixelArt.bossShotgunBullet });
+      this.game.spawnBullet(this.universe, baseX + Math.cos(angle) * 16, baseY + Math.sin(angle) * 16, Math.cos(angle) * speed + this.velX * 0.05, Math.sin(angle) * speed, 'enemy', 1, { maxWraps: 0, sprite: pixelArt.bossShotgunBullet, sourceName: this.name });
     }
   }
 

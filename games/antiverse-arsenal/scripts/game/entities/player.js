@@ -40,13 +40,15 @@ class Player {
     return circleCollisionShape(this.x, this.y, this.radius);
   }
 
-  takeDamage(sourceVX = 0, sourceVY = 0, damage = 1) {
+  takeDamage(sourceVX = 0, sourceVY = 0, damage = 1, cause = 'unknown', sourceName = '') {
     const game = this.game;
     if (game.invulnerable || game.debugInvulnerable || this.dashing || !game.running) {
       return;
     }
 
     game.hp -= damage;
+    game.lastDamageCause = cause;
+    game.lastDamageSourceName = sourceName;
     game.sound.play('hitHurt');
     this.universe.triggerDamageShake();
     game.invulnerable = true;
@@ -281,6 +283,7 @@ class Player {
     this.dashElapsed = 0;
     this.dashHitEntities = new Set();
     this.dashing = true;
+    this.game.abilityUses.dash += 1;
     this.game.sound.play('phaseDash');
     this.velX = this.dashDirX * DASH_SPEED;
     this.velY = this.dashDirY * DASH_SPEED;

@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Antiverse Arsenal Prototype</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="focus-pending">
@@ -70,25 +71,23 @@
     </div>
 
     <div class="player-hud-cooldowns" aria-label="Player ability cooldowns">
-      <div id="dash" class="ability-cooldown" data-ready="true">
-        <div class="ability-cooldown-ring" id="dash-ring"><span>D</span></div>
+      <div id="dash" class="ability-cooldown" data-ready="true" aria-label="Dash — Shift">
+        <div class="ability-cooldown-ring" id="dash-ring">
+          <i class="fa-solid fa-bolt ability-cooldown-icon" aria-hidden="true"></i>
+        </div>
         <span class="ability-cooldown-label">Dash</span>
-        <span id="dash-label" class="ability-cooldown-value"></span>
       </div>
-      <div id="warp" class="ability-cooldown" data-ready="true">
-        <div class="ability-cooldown-ring" id="warp-ring"><span>W</span></div>
+      <div id="warp" class="ability-cooldown" data-ready="true" aria-label="Warp — middle mouse button">
+        <div class="ability-cooldown-ring" id="warp-ring">
+          <i class="fa-solid fa-shuffle ability-cooldown-icon" aria-hidden="true"></i>
+        </div>
         <span class="ability-cooldown-label">Warp</span>
-        <span id="warp-label" class="ability-cooldown-value"></span>
       </div>
-      <div id="laser" class="ability-cooldown" data-ready="true">
-        <div class="ability-cooldown-ring" id="laser-ring"><span>L</span></div>
+      <div id="laser" class="ability-cooldown" data-ready="true" aria-label="Laser — Control">
+        <div class="ability-cooldown-ring" id="laser-ring">
+          <i class="fa-solid fa-crosshairs ability-cooldown-icon" aria-hidden="true"></i>
+        </div>
         <span class="ability-cooldown-label">Laser</span>
-        <span id="laser-label" class="ability-cooldown-value"></span>
-      </div>
-      <div id="shake" class="ability-cooldown" data-ready="true">
-        <div class="ability-cooldown-ring" id="shake-ring"><span>S</span></div>
-        <span class="ability-cooldown-label">Shake</span>
-        <span id="shake-label" class="ability-cooldown-value"></span>
       </div>
     </div>
   </section>
@@ -157,11 +156,16 @@
   <div id="gameover-overlay" class="hidden">
     <div class="menu-card gameover-card">
       <h1 id="gameover-title"></h1>
-      <p id="final-score-label"></p>
-      <p id="final-highscore-label"></p>
-      <p id="final-multiverse-label"></p>
-      <p id="final-wrap-hits-label"></p>
-      <p id="final-highest-wrap-shot-label"></p>
+      <div class="gameover-details" aria-label="Run summary">
+        <p id="gameover-cause-label" class="gameover-cause"></p>
+        <p id="gameover-ability-label" class="gameover-ability"></p>
+        <p id="gameover-least-ability-label" class="gameover-ability"></p>
+        <p id="final-score-label"></p>
+        <p id="final-highscore-label"></p>
+        <p id="final-multiverse-label"></p>
+        <p id="final-wrap-hits-label"></p>
+        <p id="final-highest-wrap-shot-label"></p>
+      </div>
       <button id="restart-button"></button>
     </div>
   </div>
@@ -231,5 +235,128 @@
   <script src="scripts/game/runtime.js"></script>
   <script src="scripts/game/bootstrap.js"></script>
   <script src="scripts/game/tunnel-background.js"></script>
+
+  <script>
+    (() => {
+      const fallbackGameoverText = {
+        title: 'GAME OVER!',
+        destroyedBy: 'DESTROYED BY:',
+        mostUsed: 'MOST USED:',
+        leastUsed: 'LEAST USED:',
+        yourScore: 'YOUR SCORE:',
+        highScore: 'HIGH SCORE:',
+        multiverse: 'MULTIVERSE:',
+        wrapHits: 'WRAP HITS:',
+        highestWrapShot: 'HIGHEST WRAP SHOT:'
+      };
+
+      const title = document.getElementById('gameover-title');
+      const mostAbility = document.getElementById('gameover-ability-label');
+      const leastAbility = document.getElementById('gameover-least-ability-label');
+      const card = document.querySelector('.gameover-card');
+
+      if (!title || !mostAbility || !leastAbility || !card) return;
+
+      let gameoverText = fallbackGameoverText;
+      let applying = false;
+
+      const makeFormattedLine = (label, value) => {
+        const prefix = document.createElement('span');
+        prefix.className = 'gameover-label-prefix';
+        prefix.textContent = label;
+        return [prefix, document.createTextNode(value ? ` ${value}` : '')];
+      };
+
+      const readValueAfterColon = (text) => {
+        const match = String(text || '').trim().match(/^[^:]+:\s*(.*)$/s);
+        return match ? match[1].trim() : String(text || '').trim();
+      };
+
+      const parseAbilitySummary = (text) => {
+        const source = String(text || '').replace(/\s+/g, ' ').trim();
+        if (!source) return null;
+
+        const mostMatch = source.match(/MOST\s+USED\s*:\s*(.*?)(?=\s*(?:[|•/—–]\s*)?LEAST\s+USED\s*:|$)/i);
+        const leastMatch = source.match(/LEAST\s+USED\s*:\s*(.*)$/i);
+        if (!mostMatch && !leastMatch) return null;
+
+        return {
+          most: mostMatch ? mostMatch[1].replace(/\s*[|•/—–]\s*$/, '').trim() : '',
+          least: leastMatch ? leastMatch[1].trim() : ''
+        };
+      };
+
+      const formatKnownLine = (id, label) => {
+        const element = document.getElementById(id);
+        if (!element) return;
+        const value = readValueAfterColon(element.textContent);
+        if (!value && !element.textContent.trim()) return;
+        element.replaceChildren(...makeFormattedLine(label, value));
+      };
+
+      const refreshGameoverCopy = () => {
+        if (applying) return;
+        applying = true;
+        observer.disconnect();
+
+        try {
+          title.textContent = gameoverText.title;
+
+          formatKnownLine('gameover-cause-label', gameoverText.destroyedBy);
+          formatKnownLine('final-score-label', gameoverText.yourScore);
+          formatKnownLine('final-highscore-label', gameoverText.highScore);
+          formatKnownLine('final-multiverse-label', gameoverText.multiverse);
+          formatKnownLine('final-wrap-hits-label', gameoverText.wrapHits);
+          formatKnownLine('final-highest-wrap-shot-label', gameoverText.highestWrapShot);
+
+          const combined = parseAbilitySummary(mostAbility.textContent);
+          if (combined && combined.least) {
+            mostAbility.replaceChildren(...makeFormattedLine(gameoverText.mostUsed, combined.most));
+            leastAbility.replaceChildren(...makeFormattedLine(gameoverText.leastUsed, combined.least));
+          } else {
+            const mostValue = readValueAfterColon(mostAbility.textContent);
+            const leastValue = readValueAfterColon(leastAbility.textContent);
+            if (mostValue) mostAbility.replaceChildren(...makeFormattedLine(gameoverText.mostUsed, mostValue));
+            if (leastValue) leastAbility.replaceChildren(...makeFormattedLine(gameoverText.leastUsed, leastValue));
+          }
+        } finally {
+          applying = false;
+          observer.observe(card, { subtree: true, childList: true, characterData: true });
+        }
+      };
+
+      const observer = new MutationObserver(refreshGameoverCopy);
+      observer.observe(card, { subtree: true, childList: true, characterData: true });
+
+      fetch('text.json')
+        .then((response) => response.ok ? response.json() : Promise.reject(new Error(`HTTP ${response.status}`)))
+        .then((localization) => {
+          if (!localization) return;
+
+          const labelFromTemplate = (key, fallback) => {
+            const template = localization[key];
+            if (typeof template !== 'string') return fallback;
+            const placeholderIndex = template.indexOf('%');
+            const label = (placeholderIndex >= 0 ? template.slice(0, placeholderIndex) : template).trim();
+            return label || fallback;
+          };
+
+          gameoverText = {
+            ...fallbackGameoverText,
+            title: localization['gameover.title'] || fallbackGameoverText.title,
+            destroyedBy: labelFromTemplate('gameover.destroyedBy', fallbackGameoverText.destroyedBy),
+            mostUsed: labelFromTemplate('gameover.mostUsed', fallbackGameoverText.mostUsed),
+            leastUsed: labelFromTemplate('gameover.leastUsed', fallbackGameoverText.leastUsed),
+            yourScore: labelFromTemplate('gameover.score', fallbackGameoverText.yourScore),
+            highScore: labelFromTemplate('gameover.highscore', fallbackGameoverText.highScore),
+            multiverse: labelFromTemplate('gameover.multiverse', fallbackGameoverText.multiverse),
+            wrapHits: labelFromTemplate('gameover.wrapHits', fallbackGameoverText.wrapHits),
+            highestWrapShot: labelFromTemplate('gameover.highestWrapShot', fallbackGameoverText.highestWrapShot)
+          };
+        })
+        .catch(() => {})
+        .finally(refreshGameoverCopy);
+    })();
+  </script>
 </body>
 </html>

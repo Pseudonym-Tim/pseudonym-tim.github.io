@@ -53,39 +53,23 @@ Object.assign(Game.prototype, {
       }
     }
 
-    const setAbilityCooldown = (element, label, cooldown, maxCooldown, activeLabel = null) => {
-      const ready = cooldown <= 0 && !activeLabel;
-      const ratio = activeLabel ? 1 : 1 - clamp(cooldown / maxCooldown, 0, 1);
+    const setAbilityCooldown = (element, cooldown, maxCooldown, active = false) => {
+      const ready = cooldown <= 0 && !active;
+      const ratio = active ? 1 : 1 - clamp(cooldown / maxCooldown, 0, 1);
 
       if (element) {
         element.style.setProperty('--cooldown-ratio', ratio.toFixed(3));
         element.dataset.ready = String(ready);
       }
-
-      if (label) {
-        label.textContent = activeLabel || (ready ? formatText('status.ready') : `${cooldown.toFixed(1)}s`);
-      }
     };
 
     const warp = this.player ? this.player.warpCooldown : 0;
-    setAbilityCooldown(warpCooldown, warpValue, warp, 3.5);
+    setAbilityCooldown(warpCooldown, warp, 3.5);
 
     const dashTime = this.player ? this.player.dashCooldown : 0;
-    setAbilityCooldown(dashCooldown, dashValue, dashTime, DASH_COOLDOWN, this.player?.dashing ? formatText('status.dashing') : null);
+    setAbilityCooldown(dashCooldown, dashTime, DASH_COOLDOWN, Boolean(this.player?.dashing));
 
     const laserTime = this.laserCooldown || 0;
-    setAbilityCooldown(laserCooldown, laserValue, laserTime, LASER_COOLDOWN, this.laserCharging ? formatText('status.locking') : null);
-
-    const shakeUnavailable = this.bossPending || this.bossActive;
-
-    if (shakeCooldown) {
-      shakeCooldown.classList.toggle('hidden', shakeUnavailable);
-      shakeCooldown.setAttribute('aria-hidden', String(shakeUnavailable));
-    }
-
-    if (!shakeUnavailable) {
-      const shakeTime = this.shakeAbilityCooldown || 0;
-      setAbilityCooldown(shakeCooldown, shakeValue, shakeTime, UNIVERSE_SHAKE_ABILITY_COOLDOWN);
-    }
+    setAbilityCooldown(laserCooldown, laserTime, LASER_COOLDOWN, this.laserCharging);
   }
 });

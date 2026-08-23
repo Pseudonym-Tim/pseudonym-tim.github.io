@@ -34,7 +34,7 @@ class DoubleShotEnemy extends Enemy {
     const muzzleDistance = this.radius;
 
     for (const side of [-1, 1]) {
-      this.game.spawnBullet(this.universe, this.x + forwardX * muzzleDistance + sideX * this.shotSpacing * side, this.y + forwardY * muzzleDistance + sideY * this.shotSpacing * side, forwardX * this.bulletSpeed + this.velX * 0.2, forwardY * this.bulletSpeed + this.velY * 0.2, 'enemy', 1, { maxWraps: this.bulletMaxWraps });
+      this.game.spawnBullet(this.universe, this.x + forwardX * muzzleDistance + sideX * this.shotSpacing * side, this.y + forwardY * muzzleDistance + sideY * this.shotSpacing * side, forwardX * this.bulletSpeed + this.velX * 0.2, forwardY * this.bulletSpeed + this.velY * 0.2, 'enemy', 1, { maxWraps: this.bulletMaxWraps, sourceName: this.name });
     }
   }
 }

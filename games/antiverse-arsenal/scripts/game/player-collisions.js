@@ -105,7 +105,7 @@ Object.assign(Game.prototype, {
       }
 
       if (entitiesOverlap(this.player, rocket)) {
-        this.player.takeDamage(rocket.velX, rocket.velY);
+        this.player.takeDamage(rocket.velX, rocket.velY, 1, 'homingRocket', rocket.sourceName);
         rocket.explode();
       }
     }
@@ -119,7 +119,7 @@ Object.assign(Game.prototype, {
         const dx = this.player.x - asteroid.x;
         const dy = this.player.y - asteroid.y;
         const len = Math.max(1, Math.hypot(dx, dy));
-        this.player.takeDamage((dx / len) * 200, (dy / len) * 200);
+        this.player.takeDamage((dx / len) * 200, (dy / len) * 200, 1, 'asteroid');
         this.player.x += (dx / len) * 8;
         this.player.y += (dy / len) * 8;
       }
@@ -133,7 +133,7 @@ Object.assign(Game.prototype, {
       if (entitiesOverlap(this.player, enemy)) {
         if (enemy.enemyType === 'boss') {
           this.hp = 1;
-          this.player.takeDamage(0, 300);
+          this.player.takeDamage(0, 300, 1, 'dreadnought');
           return;
         }
 
@@ -145,7 +145,7 @@ Object.assign(Game.prototype, {
         const dx = this.player.x - enemy.x;
         const dy = this.player.y - enemy.y;
         const len = Math.max(1, Math.hypot(dx, dy));
-        this.player.takeDamage((dx / len) * 220, (dy / len) * 220);
+        this.player.takeDamage((dx / len) * 220, (dy / len) * 220, 1, 'enemyCollision', enemy.name);
         enemy.takeDamage(1, 1);
       }
     }

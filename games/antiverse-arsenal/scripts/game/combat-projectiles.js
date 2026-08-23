@@ -10,8 +10,8 @@ Object.assign(Game.prototype, {
     return bullet;
   },
 
-  spawnHomingRocket(universe, x, y, vx, vy) {
-    const rocket = new HomingRocket(this, universe, x, y, vx, vy);
+  spawnHomingRocket(universe, x, y, vx, vy, sourceName = '') {
+    const rocket = new HomingRocket(this, universe, x, y, vx, vy, 'enemy', sourceName);
     this.rockets.push(rocket);
     return rocket;
   },
