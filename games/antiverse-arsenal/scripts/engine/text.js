@@ -44,6 +44,11 @@ function applyStaticText() {
   document.getElementById('gameover-title').textContent = formatText('gameover.title');
   restartButton.textContent = formatText('gameover.restart');
   multiverseCompleteTitle.textContent = formatText('multiverseComplete.title', { value: 1 });
+  multiverseCompleteEarnedLabel.textContent = formatText('multiverseComplete.cashEarned');
+  multiverseCompleteSpentLabel.textContent = formatText('multiverseComplete.cashSpent');
+  multiverseCompleteNetLabel.textContent = formatText('multiverseComplete.netCash');
+  multiverseCompleteWrapHitsLabel.textContent = formatText('multiverseComplete.wrapHits');
+  multiverseCompleteBestWrapLabel.textContent = formatText('multiverseComplete.bestWrap');
   multiverseCompleteContinueButton.textContent = formatText('multiverseComplete.continue');
   pauseTitle.textContent = formatText('pause.title');
   resumeButton.textContent = formatText('pause.resume');

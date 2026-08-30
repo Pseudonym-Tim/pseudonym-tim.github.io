@@ -20,19 +20,22 @@ Object.assign(Game.prototype, {
     moneyValue.textContent = formatText('hud.money', { value: Math.floor(this.money) });
 
     if (encounterTimeline) {
-      // Keep the timeline on shop throughout the
-      // checkpoint (including the transition into/out of the overlay), and do
-      // not mark boss as current until its summon sequence has really begun...
-      const atShopCheckpoint = this.round === BOSS_ROUND && this.lastCompletedRound === SHOP_ROUND && !this.bossPending && !this.bossActive && !this.bossDefeated;
-      const bossEncounterStarted = this.round === BOSS_ROUND && (this.bossPending || this.bossActive || this.bossDefeated);
+      // Keep the timeline on shop throughout the checkpoint (including the
+      // transition into/out of the overlay), and keep the completed boss as
+      // the current stop until the player confirms the multiverse report...
+      // The gameplay round can already be prepared as Sector 1 underneath,
+      // timelineRound is purely the player's visible progression...
+      const timelineRound = this.holdTimelineAtCompletedBoss ? BOSS_ROUND : this.round;
+      const atShopCheckpoint = timelineRound === BOSS_ROUND && this.lastCompletedRound === SHOP_ROUND && !this.bossPending && !this.bossActive && !this.bossDefeated && !this.holdTimelineAtCompletedBoss;
+      const bossEncounterStarted = timelineRound === BOSS_ROUND && (this.bossPending || this.bossActive || this.bossDefeated || this.holdTimelineAtCompletedBoss);
 
       for (const event of encounterTimeline.children) {
         const eventSector = Number(event.dataset.sector || event.dataset.afterSector);
         const isShopEvent = Boolean(event.dataset.afterSector);
         const isBossEvent = event.dataset.kind === 'boss';
-        const isCurrent = isShopEvent ? atShopCheckpoint && eventSector === SHOP_ROUND : isBossEvent ? bossEncounterStarted && eventSector === this.round : eventSector === this.round;
+        const isCurrent = isShopEvent ? atShopCheckpoint && eventSector === SHOP_ROUND : isBossEvent ? bossEncounterStarted && eventSector === timelineRound : eventSector === timelineRound;
         event.classList.toggle('current', isCurrent);
-        event.classList.toggle('past', eventSector < this.round && !isCurrent);
+        event.classList.toggle('past', eventSector < timelineRound && !isCurrent);
       }
     }
 

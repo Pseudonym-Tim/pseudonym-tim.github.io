@@ -70,6 +70,7 @@ Object.assign(Game.prototype, {
         }
 
         this.money -= option.cost;
+        this.multiverseStats.cashSpent += option.cost;
         this.sound.play('powerupSelect');
         this.applyPowerup(option.id);
         this.continueFromPowerupShop();
@@ -112,6 +113,7 @@ Object.assign(Game.prototype, {
     }
 
     this.money -= SHOP_REROLL_COST;
+    this.multiverseStats.cashSpent += SHOP_REROLL_COST;
     this.shopRerolls += 1;
     this.updateShopCash();
     this.sound.play('powerupSelect');

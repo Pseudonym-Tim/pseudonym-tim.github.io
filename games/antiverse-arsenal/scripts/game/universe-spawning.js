@@ -59,12 +59,14 @@ Object.assign(Game.prototype, {
     if (this.roundGraceActive || !this.encounterActive) {
       spawnBanner.textContent = formatText('message.incursionSignaturesForming');
       nextUniverseValue.textContent = formatText('hud.nextIncursion', { value: formatText('status.forming') });
+      spawnBanner.classList.remove('warning');
       return;
     }
 
     if (this.incursionDeploying || this.pendingEnemySpawns.length > 0) {
       spawnBanner.textContent = formatText('message.universeMaterializingStatus');
       nextUniverseValue.textContent = formatText('hud.nextIncursion', { value: formatText('status.deploying') });
+      spawnBanner.classList.remove('warning');
       return;
     }
 

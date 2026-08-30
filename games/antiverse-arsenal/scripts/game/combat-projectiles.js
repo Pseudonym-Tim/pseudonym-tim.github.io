@@ -37,8 +37,10 @@ Object.assign(Game.prototype, {
 
     if (multiUniversalWraps > 0) {
       this.wrapShotHits += 1;
+      this.multiverseStats.wrapShotHits += 1;
+      this.multiverseStats.highestWrapShotCount = Math.max(this.multiverseStats.highestWrapShotCount, totalWraps);
 
-      // Keep every rewarded multi-universal wrap shot until its boss is defeated...
+      // Keep every rewarded multi-universal wrap shot until the next shop payout...
       this.multiverseWrapShotMultiplier += bullet.scoreMultiplier || 1;
     }
   }

@@ -42,9 +42,16 @@ Object.assign(Game.prototype, {
     this.maxHull = MAX_PLAYER_HULL;
     this.score = 0;
     this.money = 0;
+    this.multiverseStats = {
+      cashEarned: 0,
+      cashSpent: 0,
+      wrapShotHits: 0,
+      highestWrapShotCount: 0
+    };
     this.multiverseWrapShotMultiplier = 0;
     this.shopRerolls = 0;
     this.lastCompletedRound = 0;
+    this.holdTimelineAtCompletedBoss = false;
     this.showShopFeedback('');
     this.wrapShotHits = 0;
     this.highestWrapShotCount = 0;

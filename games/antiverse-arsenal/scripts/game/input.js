@@ -27,7 +27,7 @@ Object.assign(Game.prototype, {
         return;
       }
 
-      if (this.isShopOpen()) {
+      if (this.isShopOpen() || this.isMultiverseCompleteOpen()) {
         this.clearAllInput();
         return;
       }

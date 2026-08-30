@@ -24,4 +24,10 @@ window.BYTEBEAT_TRACKS = Object.freeze({
     sampleRate: 44100,
     source: 'assets/audio/music/gameover.txt',
   }),
+
+  multiverseComplete: Object.freeze({
+    mode: 'floatbeat',
+    sampleRate: 25941.33203125,
+    source: 'assets/audio/music/multiverse-complete.txt',
+  }),
 });

@@ -347,7 +347,7 @@ class Player {
     const hasMultiShot = this.game.hasPowerup('multi');
     const hasDualShot = this.game.hasPowerup('dual');
     const angles = hasMultiShot ? [aimAngle, aimAngle - 0.2, aimAngle + 0.2] : [aimAngle];
-    const dualShotOffset = 16;
+    const dualShotOffset = 12;
     this.game.sound.play('shoot');
 
     angles.forEach((angle) => {

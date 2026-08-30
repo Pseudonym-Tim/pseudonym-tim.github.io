@@ -20,6 +20,7 @@ class Bullet {
     this.spritePixelScale = options.spritePixelScale ?? 3;
     this.orbitalIgnoreTime = options.orbitalIgnoreTime ?? 0;
     this.sourceName = options.sourceName || '';
+    this.readabilityGlowFactor = 0;
   }
 
   update(dt) {
@@ -34,13 +35,15 @@ class Bullet {
       this.prevY = this.y;
       this.x += this.velX * stepDt;
       this.y += this.velY * stepDt;
+      this.updateReadabilityGlow(stepDt);
       remainingDt -= stepDt;
       safetySteps += 1;
 
       this.checkHits();
 
       if (!this.dead) {
-        this.game.wrapEntity(this, {sameUniverse: true, countWrap: true, scoreMultiplier: true, universeEntrySpeedMultiplier: MULTIVERSE_BULLET_SPEED_MULTIPLIER});
+        const universeEntrySpeedMultiplier = this.owner === 'player' ? PLAYER_MULTIVERSE_BULLET_SPEED_MULTIPLIER : ENEMY_MULTIVERSE_BULLET_SPEED_MULTIPLIER;
+        this.game.wrapEntity(this, { sameUniverse: true, countWrap: true, scoreMultiplier: true, universeEntrySpeedMultiplier });
       }
     }
   }
@@ -100,15 +103,114 @@ class Bullet {
     }
   }
 
-  getWrapWarning() {
+  getWrapGlowTargetFactor() {
+    if (this.wrapCount >= this.maxWraps) {
+      return 0;
+    }
+
     const direction = normalizeVector(this.velX, this.velY);
 
-    // The final wrap deliberately has no preview...
-    if (!direction || this.wrapCount >= this.maxWraps - 1) {
+    if (!direction) {
+      return 0;
+    }
+
+    const source = this.universe;
+    // Clamp to the canvas so the factor stays at full strength during the tiny
+    // radius-sized interval where the projectile center has crossed the seam but wrapping
+    // waits for the whole projectile to leave the source canvas...
+    const probeX = clamp(this.x, 0, source.width);
+    const probeY = clamp(this.y, 0, source.height);
+    const worldPosition = source.localToWorld(probeX, probeY);
+    const worldDirection = normalizeVector(direction.x * source.scale, direction.y * source.scale);
+    const exit = rayExitRect(worldPosition, worldDirection, source.getCanvasRect());
+
+    if (!exit) {
+      return 0;
+    }
+
+    const localDistanceToExit = Math.max(0, exit.t / source.scale);
+    const proximity = clamp(1 - localDistanceToExit / BULLET_READABILITY_GLOW_WRAP_FADE_DISTANCE, 0, 1);
+
+    // Smoothstep keeps glow fully dormant until the approach, then ramps without
+    // a visible pop as the projectile closes on the seam...
+    return proximity * proximity * (3 - 2 * proximity);
+  }
+
+  updateReadabilityGlow(dt) {
+    const target = this.getWrapGlowTargetFactor();
+
+    if (target >= this.readabilityGlowFactor) {
+      // Fade-in is driven directly by boundary proximity, so even very fast projectiles reach
+      // their full speed-based warning intensity by the time they hit the seam...
+      this.readabilityGlowFactor = target;
+    } else {
+      // After a wrap (or if a projectile moves away from its projected exit), ease the same
+      // aura back to zero instead of snapping it off...
+      const amount = 1 - Math.exp(-BULLET_READABILITY_GLOW_LERP_RATE * Math.max(0, dt));
+      this.readabilityGlowFactor += (target - this.readabilityGlowFactor) * amount;
+    }
+
+    if (target === 0 && this.readabilityGlowFactor < 0.001) {
+      this.readabilityGlowFactor = 0;
+    }
+  }
+
+  getReadabilityGlow() {
+    const speed = Math.hypot(this.velX, this.velY);
+    const speedRatio = clamp((speed - BULLET_READABILITY_GLOW_MIN_SPEED) / (BULLET_READABILITY_GLOW_MAX_SPEED - BULLET_READABILITY_GLOW_MIN_SPEED), 0, 1);
+
+    // Faster projectiles get a larger/brighter screen-blended aura so their danger is legible at a glance...
+    const targetAlpha = BULLET_READABILITY_GLOW_MIN_ALPHA + (BULLET_READABILITY_GLOW_MAX_ALPHA - BULLET_READABILITY_GLOW_MIN_ALPHA) * speedRatio;
+
+    return {
+      alpha: targetAlpha * this.readabilityGlowFactor,
+      radius: BULLET_READABILITY_GLOW_MIN_RADIUS + (BULLET_READABILITY_GLOW_MAX_RADIUS - BULLET_READABILITY_GLOW_MIN_RADIUS) * speedRatio
+    };
+  }
+
+  drawReadabilityGlowAt(ctx, x, y) {
+    const glowSettings = this.getReadabilityGlow();
+
+    if (!glowSettings) {
+      return;
+    }
+
+    const [red, green, blue] = this.owner === 'player' ? [143, 255, 143] : [255, 121, 94];
+    const drawX = pixelSnap(x);
+    const drawY = pixelSnap(y);
+    const { alpha, radius } = glowSettings;
+
+    if (alpha <= 0.0001) {
+      return;
+    }
+
+    const glow = ctx.createRadialGradient(drawX, drawY, 0, drawX, drawY, radius);
+
+    glow.addColorStop(0, `rgba(${red}, ${green}, ${blue}, ${alpha})`);
+    glow.addColorStop(0.18, `rgba(${red}, ${green}, ${blue}, ${alpha * 0.7})`);
+    glow.addColorStop(1, `rgba(${red}, ${green}, ${blue}, 0)`);
+
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    ctx.fillStyle = glow;
+    ctx.fillRect(drawX - radius, drawY - radius, radius * 2, radius * 2);
+    ctx.restore();
+  }
+
+  drawReadabilityGlow(ctx) {
+    this.drawReadabilityGlowAt(ctx, this.x, this.y);
+  }
+
+  getWrappedGlowProjection() {
+    const direction = normalizeVector(this.velX, this.velY);
+
+    // There is no projected glow when the next boundary crossing will destroy the projectile...
+    if (!direction || this.wrapCount >= this.maxWraps) {
       return null;
     }
 
     const source = this.universe;
+    const glowSettings = this.getReadabilityGlow();
     const worldPosition = source.localToWorld(this.x, this.y);
     const worldDirection = normalizeVector(direction.x * source.scale, direction.y * source.scale);
     const exit = rayExitRect(worldPosition, worldDirection, source.getCanvasRect());
@@ -117,13 +219,15 @@ class Bullet {
       return null;
     }
 
-    const distance = Math.hypot(exit.x - worldPosition.x, exit.y - worldPosition.y) / source.scale;
+    const worldDistanceToExit = Math.hypot(exit.x - worldPosition.x, exit.y - worldPosition.y);
+    const sourceGlowWorldRadius = glowSettings.radius * source.scale;
 
-    if (distance > WRAP_WARNING_DISTANCE) {
+    // Only draw the continuation once the bullet's real aura reaches the seam. This is the
+    // warning: The aura itself crosses first, rather than a separate border light appearing...
+    if (worldDistanceToExit > sourceGlowWorldRadius) {
       return null;
     }
 
-    const approach = 1 - distance / WRAP_WARNING_DISTANCE;
     const sourceExit = source.worldToLocal(exit.x, exit.y);
     const hit = this.game.findRaycastUniverse(exit.x, exit.y, worldDirection, source);
     const target = hit?.universe || source;
@@ -143,61 +247,33 @@ class Bullet {
       };
     }
 
-    const targetDirection = normalizeVector(worldDirection.x / target.scale, worldDirection.y / target.scale);
-    const travelDistance = 24;
-
-    const slideAlongBorder = (point, universe, localDirection) => {
-      const onVerticalBorder = point.x <= 0.001 || point.x >= universe.width - 0.001;
-      const offset = approach * travelDistance;
-
-      // Warning lights remain on their border and only slide along tangent so you can judge what direction they're travelling roughly...
-      // (Vertical borders follow vertical movement, while horizontal borders follow horizontal movement)...
-      return onVerticalBorder
-        ? { x: point.x, y: point.y + localDirection.y * offset }
-        : { x: point.x + localDirection.x * offset, y: point.y };
-    };
+    const targetDirection = normalizeVector(worldDirection.x / target.scale, worldDirection.y / target.scale) || direction;
+    const targetDistanceToEntry = worldDistanceToExit / target.scale;
 
     return {
-      // Each wrap softens the remaining warning so old repeated shots become less distracting..
-      alpha: Math.pow(approach, 1.15) * (1 - this.wrapCount / this.maxWraps),
-      lights: [
-        { universe: source, ...slideAlongBorder(sourceExit, source, direction) },
-        { universe: target, ...slideAlongBorder(targetEntry, target, targetDirection) }
-      ]
+      universe: target,
+      // Keep the glow center outside the destination by exactly the bullet's remaining distance
+      // to the source seam. As it approaches, progressively more of the same radial glow becomes
+      // visible in the destination canvas, when the center crosses, normal projectile drawing takes over...
+      x: targetEntry.x - targetDirection.x * targetDistanceToEntry,
+      y: targetEntry.y - targetDirection.y * targetDistanceToEntry
     };
   }
 
-  drawWrapWarning() {
-    const warning = this.getWrapWarning();
+  drawWrappedReadabilityGlow() {
+    const projection = this.getWrappedGlowProjection();
 
-    if (!warning) {
+    if (!projection) {
       return;
     }
 
-    const [red, green, blue] = this.owner === 'player' ? [143, 255, 143] : [255, 121, 94];
-    const intensity = clamp(warning.alpha * 0.2, 0, 1);
-    const radius = 30 + intensity * 20;
-
-    for (const light of warning.lights) {
-      const ctx = light.universe.ctx;
-      const x = clamp(light.x, WRAP_WARNING_INSET, light.universe.width - WRAP_WARNING_INSET);
-      const y = clamp(light.y, WRAP_WARNING_INSET, light.universe.height - WRAP_WARNING_INSET);
-      const glow = ctx.createRadialGradient(x, y, 0, x, y, radius);
-
-      glow.addColorStop(0, `rgba(${red}, ${green}, ${blue}, ${intensity})`);
-      glow.addColorStop(0.18, `rgba(${red}, ${green}, ${blue}, ${intensity * 0.7})`);
-      glow.addColorStop(1, `rgba(${red}, ${green}, ${blue}, 0)`);
-
-      ctx.save();
-      ctx.globalCompositeOperation = 'screen';
-      ctx.fillStyle = glow;
-      ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
-      ctx.restore();
-    }
+    this.drawReadabilityGlowAt(projection.universe.ctx, projection.x, projection.y);
   }
 
   draw() {
     const ctx = this.universe.ctx;
+    this.drawWrappedReadabilityGlow();
+    this.drawReadabilityGlow(ctx);
     ctx.save();
     ctx.translate(pixelSnap(this.x), pixelSnap(this.y));
     ctx.rotate(Math.atan2(this.velY, this.velX) + Math.PI / 2);

@@ -699,10 +699,10 @@ body.window-dragging {
 }
 
 #spawn-banner.warning {
-  border-color: rgba(255, 77, 90, 0.72);
-  color: #fff2d2;
-  background: linear-gradient(90deg, rgba(58, 8, 18, 0.82), rgba(0, 0, 0, 0.74));
-  box-shadow: 0 0 18px rgba(255, 77, 90, 0.16), inset 0 -2px 0 rgba(255, 210, 92, 0.32);
+  border-color: rgba(255, 210, 92, 0.78);
+  color: #fff0a8;
+  background: linear-gradient(90deg, rgba(62, 44, 8, 0.86), rgba(0, 0, 0, 0.74));
+  box-shadow: 0 0 20px rgba(255, 210, 92, 0.24);
 }
 
 @media (max-width: 1050px) {
@@ -1148,23 +1148,90 @@ body.window-dragging {
 }
 
 .multiverse-complete-card {
-  min-width: min(440px, calc(100vw - 40px));
+  width: min(680px, calc(100vw - 40px));
+  padding: 34px 38px;
   border: 1px solid var(--gold);
   box-shadow: 0 0 28px rgba(255, 210, 92, 0.2);
 }
 
+
 .multiverse-complete-card h1 {
+  margin: 0 0 28px;
+  color: var(--gold);
+  font-size: 28px;
+  line-height: 50px;
   text-decoration: underline;
   text-underline-offset: 5px;
   text-decoration-thickness: 6px;
-  margin-top: 0;
-  color: var(--gold);
   text-transform: uppercase;
 }
 
-#multiverse-complete-cash {
-  color: #7dffad;
-  font-size: 16px;
+.multiverse-complete-stats {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  margin-bottom: 28px;
+  border-top: 1px solid rgba(255, 210, 92, 0.42);
+  border-bottom: 1px solid rgba(255, 210, 92, 0.42);
+  text-align: left;
+}
+
+.multiverse-complete-stat {
+  display: contents;
+}
+
+.multiverse-complete-stat-label,
+.multiverse-complete-stat-value {
+  padding: 13px 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.multiverse-complete-stat:nth-last-child(1) .multiverse-complete-stat-label,
+.multiverse-complete-stat:nth-last-child(1) .multiverse-complete-stat-value {
+  border-bottom: 0;
+}
+
+.multiverse-complete-stat-label {
+  min-width: 0;
+  padding-right: 20px;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.multiverse-complete-stat-value {
+  color: #fff;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.multiverse-complete-stat-net .multiverse-complete-stat-label,
+.multiverse-complete-stat-net .multiverse-complete-stat-value {
+  border-bottom-color: rgba(255, 210, 92, 0.35);
+}
+
+.multiverse-complete-stat-value.stat-positive {
+  color: var(--green);
+}
+
+.multiverse-complete-stat-value.stat-negative {
+  color: var(--red);
+}
+
+@media (max-width: 560px) {
+  .multiverse-complete-card {
+    padding: 26px 20px;
+  }
+
+  .multiverse-complete-card h1 {
+    font-size: 22px;
+    line-height: 32px;
+  }
+
+  .multiverse-complete-stat-label,
+  .multiverse-complete-stat-value {
+    font-size: 12px;
+    line-height: 18px;
+  }
 }
 
 #pause-overlay h1,

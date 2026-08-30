@@ -479,16 +479,16 @@ class DreadnoughtBoss extends Enemy {
     ctx.save();
     ctx.fillStyle = 'rgba(3, 7, 18, 0.86)';
     ctx.fillRect(x - 3, y - 3, width + 6, 24);
-    ctx.fillStyle = '#3d1430';
+    ctx.fillStyle = '#3a0d0d';
     ctx.fillRect(x, y, width, 14);
-    ctx.fillStyle = '#ff4d8d';
+    ctx.fillStyle = '#ef4444';
     ctx.fillRect(x, y, width * ratio, 14);
-    ctx.strokeStyle = '#ffd6e7';
+    ctx.strokeStyle = '#fecaca';
     ctx.strokeRect(x - 0.5, y - 0.5, width + 1, 15);
 
     const hpText = formatText('boss.hp', { name: this.name, hp: Math.ceil(this.hp), maxHp: this.maxHp });
     const hpTextX = Math.round(this.universe.width / 2);
-    const hpTextY = Math.round(y + 35);
+    const hpTextY = Math.round(y + 40);
 
     ctx.font = '16px "Press Start 2P", "Lucida Console", monospace';
     ctx.textAlign = 'center';
