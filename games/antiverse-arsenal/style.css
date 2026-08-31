@@ -900,6 +900,20 @@ body.window-dragging {
   background: rgba(30, 25, 78, 0.98);
 }
 
+.powerup-card[data-purchased="true"] {
+  cursor: default;
+}
+
+.powerup-card[data-purchased="true"]:hover {
+  transform: none;
+  background: rgba(8, 10, 34, 0.96);
+}
+
+.powerup-card[data-purchased="true"] .powerup-cost {
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
 .powerup-card h3 { color: var(--gold); margin-top: 0; }
 
 .powerup-cost {

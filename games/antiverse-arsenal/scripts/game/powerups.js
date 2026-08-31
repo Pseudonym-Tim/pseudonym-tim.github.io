@@ -49,12 +49,7 @@ Object.assign(Game.prototype, {
     }
 
     if (!choices.length) {
-      powerupOverlay.classList.add('hidden');
-
-      if (this.shopAfterSelection) {
-        this.shopAfterSelection();
-      }
-
+      this.updateShopRerollButton();
       return;
     }
 
@@ -62,18 +57,25 @@ Object.assign(Game.prototype, {
       const card = document.createElement('div');
       card.className = 'powerup-card';
       card.innerHTML = `<h3>${option.name}</h3><p>${option.desc}</p><p class="powerup-cost">$${option.cost}</p>`;
+      const costLabel = card.querySelector('.powerup-cost');
 
       card.addEventListener('click', () => {
+        if (card.dataset.purchased === 'true') {
+          return;
+        }
+
         if (this.money < option.cost) {
           this.showShopFeedback(formatText('shop.noCash'), 'error');
           return;
         }
 
+        card.dataset.purchased = 'true';
         this.money -= option.cost;
         this.multiverseStats.cashSpent += option.cost;
         this.sound.play('powerupSelect');
         this.applyPowerup(option.id);
-        this.continueFromPowerupShop();
+        this.updateShopCash();
+        costLabel.textContent = formatText('shop.bought');
       });
 
       powerupOptions.appendChild(card);
