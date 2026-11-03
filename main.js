@@ -17,8 +17,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 const targetId = href.substring(1);
                 const targetElement = document.getElementById(targetId);
 
-                window.scrollTo({
-                    top: targetElement.offsetTop - document.querySelector('.navbar').offsetHeight,
+                targetElement.scrollIntoView({
+                    block: 'start',
                     behavior: 'smooth'
                 });
             }
